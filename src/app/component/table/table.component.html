@@ -1,0 +1,66 @@
+<!-- table.component.html -->
+<table class="tcx-table">
+  <thead>
+    <tr>
+      <th
+        *ngFor="let coluna of colunas"
+        [ngStyle]="getEstiloColunaTitulo(coluna)"
+      >
+        {{ colunasLabels[coluna] || coluna }}
+      </th>
+      <th
+        *ngIf="mostrarAcoes"
+        [ngStyle]="{ 'text-align': 'center', 'white-space': 'nowrap' }"
+      >
+        <!-- [ngStyle]="getEstiloColunaTitulo('mostrarAcoes')" -->
+        Ações
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of dados" [ngClass]="getClassesDestaque(item)">
+      <td *ngFor="let coluna of colunas" [ngStyle]="getEstiloColuna(coluna)">
+        <ng-container *ngIf="isLink(item[coluna]); else textoSimples">
+          <a [routerLink]="isLink(item[coluna])?.url">{{
+            isLink(item[coluna])?.value
+          }}</a>
+        </ng-container>
+        <ng-template #textoSimples>
+          {{ formatarValor(item[coluna], formatoColunas[coluna] || "texto") }}
+        </ng-template>
+      </td>
+      <td
+        *ngIf="mostrarAcoes"
+        class="sticky-acoes"
+        [ngStyle]="{ 'text-align': 'center', 'white-space': 'nowrap' }"
+        [ngClass]="getClassesDestaque(item)"
+      >
+        <!-- [ngStyle]="getEstiloColuna('mostrarAcoes')" -->
+        <div class="container__mostrar-acoes">
+          <ng-container *ngFor="let acao of acoesTabela">
+            <div
+              class="mostrar-acoes__button"
+              *ngIf="!acao.visivel || acao.visivel(item)"
+            >
+              <button
+                class="buttons-stile"
+                *ngIf="!acao.visivel || acao.visivel(item)"
+                [ngClass]="acao.classe || ''"
+                (click)="acao.callback(item)"
+              >
+                {{ acao.label }}
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- <tcx-button
+              [label]="acao.label"
+              [descricao]="acao.descricao"
+              [ngClass]="acao.classe || ''"
+              (click)="acao.callback(item)"
+            ></tcx-button> -->

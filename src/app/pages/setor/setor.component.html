@@ -1,0 +1,67 @@
+<div class="container__tela">
+  <div id="barra-titulo__container">
+    <h2 style="font-weight: normal; color: grey">SETORES</h2>
+  </div>
+  <div id="tela__barra-menu">
+    <div class="button-container">
+      <tcx-button label="Novo" (click)="buttonClick()"></tcx-button>
+    </div>
+  </div>
+  <div id="tela__container-tabela">
+    <!-- <tcx-table
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [formatoColunas]="formatoColunas"
+      [dados]="dados"
+      [mostrarAcoes]="true"
+      [acoesTabela]="acoes"
+      [destacarLinhas]="regrasDestaque"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+    /> -->
+  </div>
+</div>
+
+<tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
+  <div class="templates__form">
+    <form [formGroup]="dadosForms" (ngSubmit)="onSalvar()">
+      <div class="linha1">
+        <div class="input-text" id="input-nomeSetor">
+          <tcx-text
+            label="Nome do Setor"
+            type="name"
+            formControlName="nomeSetor"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+        <div class="input-text" id="input-nomeCidade">
+          <tcx-text
+            label="Nome da Cidade"
+            type="locate"
+            formControlName="nomeCidade"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+        <div class="input-select">
+          <tcx-select
+            [label]="'UF'"
+            [placeholder]="''"
+            [niveis]="listaEstados"
+            [formControl]="getControl('estado')"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
+      <!-- <div class="linha2"></div> -->
+      <div class="linhaButton">
+        <div class="form__button">
+          <tcx-button label="Salvar" type="submit"></tcx-button>
+        </div>
+      </div>
+    </form>
+  </div>
+</tcx-modal>

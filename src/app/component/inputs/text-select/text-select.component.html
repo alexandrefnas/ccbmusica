@@ -1,0 +1,86 @@
+<div
+  class="form-field"
+  [class.focused]="isFocused || selectedValue || placeholder"
+>
+  <label class="form-label">{{ label }}</label>
+
+  <div class="input-wrapper">
+    <input
+      class="form-input"
+      [value]="selectedValue"
+      [ngStyle]="{ 'font-size.px': fontSize }"
+      (input)="selecionarValor(getInputValue($event))"
+      (focus)="onFocus()"
+      (keydown)="onKeyDown($event)"
+      (blur)="onBlur()"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+    />
+    <!-- (click)="toggleOptions()" -->
+
+    <div
+      class="dropdown-icon"
+      [class.open]="showOptions"
+      (click)="toggleOptions()"
+    ></div>
+
+    <ul *ngIf="showOptions && filteredOptions.length" class="options-dropdown">
+      <li
+        *ngFor="let option of filteredOptions"
+        (mousedown)="selectOption(option)"
+      >
+        {{ option.label }}
+      </li>
+    </ul>
+  </div>
+
+  <div class="form-error" *ngIf="hasError() && !isFocused">
+    {{ errorMessage }}
+  </div>
+</div>
+
+<!-- <div
+  class="form-field"
+  [class.focused]="isFocused || selectedValue || placeholder"
+  (mousedown)="abrirFecharComControle($event)"
+>
+  <label class="form-label">{{ label }}</label>
+
+  <ng-container *ngIf="allowTyping">
+  <ng-container>
+    <div class="input-wrapper">
+      <input
+        class="form-input"
+        [value]="selectedValue"
+        [ngStyle]="{ 'font-size.px': fontSize }"
+        (input)="onInputChange($event)"
+        (focus)="onFocus()"
+        (keydown)="onKeyDown($event)"
+        (click)="toggleOptions()"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+      />
+      (blur)="onBlur()"
+      <div
+        class="dropdown-icon"
+        [class.open]="showOptions"
+        (mousedown)="toggleOptions()"
+      ></div>
+      <ul
+        *ngIf="showOptions && filteredOptions.length"
+        class="options-dropdown"
+      >
+        <li
+          *ngFor="let option of filteredOptions"
+          (mousedown)="selectOption(option)"
+        >
+          {{ option.label }}
+        </li>
+      </ul>
+    </div>
+  </ng-container>
+
+  <div class="form-error" *ngIf="hasError() && !isFocused">
+    {{ errorMessage }}
+  </div>
+</div> -->

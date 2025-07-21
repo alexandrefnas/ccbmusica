@@ -1,0 +1,22 @@
+<div *ngIf="visible" class="modal-container" aria-modal="true">
+  <div class="modal-backdrop" (click)="onBackdropClick()"></div>
+  <div class="container__form">
+    <div class="container__form-windows">
+      <div class="title_container">
+        <div class="title1">
+          <h3>{{ title }}</h3>
+        </div>
+        <div class="title2">
+          <button type="button" (click)="cancelar()" tabindex="-1">X</button>
+        </div>
+      </div>
+      <div class="field__container">
+        <ng-content></ng-content>
+        <!-- <div class="templates__form">
+        </div> -->
+
+        <!-- <div class="buttons"></div> -->
+      </div>
+    </div>
+  </div>
+</div>

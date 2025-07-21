@@ -1,0 +1,59 @@
+<div class="container__Menu">
+  <br />
+  <table class="demonstrativo__tabela">
+    <tbody>
+      <tr class="grupo" (click)="menuHome()" style="cursor: pointer">
+        <td>
+          <div class="grupo__submenu">
+            <strong>Painel de Controle</strong>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Cadastros -->
+  <table class="demonstrativo__tabela">
+    <tbody>
+      <tr class="grupo" (click)="menuCadastro()" style="cursor: pointer">
+        <td>
+          <div class="grupo__submenu">
+            <strong>Manutenção</strong>
+            <span>{{ mostrarGrupo1 ? "▼" : "▶" }}</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Submenus com navegação -->
+      <ng-container *ngIf="mostrarGrupo1">
+        <tr *ngFor="let page of cadastros" @expandCollapse class="submenu">
+          <td (click)="abrirRota(page.rota)" style="cursor: pointer">
+            {{ page.label }}
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+
+  <table class="demonstrativo__tabela">
+    <tbody>
+      <tr class="grupo" (click)="menuTestes()" style="cursor: pointer">
+        <td>
+          <div class="grupo__submenu">
+            <strong>Avaliações</strong>
+            <span>{{ mostrarGrupo2 ? "▼" : "▶" }}</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Submenus com navegação -->
+      <ng-container *ngIf="mostrarGrupo2">
+        <tr *ngFor="let page of avaliacoes" @expandCollapse class="submenu">
+          <td (click)="abrirRota(page.rota)" style="cursor: pointer">
+            {{ page.label }}
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>

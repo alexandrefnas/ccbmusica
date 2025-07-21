@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.conteiner__menu-topo {
+  width: 100%;
+  height: 60px;
+  background: linear-gradient(to bottom, #2d89ef, #1b4f9c);
+
+  /* border: solid 1px red; */
+}
+
+.container__menu-lateral * {
+  box-sizing: border-box;
+  width: 200px;
+  background-color: #dadada;
+  /* background: linear-gradient(to bottom, #9b9da0, #5d6268); */
+
+  transition: width 0.3s ease;
+  padding: 3px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.container__menu-lateral.oculto {
+  width: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.container__conteudo {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100% - 40px);
+  /* height: 100%; */
+}
+
+.container__router {
+  width: 100%;
+  height: 100%;
+  /* border: solid 1px red; */
+}
+
+.toggle-btn {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  z-index: 1;
+  /* padding: 0.5rem 1rem; */
+  padding: 8px 12px;
+
+  background-color: #1b4f9c;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  border-color: #ffffff79;
+  transition: transform 0.1s ease;
+  border-radius: 4px;
+}
+
+.toggle-btn:active {
+  transform: translateY(2px);
+}

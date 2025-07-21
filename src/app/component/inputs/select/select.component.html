@@ -1,0 +1,34 @@
+<div
+  class="form-field"
+  [class.focused]="isFocused || selectedValue || placeholder"
+>
+  <label class="form-label">{{ label }}</label>
+
+  <ng-container>
+    <div class="input-wrapper">
+      <select
+        class="form-input"
+        [ngModel]="selectedValue"
+        [ngStyle]="{ 'font-size.px': fontSize }"
+        (ngModelChange)="onSelectChange($event)"
+        (focus)="isFocused = true"
+        (blur)="onBlur()"
+        (keydown)="onKeyDown($event)"
+        [disabled]="disabled"
+      >
+        <option [ngValue]="null" disabled hidden>{{ placeholder }}</option>
+        <option
+          class="list-format"
+          *ngFor="let nivel of niveis"
+          [ngValue]="nivel.value"
+        >
+          {{ nivel.label }}
+        </option>
+      </select>
+    </div>
+  </ng-container>
+
+  <div class="form-error" *ngIf="hasError() && !isFocused">
+    {{ errorMessage }}
+  </div>
+</div>

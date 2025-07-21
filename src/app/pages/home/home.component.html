@@ -1,0 +1,90 @@
+<div class="container__tela">
+  <div id="barra-titulo__container">
+    <h2 style="font-weight: normal; color: grey">Painel de Contole</h2>
+  </div>
+  <div id="tela__barra-menu">
+    <div>
+      <button (click)="buttonClick()">Teste</button>
+    </div>
+  </div>
+  <div id="tela__container-tabela">
+    <tcx-table
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [formatoColunas]="formatoColunas"
+      [dados]="dados"
+      [mostrarAcoes]="true"
+      [acoesTabela]="acoes"
+      [destacarLinhas]="regrasDestaque"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+    />
+  </div>
+</div>
+
+<!-- Modal -->
+<tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
+  <div class="templates__form">
+    <form [formGroup]="dadosForms" (ngSubmit)="onSalvar()">
+      <div class="linha1">
+        <div class="input-data">
+          <tcx-data
+            label="Data"
+            type="data"
+            formControlName="dataTeste"
+            [required]="true"
+            errorMessage="teste"
+          ></tcx-data>
+        </div>
+        <div class="input-text">
+          <tcx-text
+            label="Nome"
+            type="name"
+            formControlName="nome"
+            [required]="true"
+            errorMessage="teste"
+          />
+        </div>
+        <div class="input-decimal">
+          <tcx-decimal
+            label="Fone"
+            [maskType]="'decimal'"
+            [alinharDireita]="false"
+            formControlName="cpf"
+            [required]="true"
+            errorMessage="teste"
+          ></tcx-decimal>
+        </div>
+      </div>
+      <div class="linha2">
+        <div class="input-select">
+          <tcx-select
+            [label]="'Alerta'"
+            [placeholder]="''"
+            [niveis]="lista1"
+            [formControl]="getControl('teste')"
+            [required]="true"
+            errorMessage="teste"
+          />
+        </div>
+        <div class="input-select">
+          <tcx-text-select
+            [label]="'Alerta digitavel'"
+            [placeholder]="''"
+            [niveis]="lista1"
+            [formControl]="getControl('testeAlerta')"
+            [required]="true"
+            errorMessage="teste"
+          ></tcx-text-select>
+        </div>
+      </div>
+      <div class="linhaButton">
+        <div class="form__button">
+          <tcx-button label="Salvar" type="submit"></tcx-button>
+          <!-- <button (click)="mostrarModal = false">Fechar modal</button> -->
+        </div>
+      </div>
+    </form>
+  </div>
+</tcx-modal>
