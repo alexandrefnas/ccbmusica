@@ -12,7 +12,6 @@ export class AppComponent {
   title = 'ccbmusica';
   menuOculto = false;
 
-
   alternarMenu() {
     this.menuOculto = !this.menuOculto;
   }
