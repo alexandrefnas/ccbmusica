@@ -1,10 +1,10 @@
 <div class="container__tela">
   <div id="barra-titulo__container">
-    <h2 style="font-weight: normal; color: grey;">ALUNOS</h2>
+    <h2 style="font-weight: normal; color: grey">ALUNOS</h2>
   </div>
   <div id="tela__barra-menu">
-    <div>
-      <button (click)="buttonClick()">Teste</button>
+    <div class="button-container">
+      <tcx-button label="Novo" (click)="buttonClick()"></tcx-button>
     </div>
   </div>
   <div id="tela__container-tabela"></div>
@@ -12,12 +12,64 @@
 
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
   <div class="templates__form">
-    <div class="linha1"></div>
-    <div class="linha2"></div>
-    <div class="linhaButton">
-      <div class="form__button">
-        <tcx-button label="Salvar" type="submit"></tcx-button>
+    <form [formGroup]="dadosForms" (ngSubmit)="onSalvar()">
+      <div class="linha1">
+        <div class="input-text" id="input-nomeAluno">
+          <tcx-text
+            label="Aluno"
+            type="name"
+            formControlName="nomeAluno"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
       </div>
-    </div>
+      <div class="linha2">
+        <div class="input-select" id="input-congregacao">
+          <tcx-select
+            [label]="'Comum Congregaçã'"
+            [placeholder]="''"
+            [niveis]="listaCongregacao"
+            [formControl]="getControl('idCongregacao')"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
+      <div class="linha3">
+        <div class="input-data">
+          <tcx-data
+            label="D. Nascimento"
+            type="data"
+            formControlName="dataNascimento"
+            [required]="false"
+          />
+        </div>
+        <div class="input-select" id="input-instrumento">
+          <tcx-select
+            [label]="'Instrumento'"
+            [placeholder]="''"
+            [niveis]="listaInstrumento"
+            [formControl]="getControl('idInstrumento')"
+            [required]="false"
+          />
+        </div>
+        <div class="input-select" id="input-afinacao">
+          <tcx-select
+            [label]="'Afinação'"
+            [placeholder]="''"
+            [niveis]="listaAfinacao"
+            [formControl]="getControl('afinacao')"
+            [required]="false"
+          />
+        </div>
+      </div>
+      <!-- <div class="linha4"></div> -->
+      <div class="linhaButton">
+        <div class="form__button">
+          <tcx-button label="Salvar" type="submit"></tcx-button>
+        </div>
+      </div>
+    </form>
   </div>
 </tcx-modal>

@@ -2,12 +2,17 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   EventEmitter,
+  forwardRef,
   Input,
   Optional,
   Output,
   Self,
 } from '@angular/core';
-import { ControlValueAccessor, NgControl } from '@angular/forms';
+import {
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
+  NgControl,
+} from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import {
   DateAdapter,
@@ -43,6 +48,11 @@ import { MatInputModule } from '@angular/material/input';
       useClass: MomentDateAdapter,
       deps: [MAT_DATE_LOCALE],
     },
+    // {
+    //   provide: NG_VALUE_ACCESSOR,
+    //   useExisting: forwardRef(() => DataComponent), // ✅ Usar forwardRef aqui
+    //   multi: true,
+    // },
   ],
 })
 export class DataComponent implements ControlValueAccessor {

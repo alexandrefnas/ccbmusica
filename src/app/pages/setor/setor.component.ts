@@ -96,5 +96,6 @@ export class SetorComponent {
 
   fecharModal() {
     this.mostrarModal = false;
+    this.dadosForms.reset();
   }
 }

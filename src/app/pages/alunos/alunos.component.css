@@ -24,7 +24,6 @@
   font-weight: bold;
   align-items: center;
   border-bottom: 2px solid #ccc;
-
 }
 
 #tela__barra-menu {
@@ -50,7 +49,6 @@
   box-shadow: inset -1px -1px 0 #dcdcdc, inset 2px 2px 0 #999;
 }
 
-
 /* / / */
 .templates__form {
   display: flex;
@@ -62,7 +60,8 @@
 }
 
 .linha1,
-.linha2 {
+.linha2,
+.linha3 {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -79,8 +78,34 @@
   /* border: solid 1px red; */
 }
 
+.button-container {
+  width: 80px;
+}
+
 .form__button {
   width: 100px;
   height: 25px;
+}
+/* // */
+
+/* / / */
+#input-nomeAluno {
+  width: 100%;
+}
+
+#input-congregacao {
+  width: 100%;
+}
+
+.input-data {
+  width: 130px;
+}
+
+#input-instrumento {
+  flex: 1;
+}
+
+#input-afinacao {
+  width: 80px;
 }
 /* // */

@@ -24,7 +24,6 @@
   font-weight: bold;
   align-items: center;
   border-bottom: 2px solid #ccc;
-
 }
 
 #tela__barra-menu {
@@ -50,13 +49,12 @@
   box-shadow: inset -1px -1px 0 #dcdcdc, inset 2px 2px 0 #999;
 }
 
-
 /* / / */
 .templates__form {
   display: flex;
   flex-direction: column;
   justify-content: center; /* alinha o primeiro à esquerda e o último à direita */
-  max-width: 500px;
+  /* max-width: 500px; */
   max-height: 60vh;
   box-sizing: border-box;
 }
@@ -67,9 +65,13 @@
   flex-direction: row;
   justify-content: space-between;
   gap: 5px;
-  width: 350px;
+  width: 550px;
   height: 58px;
   /* border: solid 1px red; */
+}
+
+.button-container {
+  width: 80px;
 }
 
 .linhaButton {
@@ -82,5 +84,19 @@
 .form__button {
   width: 100px;
   height: 25px;
+}
+/* // */
+
+/* / / */
+#input-nomeCongregacao {
+  width: 200px;
+}
+
+.input-select {
+  width: 130px;
+}
+
+#input-localizacao {
+  flex: 1;
 }
 /* // */
