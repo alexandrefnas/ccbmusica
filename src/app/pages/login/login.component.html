@@ -1,9 +1,26 @@
 <div class="login-container">
-  <form (ngSubmit)="login()" #form="ngForm">
-    <input type="email" name="email" [(ngModel)]="email" placeholder="Email" required />
-    <input type="password" name="senha" [(ngModel)]="senha" placeholder="Senha" required />
-    <button type="submit">Entrar</button>
-    <div *ngIf="erro" style="color: red;">{{ erro }}</div>
-  </form>
+  <div class="login-titulo">
+    <h2>Controle de Testes e Exames</h2>
+    <label>Informe email e senha para acessar </label>
+  </div>
+  <div>
+    <form (ngSubmit)="login()" #form="ngForm">
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        placeholder="Email"
+        required
+      />
+      <input
+        type="password"
+        name="senha"
+        [(ngModel)]="senha"
+        placeholder="Senha"
+        required
+      />
+      <button type="submit">Entrar</button>
+      <div *ngIf="erro" style="color: red">{{ erro }}</div>
+    </form>
+  </div>
 </div>
-

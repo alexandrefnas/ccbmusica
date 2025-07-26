@@ -6,11 +6,13 @@ import { IgrejasComponent } from './pages/igrejas/igrejas.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
+import { loginGuard } from './guards/login.guard';
+import { perfilGuard } from './guards/perfil.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [loginGuard]  },
   { path: '', component: HomeComponent , canActivate: [AuthGuard] },
-  { path: 'setor', component: SetorComponent, canActivate: [AuthGuard]  },
+  { path: 'setor', component: SetorComponent, canActivate: [perfilGuard] }, // 🔒 Só admins
   { path: 'igrejas', component: IgrejasComponent, canActivate: [AuthGuard]  },
   { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard]  },
   { path: 'alunos', component: AlunosComponent, canActivate: [AuthGuard]  },

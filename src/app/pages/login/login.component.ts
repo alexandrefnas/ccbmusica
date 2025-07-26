@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'tcx-login',
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
   email = '';
@@ -19,11 +19,38 @@ export class LoginComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
   login() {
-    this.authService.login(this.email, this.senha)
-      .then(() => this.router.navigate(['/'])) // redireciona para a home ou painel
+    this.authService
+      .login(this.email, this.senha)
+      .then(() => {
+        console.log('✅ Login iniciado, aguardando onAuthStateChanged...');
+
+        let sub: any;
+
+        // use setTimeout para empurrar para o próximo ciclo de evento
+        setTimeout(() => {
+          sub = this.authService
+            .getUsuarioAtualObservable()
+            .subscribe((usuario) => {
+              if (usuario) {
+                console.log('👤 Usuário detectado após login:', usuario);
+                this.router.navigate(['/']);
+                sub?.unsubscribe(); // agora funciona
+              }
+            });
+        });
+      })
       .catch((err) => {
-        console.error(err);
+        console.error('❌ Erro ao fazer login', err);
         this.erro = 'Email ou senha inválidos';
       });
   }
+
+  // login() {
+  //   this.authService.login(this.email, this.senha)
+  //     .then(() => this.router.navigate(['/'])) // redireciona para a home ou painel
+  //     .catch((err) => {
+  //       console.error(err);
+  //       this.erro = 'Email ou senha inválidos';
+  //     });
+  // }
 }

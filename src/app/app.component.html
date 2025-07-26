@@ -1,11 +1,16 @@
 <div class="container">
   <!-- <div class="container__tela"> -->
-  <div class="conteiner__menu-topo">
-    <button (click)="alternarMenu()" class="toggle-btn">☰</button>
+  <div class="conteiner__menu-topo" *ngIf="logado">
+    <div>
+      <button (click)="alternarMenu()" class="toggle-btn">☰</button>
+    </div>
+    <div>
+      <button (click)="logout()" class="toggle-btn">Sair</button>
+    </div>
   </div>
   <div class="container__conteudo">
-    <div class="container__menu-lateral" [class.oculto]="!menuOculto">
-      <tcx-menu/>
+    <div class="container__menu-lateral" [class.oculto]="!menuOculto" *ngIf="logado">
+      <tcx-menu />
     </div>
 
     <div class="container__router">
