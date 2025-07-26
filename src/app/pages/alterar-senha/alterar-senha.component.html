@@ -1,0 +1,34 @@
+<div class="cadastro-container">
+  <h2>Alterar Senha</h2>
+  <form (ngSubmit)="alterarSenha()" class="cadastro-form">
+    <div class="campo-senha">
+      <input
+        [type]="mostrarSenhaAtual ? 'text' : 'password'"
+        [(ngModel)]="senhaAtual"
+        name="senhaAtual"
+        placeholder="Senha atual"
+        required
+      />
+      <button type="button" (click)="visualizador('atual')">
+        {{ mostrarSenhaAtual ? "🚫" : "👁️" }}
+      </button>
+    </div>
+
+    <div class="campo-senha">
+      <input
+        [type]="mostrarNovaSenha ? 'text' : 'password'"
+        [(ngModel)]="novaSenha"
+        name="novaSenha"
+        placeholder="Nova senha"
+        required
+      />
+      <button type="button" (click)="visualizador('nova')">
+        {{ mostrarNovaSenha ? "🚫" : "👁️" }}
+      </button>
+    </div>
+
+    <button type="submit" [disabled]="carregando">
+      {{ carregando ? "Alterando..." : "Alterar Senha" }}
+    </button>
+  </form>
+</div>
