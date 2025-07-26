@@ -1,6 +1,6 @@
 <div class="container__tela">
   <div id="barra-titulo__container">
-    <h2 style="font-weight: normal; color: grey;">USUÁRIOS</h2>
+    <h2 style="font-weight: normal; color: grey">USUÁRIOS</h2>
   </div>
   <div id="tela__barra-menu">
     <div>
@@ -12,12 +12,57 @@
 
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
   <div class="templates__form">
-    <div class="linha1"></div>
-    <div class="linha2"></div>
-    <div class="linhaButton">
-      <div class="form__button">
-        <tcx-button label="Salvar" type="submit"></tcx-button>
+    <form [formGroup]="dadosForms"  (ngSubmit)="carregarDados()">
+      <div class="linha1">
+        <div class="input-text" id="input-nome">
+          <tcx-text
+            label="Nome Completo"
+            type="name"
+            formControlName="nome"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
       </div>
-    </div>
+      <div class="linha2">
+        <div class="input-text" id="input-email">
+          <tcx-text
+            label="Email"
+            type="email"
+            formControlName="email"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
+      <div class="linha3">
+        <div class="input-text" id="input-senha">
+          <tcx-text
+            label="Senha"
+            type="password"
+            formControlName="senha"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+            />
+          </div>
+        </div>
+        <div class="linha4">
+          <div class="input-select">
+            <tcx-select
+            [label]="'Perfil'"
+            [placeholder]="''"
+            [niveis]="listaTipoUsuario"
+            [formControl]="getControl('perfil')"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
+      <div class="linhaButton">
+        <div class="form__button">
+          <tcx-button label="Salvar" type="submit"></tcx-button>
+        </div>
+      </div>
+    </form>
   </div>
 </tcx-modal>

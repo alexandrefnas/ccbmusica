@@ -60,7 +60,9 @@
 }
 
 .linha1,
-.linha2 {
+.linha2,
+.linha3,
+.linha4 {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -82,3 +84,11 @@
   height: 25px;
 }
 /* // */
+
+.input-text {
+  width: 100%;
+}
+
+.input-select {
+  width: 100%;
+}

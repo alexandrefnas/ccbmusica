@@ -51,20 +51,20 @@ export class HomeComponent {
   // dados: any[] = [];
 
   tituloColunas = {
-    data:'Data',
+    data: 'Data',
     nome: 'Nome',
     valor: 'Valor (R$)',
     status: 'Situação',
   };
 
-  camposColunas = ['data','nome', 'valor', 'status'];
+  camposColunas = ['data', 'nome', 'valor', 'status'];
 
-  formatoColunas: any = {data:'data', valor: 'decimal' };
+  formatoColunas: any = { data: 'data', valor: 'decimal' };
 
   dados = [
-    { data: '15/12/2014',nome: 'Alexandre', valor: 1200, status: 'pendente' },
-    { data: '',nome: 'Fernanda' , valor: 800 , status: 'pago' },
-    { data: '',nome: 'Carlos'   , valor: 600 , status: 'atrasado' },
+    { data: '15/12/2014', nome: 'Alexandre', valor: 1200, status: 'pendente' },
+    { data: '', nome: 'Fernanda', valor: 800, status: 'pago' },
+    { data: '', nome: 'Carlos', valor: 600, status: 'atrasado' },
   ];
 
   // Buttons
@@ -153,6 +153,7 @@ export class HomeComponent {
     this.title = 'TESTE';
     this.mostrarModal = true;
   }
+
 
   fecharModal() {
     this.mostrarModal = false;

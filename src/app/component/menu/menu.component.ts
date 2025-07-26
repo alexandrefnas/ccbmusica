@@ -34,10 +34,11 @@ export class MenuComponent {
   mostrarGrupo2 = true;
 
   cadastros = [
-    { label: 'Usuários', rota: '/usuarios', nivelLiberacao: '' },
+    { label: 'Alterar Senha', rota: '/as', nivelLiberacao: '' },
     { label: 'Alunos', rota: '/alunos', nivelLiberacao: '' },
     { label: 'Igrejas', rota: '/igrejas', nivelLiberacao: '' },
     { label: 'Setores', rota: '/setor', nivelLiberacao: '' },
+    { label: 'Usuários', rota: '/usuarios', nivelLiberacao: '' },
     // { label: 'Painel de Controle', rota: '/', nivelLiberacao: '' },
     // { label: '', rota: '', nivelLiberacao: '' },
   ];
