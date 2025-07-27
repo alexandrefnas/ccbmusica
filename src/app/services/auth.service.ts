@@ -9,7 +9,14 @@ import {
   User,
   UserCredential,
 } from '@angular/fire/auth';
-import { doc, Firestore, getDoc, setDoc } from '@angular/fire/firestore';
+import {
+  collection,
+  collectionData,
+  doc,
+  Firestore,
+  getDoc,
+  setDoc,
+} from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import {
   createUserWithEmailAndPassword,
@@ -17,7 +24,15 @@ import {
   reauthenticateWithCredential,
   updatePassword,
 } from 'firebase/auth';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+export interface Usuarios {
+  uid?: string;
+  nome: string;
+  email: string;
+  perfil: string;
+}
+
 
 @Injectable({
   providedIn: 'root',
@@ -94,6 +109,13 @@ export class AuthService {
       ...dadosExtras,
     });
     return cred;
+  }
+
+  getUsuario() {
+    const dadosCollection = collection(this.firestore, 'usuarios');
+    return collectionData(dadosCollection, {
+      idField: 'uid',
+    }) as Observable<Usuarios[]>;
   }
 
   async reautenticarEAlterarSenha(

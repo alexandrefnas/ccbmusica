@@ -1,8 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { converterISOParaBR } from '../../../shared/shared.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ButtonComponent } from '../button/button.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'tcx-table',
@@ -45,12 +46,17 @@ export class TableComponent {
   @Input() mostrarAcoes: boolean = false;
 
   usuario: any;
-  // constructor(public auth: AuthService) {}
+  constructor(public auth: AuthService) {}
 
   // ngOnInit(): void {
   //   this.auth.getUsuarioAtualObservable().subscribe((user) => {
   //     this.usuario = user;
   //   });
+  // }
+  // ngOnChanges(changes: SimpleChanges): void {
+  //   if (changes['dados']) {
+  //     console.log('📊 Dados recebidos pelo componente tabela:', this.dados);
+  //   }
   // }
 
   getEstiloColunaTitulo(coluna: string): any {

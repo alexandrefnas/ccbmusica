@@ -7,7 +7,18 @@
       <tcx-button label="Novo" (click)="buttonClick()"></tcx-button>
     </div>
   </div>
-  <div id="tela__container-tabela"></div>
+  <div id="tela__container-tabela">
+    <tcx-table
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [dados]="dados"
+      [mostrarAcoes]="true"
+      [acoesTabela]="acoes"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+    />
+  </div>
 </div>
 
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">

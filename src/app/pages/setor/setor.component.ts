@@ -1,9 +1,5 @@
-import { Component } from '@angular/core';
-import { ButtonComponent } from '../../component/button/button.component';
-import { ModalComponent } from '../../modal/modal/modal.component';
-import { TableComponent } from '../../component/table/table.component';
-import { TextComponent } from '../../component/inputs/text/text.component';
-import { SelectComponent } from '../../component/inputs/select/select.component';
+import { Component, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   FormBuilder,
   FormControl,
@@ -12,6 +8,13 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ButtonComponent } from '../../component/button/button.component';
+import { ModalComponent } from '../../modal/modal/modal.component';
+import { TableComponent } from '../../component/table/table.component';
+import { TextComponent } from '../../component/inputs/text/text.component';
+import { SelectComponent } from '../../component/inputs/select/select.component';
+import { confirmarAcao } from '../../../shared/shared.service';
+import { FirestoreService, Setor } from '../../services/firestore.service';
 
 @Component({
   selector: 'tcx-setor',
@@ -20,14 +23,14 @@ import {
     ReactiveFormsModule,
     ButtonComponent,
     ModalComponent,
-    // TableComponent,
     TextComponent,
     SelectComponent,
+    TableComponent,
   ],
   templateUrl: './setor.component.html',
   styleUrl: './setor.component.css',
 })
-export class SetorComponent {
+export class SetorComponent implements OnInit {
   title = 'TITULO';
   mostrarModal = false;
 
@@ -61,14 +64,84 @@ export class SetorComponent {
     { value: 'TO', label: 'TO' },
   ];
 
+  // Campos TABELA
+  camposColunas = ['nomeSetor', 'nomeCidade', 'estado'];
+  tituloColunas = {
+    nomeSetor: 'Setor',
+    nomeCidade: 'Cidade',
+    estado: 'UF',
+  };
+
+  dados: any[] = [];
+  // dados$: Observable<Setor[]>;
+  dadosParaEditar: any | null = null;
+
+  alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
+    nomeSetor: 'center',
+    nomeCidade: 'center',
+    estado: 'center',
+  };
+
+  alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
+    nomeSetor: 'center',
+    estado: 'center',
+  };
+
+  tamanhoColunas = {
+    nomeSetor: { width: '45%' },
+    nomeCidade: { width: '45%' },
+    estado: { width: '10%' },
+  };
+
+  // Buttons
+  acoes = [
+    {
+      label: '✏️',
+      descricao: 'Editar',
+      classe: 'acao-editar',
+      visivel: (item: any) => true,
+      callback: (item: any) => this.editar(item),
+    },
+    {
+      label: '🗑️',
+      descricao: 'Excluir',
+      classe: 'acao-excluir',
+      visivel: (item: any) => true,
+      callback: (item: any) => this.excluir(item),
+    },
+  ];
+  //
+
+  //Fim
+
   dadosForms: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private firestoreService: FirestoreService,
+    private snackBar: MatSnackBar
+  ) {
     this.dadosForms = this.fb.group({
       nomeSetor: ['', Validators.required],
       nomeCidade: ['', Validators.required],
       estado: ['', Validators.required],
-      // testeAlerta: ['',Validators.required],
+    });
+  }
+
+  ngOnInit(): void {
+    this.carregarDados();
+  }
+
+  carregarDados(): void {
+    this.firestoreService.getSetor().subscribe((setores) => {
+      const setoresOrdenados = setores.sort((a, b) => {
+        const nomeA = a.nomeSetor?.toLowerCase() || '';
+        const nomeB = b.nomeSetor?.toLowerCase() || '';
+        return nomeA.localeCompare(nomeB);
+      });
+
+      this.dados = [...setoresOrdenados]; // 🔁 Cria nova referência
+      console.log('Dados carregados: ', this.dados);
     });
   }
 
@@ -85,13 +158,102 @@ export class SetorComponent {
     this.mostrarModal = true;
   }
 
+  editar(select: Setor): void {
+    this.title = 'Editar Setor';
+    this.mostrarModal = true;
+    this.dadosParaEditar = { ...select };
+
+    this.dadosForms.patchValue({
+      nomeSetor: select.nomeSetor || '',
+      nomeCidade: select.nomeCidade || '',
+      estado: select.estado || '',
+    });
+    console.log(this.dadosParaEditar);
+  }
+
+  async excluir(dados: Setor): Promise<void> {
+    const confirmacao = confirm(
+      `Tems certeza que deseja excluir "${dados.nomeSetor}"?`
+    );
+    if (!confirmacao) {
+      return;
+    }
+
+    if (dados.id) {
+      try {
+        await this.firestoreService.deleteSetor(dados.id).then(() => {
+          this.snackBar.open(
+            `${dados.nomeSetor} deletado com sucesso!`,
+            'Fechar',
+            {
+              duration: 4000,
+            }
+          );
+        });
+        // console.log('Cliente excluído:', dados);
+        this.carregarDados();
+      } catch (error) {
+        console.error(`Erro ao excluir: "${dados.nomeSetor}" `, error);
+      }
+    }
+  }
+
   onSalvar(): void {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
       alert('Formulário inválido. Preencha os campos obrigatórios.');
       return;
     }
-    console.log(this.dadosForms.value);
+
+    const baseData = this.dadosForms.value;
+
+    const mensagem = this.dadosParaEditar
+      ? `Deseja realmente alterar ${this.dadosParaEditar.nomeSetor}?`
+      : `Deseja realmente salvar ${baseData.nomeSetor}?`;
+
+    // if (!confirmarAcao(mensagem)) return;
+
+    if (this.dadosParaEditar) {
+      const alterado = Object.keys(baseData).some(
+        (key) => baseData[key] !== this.dadosParaEditar[key]
+      );
+
+      if (!alterado) {
+        this.snackBar.open('Nenhuma alteração detectada.', 'Fechar', {
+          duration: 3000,
+        });
+        this.fecharModal();
+        return;
+      }
+
+      if (!confirmarAcao(mensagem)) return;
+
+      this.firestoreService
+        .updateSetor(this.dadosParaEditar.id!, baseData)
+        .then(() => {
+          this.snackBar.open(
+            `${baseData.nomeSetor} alterado com sucesso!`,
+            'Fechar',
+            {
+              duration: 4000,
+            }
+          );
+          this.fecharModal();
+        });
+    } else {
+      if (!confirmarAcao(mensagem)) return;
+
+      this.firestoreService.addSetor(baseData).then(() => {
+        this.snackBar.open(
+          `${baseData.nomeSetor} salvo com sucesso!`,
+          'Fechar',
+          {
+            duration: 4000,
+          }
+        );
+        this.fecharModal();
+      });
+    }
   }
 
   fecharModal() {

@@ -13,3 +13,7 @@ export function formatarDataString(data: Date): string {
   return `${dia}-${mes}-${ano}`;
   // return `${ano}-${mes}-${dia}`;
 }
+
+export function confirmarAcao(mensagem: string): boolean {
+  return window.confirm(mensagem);
+}

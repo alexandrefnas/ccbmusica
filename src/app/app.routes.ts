@@ -12,7 +12,7 @@ import { PerfilGuard } from './guards/perfil.guard';
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [loginGuard] },
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
-  { path: 'setor', component: SetorComponent, canActivate: [PerfilGuard] }, // 🔒 Só admins
+  { path: 'setor', component: SetorComponent, canActivate: [AuthGuard] }, 
   { path: 'igrejas', component: IgrejasComponent, canActivate: [AuthGuard] },
   { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard] },
   { path: 'alunos', component: AlunosComponent, canActivate: [AuthGuard] },

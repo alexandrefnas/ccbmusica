@@ -7,12 +7,21 @@
       <button (click)="buttonClick()">Teste</button>
     </div>
   </div>
-  <div id="tela__container-tabela"></div>
+  <div id="tela__container-tabela">
+    <tcx-table
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [dados]="listaUsuarios"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+    />
+  </div>
 </div>
 
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
   <div class="templates__form">
-    <form [formGroup]="dadosForms"  (ngSubmit)="carregarDados()">
+    <form [formGroup]="dadosForms"  (ngSubmit)="prepararDados()">
       <div class="linha1">
         <div class="input-text" id="input-nome">
           <tcx-text
