@@ -18,13 +18,16 @@ import {
   setDoc,
 } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { getApps, initializeApp } from 'firebase/app';
 import {
   createUserWithEmailAndPassword,
   EmailAuthProvider,
+  getAuth,
   reauthenticateWithCredential,
   updatePassword,
 } from 'firebase/auth';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { firebaseConfig } from '../../firebase.config';
 
 export interface PermissoesCRUD {
   read: boolean;
@@ -55,7 +58,7 @@ export interface Usuarios {
 export class AuthService {
   // private usuarioLogado$ = new BehaviorSubject<any | null>(null);
   private usuarioLogado$ = new BehaviorSubject<Usuarios | null>(null);
-
+  private secondaryAuth = null;
   public carregando$ = new BehaviorSubject<boolean>(true); // novo!
 
   constructor(
@@ -118,13 +121,26 @@ export class AuthService {
 
   // ⚙️ Cadastro com perfil
   async cadastrar(email: string, senha: string, dadosExtras: any) {
-    const cred = await createUserWithEmailAndPassword(this.auth, email, senha);
+
+    const secondaryApp =
+      getApps().find((app) => app.name === 'secondary') ||
+      initializeApp(firebaseConfig, 'secondary');
+
+    const secondaryAuth = getAuth(secondaryApp);
+    const cred = await createUserWithEmailAndPassword(
+      secondaryAuth,
+      email,
+      senha,
+    );
     const ref = doc(this.firestore, 'usuarios', cred.user.uid);
     await setDoc(ref, {
       uid: cred.user.uid,
       email,
       ...dadosExtras,
     });
+
+    // limpa sessão secundária
+    await signOut(secondaryAuth);
     return cred;
   }
 

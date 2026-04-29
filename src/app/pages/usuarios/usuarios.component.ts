@@ -13,10 +13,12 @@ import { AuthService } from '../../services/auth.service';
 import { TextComponent } from '../../component/inputs/text/text.component';
 import { SelectComponent } from '../../component/inputs/select/select.component';
 import { TableComponent } from '../../component/table/table.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'tcx-usuarios',
   imports: [
+    CommonModule,
     ModalComponent,
     ButtonComponent,
     FormsModule,
@@ -71,13 +73,91 @@ export class UsuariosComponent implements OnInit {
 
   dadosForms: FormGroup;
 
-  constructor(private fb: FormBuilder, private auth: AuthService) {
+  tipoPerfil: any = {
+    admin: {
+      acessos: {
+        candidatos: { read: true, create: true, update: true, delete: true },
+        igrejas: { read: true, create: true, update: true, delete: true },
+        instrumentos: { read: true, create: true, update: true, delete: true },
+        setores: { read: true, create: true, update: true, delete: true },
+        usuarios: { read: true, create: true, update: true, delete: true },
+      },
+    },
+
+    regional: {
+      acessos: {
+        candidatos: { read: true, create: true, update: true, delete: true },
+        igrejas: { read: true, create: false, update: false, delete: false },
+        instrumentos: {
+          read: true,
+          create: false,
+          update: false,
+          delete: false,
+        },
+        setores: { read: false, create: false, update: false, delete: false },
+        usuarios: { read: true, create: true, update: true, delete: true },
+      },
+    },
+    secretario: {
+      acessos: {
+        candidatos: { read: true, create: true, update: true, delete: true },
+        igrejas: { read: true, create: false, update: false, delete: false },
+        instrumentos: {
+          read: true,
+          create: false,
+          update: false,
+          delete: false,
+        },
+        setores: { read: false, create: false, update: false, delete: false },
+        usuarios: { read: true, create: true, update: true, delete: true },
+      },
+    },
+
+    encarregado: {
+      acessos: {
+        candidatos: { read: true, create: true, update: true, delete: true },
+        igrejas: { read: false, create: false, update: false, delete: false },
+        instrumentos: {
+          read: false,
+          create: false,
+          update: false,
+          delete: false,
+        },
+        setores: { read: false, create: false, update: false, delete: false },
+        usuarios: { read: false, create: false, update: false, delete: false },
+      },
+    },
+
+    usuario: {
+      acessos: {
+        candidatos: { read: true, create: true, update: true, delete: false },
+        igrejas: { read: false, create: false, update: false, delete: false },
+        instrumentos: {
+          read: false,
+          create: false,
+          update: false,
+          delete: false,
+        },
+        setores: { read: false, create: false, update: false, delete: false },
+        usuarios: { read: false, create: false, update: false, delete: false },
+      },
+    },
+  };
+
+  constructor(
+    private fb: FormBuilder,
+    private auth: AuthService,
+  ) {
     this.dadosForms = this.fb.group({
       nome: ['', Validators.required],
       email: ['', Validators.required],
       senha: ['', Validators.required],
       perfil: ['', Validators.required],
     });
+  }
+
+  get permissao() {
+    return this.auth.temPermissao('usuarios', 'create');
   }
 
   ngOnInit(): void {
@@ -104,6 +184,7 @@ export class UsuariosComponent implements OnInit {
         const nomeB = b.nome?.toLowerCase() || '';
         return nomeA.localeCompare(nomeB);
       });
+      console.log(this.listaUsuarios);
     });
   }
 
@@ -123,12 +204,32 @@ export class UsuariosComponent implements OnInit {
 
   async onSalvar() {
     this.carregando = true;
+console.log('USUARIO LOGADO:', this.auth.usuario);
+console.log('UID:', this.auth.usuario?.uid);
+console.log('PERFIL:', this.auth.usuario?.perfil);
+
+
+    const usuarioLogado = this.auth.usuario;
+
+    // só admin pode criar admin
+    if (this.perfil === 'admin' && usuarioLogado?.perfil !== 'admin') {
+      alert('Você não tem permissão para criar administradores.');
+      return;
+    }
 
     try {
+      const perfilConfig = this.tipoPerfil[this.perfil];
+
+      if (!perfilConfig) {
+        alert('Perfil inválido');
+        return;
+      }
       await this.auth.cadastrar(this.email, this.senha, {
         nome: this.nome,
         perfil: this.perfil,
+        acessos: perfilConfig.acessos,
       });
+
       alert('Usuário cadastrado com sucesso!');
       this.nome = '';
       this.email = '';
