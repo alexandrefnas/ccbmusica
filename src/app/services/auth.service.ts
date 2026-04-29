@@ -26,25 +26,42 @@ import {
 } from 'firebase/auth';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+export interface PermissoesCRUD {
+  read: boolean;
+  create: boolean;
+  update: boolean;
+  delete: boolean;
+}
+
+export interface Acessos {
+  candidatos?: PermissoesCRUD;
+  igrejas?: PermissoesCRUD;
+  instrumentos?: PermissoesCRUD;
+  setores?: PermissoesCRUD;
+  usuarios?: PermissoesCRUD;
+}
+
 export interface Usuarios {
   uid?: string;
   nome: string;
   email: string;
   perfil: string;
+  acessos?: Acessos;
 }
-
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private usuarioLogado$ = new BehaviorSubject<any | null>(null);
+  // private usuarioLogado$ = new BehaviorSubject<any | null>(null);
+  private usuarioLogado$ = new BehaviorSubject<Usuarios | null>(null);
+
   public carregando$ = new BehaviorSubject<boolean>(true); // novo!
 
   constructor(
     private auth: Auth,
     private router: Router,
-    private firestore: Firestore
+    private firestore: Firestore,
   ) {
     // console.log('🚀 AuthService construído');
 
@@ -54,7 +71,7 @@ export class AuthService {
       if (user) {
         const docRef = doc(this.firestore, 'usuarios', user.uid);
         const snap = await getDoc(docRef);
-        const perfil = snap.exists() ? snap.data() : null;
+        const perfil = snap.exists() ? (snap.data() as Usuarios) : null;
         this.usuarioLogado$.next(perfil);
       } else {
         this.usuarioLogado$.next(null);
@@ -77,7 +94,7 @@ export class AuthService {
         perfil: 'usuario', // ou outro padrão
       });
     }
-    const perfil = (await getDoc(ref)).data();
+    const perfil = snap.exists() ? (snap.data() as Usuarios) : null;
 
     this.usuarioLogado$.next(perfil); // 🔁 já define aqui
     this.carregando$.next(false); // 🔚 finaliza carregamento
@@ -87,7 +104,7 @@ export class AuthService {
   private async carregarPerfil(uid: string) {
     const ref = doc(this.firestore, 'usuarios', uid);
     const snap = await getDoc(ref);
-    const perfil = snap.exists() ? snap.data() : null;
+    const perfil = snap.exists() ? (snap.data() as Usuarios) : null;
     this.usuarioLogado$.next(perfil);
   }
 
@@ -121,7 +138,7 @@ export class AuthService {
   async reautenticarEAlterarSenha(
     email: string,
     senhaAtual: string,
-    novaSenha: string
+    novaSenha: string,
   ) {
     const usuario = this.auth.currentUser;
     if (!usuario) throw new Error('Usuário não está logado.');
@@ -154,5 +171,22 @@ export class AuthService {
 
   getPerfilUsuario() {
     return this.usuario;
+  }
+
+  temPermissao(tabela: keyof Acessos, tipo: keyof PermissoesCRUD): boolean {
+    const usuario = this.usuario;
+
+    if (!usuario) return false;
+
+    if (usuario.perfil === 'admin') return true;
+
+    const acessoTabela = usuario.acessos?.[tabela];
+
+    if (!acessoTabela) {
+      console.warn(`⚠️ Sem configuração de acesso para tabela: ${tabela}`);
+      return false;
+    }
+
+    return acessoTabela[tipo] === true;
   }
 }

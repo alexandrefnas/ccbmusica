@@ -23,7 +23,7 @@
 
 .conteiner__menu-topo div {
   /* display: flex; */
-display: flex;
+  display: flex;
   justify-content: center;
   padding: 8px 0;
   width: 150px;
@@ -39,11 +39,12 @@ display: flex;
   /* border: solid 1px red; */
 }
 
-.container__conteudo {
+.container__screen {
   display: flex;
   flex-direction: row;
   width: 100%;
   height: calc(100% - 40px);
+  overflow: hidden;
   /* height: 100%; */
 }
 
@@ -56,6 +57,7 @@ display: flex;
   transition: width 0.3s ease;
   padding: 3px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .container__menu-lateral.oculto {
@@ -67,6 +69,7 @@ display: flex;
 .container__router {
   width: 100%;
   height: 100%;
+  overflow: auto;
   /* border: solid 1px red; */
 }
 

@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { access } from 'fs';
 
 @Component({
   selector: 'tcx-login',
@@ -16,7 +16,10 @@ export class LoginComponent {
   senha = '';
   erro = '';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
   login() {
     this.authService
@@ -53,4 +56,65 @@ export class LoginComponent {
   //       this.erro = 'Email ou senha inválidos';
   //     });
   // }
+
+  // usuarios = [
+  //   {
+  //     name: '',
+  //     email: '',
+  //     perfil: '',
+  //     uid: '',
+  //     acessos: {
+  //       tabelas: {
+  //         tabela: 'candidatos',
+  //         access: true,
+  //         tipoAcesso: {
+  //           create: true,
+  //           delete: false,
+  //           update: false,
+  //           read: true,
+  //         },
+  //       },
+  //     },
+  //   },
+  // ];
+
+  tipoPerfil = [
+    {
+      admin: {
+        acessos: {
+          candidatos: { read: true, create: true, update: true, delete: true },
+          igrejas: { read: true, create: false, update: false, delete: false },
+          instrumentos: {
+            read: true,
+            create: false,
+            update: false,
+            delete: false,
+          },
+          setores: { read: false, create: false, update: false, delete: false },
+          usuarios: { read: true, create: true, update: true, delete: true },
+        },
+      },
+    },
+    {
+      usuario: {
+        acessos: {
+          candidatos: { read: true, create: true, update: true, delete: true },
+          igrejas: { read: false, create: false, update: false, delete: false },
+          instrumentos: {
+            read: false,
+            create: false,
+            update: false,
+            delete: false,
+          },
+          setores: { read: false, create: false, update: false, delete: false },
+          usuarios: {
+            read: false,
+            create: false,
+            update: false,
+            delete: false,
+          },
+        },
+      },
+    },
+  ];
 }

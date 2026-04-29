@@ -8,7 +8,7 @@
       <button (click)="logout()" class="toggle-btn">Sair</button>
     </div>
   </div>
-  <div class="container__conteudo">
+  <div class="container__screen">
     <div class="container__menu-lateral" [class.oculto]="!menuOculto" *ngIf="logado">
       <tcx-menu />
     </div>
@@ -17,6 +17,4 @@
       <router-outlet />
     </div>
   </div>
-
-  <!-- </div> -->
 </div>
