@@ -40,6 +40,7 @@ export class UsuariosComponent implements OnInit {
 
   listaTipoUsuario = [
     { value: 'admin', label: 'Admin' },
+    { value: 'secretario', label: 'Secretário(a)' },
     { value: 'regional', label: 'Regional' },
     { value: 'encarregado', label: 'Encarregado' },
     { value: 'usuario', label: 'Instrutor' },

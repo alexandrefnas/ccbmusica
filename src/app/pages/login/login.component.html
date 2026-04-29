@@ -19,7 +19,10 @@
         placeholder="Senha"
         required
       />
-      <button type="submit">Entrar</button>
+      <!-- <button type="submit">Entrar</button> -->
+      <button type="submit" [disabled]="carregando">
+        {{ carregando ? "Entrando..." : "Entrar" }}
+      </button>
       <div *ngIf="erro" style="color: red">{{ erro }}</div>
     </form>
   </div>
