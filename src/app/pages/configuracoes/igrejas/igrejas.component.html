@@ -24,10 +24,10 @@
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
   <div class="templates__form">
     <form [formGroup]="dadosForms" (ngSubmit)="onSalvar()">
-      <div class="linha1">
+      <div class="linha">
         <div class="input-text" id="input-nomeCongregacao">
           <tcx-text
-            label="Congregação"
+            label="Nome Congregação"
             type="name"
             formControlName="nomeCongregacao"
             [required]="true"

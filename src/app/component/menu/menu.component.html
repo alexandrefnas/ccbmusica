@@ -13,20 +13,24 @@
   </table>
 
   <!-- Cadastros -->
-  <table class="demonstrativo__tabela">
+  <table *ngIf="cadastroFiltrados.length > 0" class="demonstrativo__tabela">
     <tbody>
       <tr class="grupo" (click)="menuCadastro()" style="cursor: pointer">
         <td>
           <div class="grupo__submenu">
-            <strong>Manutenção</strong>
-            <span>{{ mostrarGrupo1 ? "▼" : "▶" }}</span>
+            <strong>Cadastros</strong>
+            <span>{{ mostrarGrupo ? "▼" : "▶" }}</span>
           </div>
         </td>
       </tr>
 
       <!-- Submenus com navegação -->
-      <ng-container *ngIf="mostrarGrupo1">
-        <tr *ngFor="let page of cadastros" @expandCollapse class="submenu">
+      <ng-container *ngIf="mostrarGrupo">
+        <tr
+          *ngFor="let page of cadastroFiltrados"
+          @expandCollapse
+          class="submenu"
+        >
           <td (click)="abrirRota(page.rota)" style="cursor: pointer">
             {{ page.label }}
           </td>
@@ -35,7 +39,35 @@
     </tbody>
   </table>
 
-  <table class="demonstrativo__tabela">
+
+<!-- Manutenção -->
+  <table *ngIf="manutencaoFiltrados.length > 0" class="demonstrativo__tabela">
+    <tbody>
+      <tr class="grupo" (click)="menuManutencao()" style="cursor: pointer">
+        <td>
+          <div class="grupo__submenu">
+            <strong>Configurações</strong>
+            <span>{{ mostrarGrupo1 ? "▼" : "▶" }}</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Submenus com navegação -->
+      <ng-container *ngIf="mostrarGrupo1">
+        <tr
+          *ngFor="let page of manutencaoFiltrados"
+          @expandCollapse
+          class="submenu"
+        >
+          <td (click)="abrirRota(page.rota)" style="cursor: pointer">
+            {{ page.label }}
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+
+  <table *ngIf="avaliacoesFiltradas.length > 0" class="demonstrativo__tabela">
     <tbody>
       <tr class="grupo" (click)="menuTestes()" style="cursor: pointer">
         <td>
@@ -48,7 +80,7 @@
 
       <!-- Submenus com navegação -->
       <ng-container *ngIf="mostrarGrupo2">
-        <tr *ngFor="let page of avaliacoes" @expandCollapse class="submenu">
+        <tr *ngFor="let page of avaliacoesFiltradas" @expandCollapse class="submenu">
           <td (click)="abrirRota(page.rota)" style="cursor: pointer">
             {{ page.label }}
           </td>

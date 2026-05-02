@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { AlunosComponent } from './pages/alunos/alunos.component';
-import { SetorComponent } from './pages/setor/setor.component';
-import { IgrejasComponent } from './pages/igrejas/igrejas.component';
-import { UsuariosComponent } from './pages/usuarios/usuarios.component';
+import { SetorComponent } from './pages/configuracoes/setor/setor.component';
+import { IgrejasComponent } from './pages/configuracoes/igrejas/igrejas.component';
+import { UsuariosComponent } from './pages/configuracoes/usuarios/usuarios.component';
 import { AuthGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 import { PerfilGuard } from './guards/perfil.guard';
@@ -40,7 +40,7 @@ export const routes: Routes = [
   {
     path: 'as',
     loadComponent: () =>
-      import('./pages/alterar-senha/alterar-senha.component').then(
+      import('./pages/configuracoes/alterar-senha/alterar-senha.component').then(
         (m) => m.AlterarSenhaComponent,
       ),
     canActivate: [AuthGuard], // Apenas usuários logados

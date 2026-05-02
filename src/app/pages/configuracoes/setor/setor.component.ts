@@ -8,13 +8,13 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ButtonComponent } from '../../component/button/button.component';
-import { ModalComponent } from '../../modal/modal/modal.component';
-import { TableComponent } from '../../component/table/table.component';
-import { TextComponent } from '../../component/inputs/text/text.component';
-import { SelectComponent } from '../../component/inputs/select/select.component';
-import { confirmarAcao } from '../../../shared/shared.service';
-import { FirestoreService, Setor } from '../../services/firestore.service';
+import { ButtonComponent } from '../../../component/button/button.component';
+import { ModalComponent } from '../../../modal/modal/modal.component';
+import { TableComponent } from '../../../component/table/table.component';
+import { TextComponent } from '../../../component/inputs/text/text.component';
+import { SelectComponent } from '../../../component/inputs/select/select.component';
+import { confirmarAcao } from '../../../../shared/shared.service';
+import { FirestoreService, Setor } from '../../../services/firestore.service';
 
 @Component({
   selector: 'tcx-setor',
@@ -119,7 +119,7 @@ export class SetorComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {
     this.dadosForms = this.fb.group({
       nomeSetor: ['', Validators.required],
@@ -173,7 +173,7 @@ export class SetorComponent implements OnInit {
 
   async excluir(dados: Setor): Promise<void> {
     const confirmacao = confirm(
-      `Tems certeza que deseja excluir "${dados.nomeSetor}"?`
+      `Tems certeza que deseja excluir "${dados.nomeSetor}"?`,
     );
     if (!confirmacao) {
       return;
@@ -187,7 +187,7 @@ export class SetorComponent implements OnInit {
             'Fechar',
             {
               duration: 4000,
-            }
+            },
           );
         });
         // console.log('Cliente excluído:', dados);
@@ -215,7 +215,7 @@ export class SetorComponent implements OnInit {
 
     if (this.dadosParaEditar) {
       const alterado = Object.keys(baseData).some(
-        (key) => baseData[key] !== this.dadosParaEditar[key]
+        (key) => baseData[key] !== this.dadosParaEditar[key],
       );
 
       if (!alterado) {
@@ -236,7 +236,7 @@ export class SetorComponent implements OnInit {
             'Fechar',
             {
               duration: 4000,
-            }
+            },
           );
           this.fecharModal();
         });
@@ -249,7 +249,7 @@ export class SetorComponent implements OnInit {
           'Fechar',
           {
             duration: 4000,
-          }
+          },
         );
         this.fecharModal();
       });

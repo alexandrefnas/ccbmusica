@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent {
   title = 'ccbmusica';
-  menuOculto = false;
+  public menuOculto = false;
   logado: boolean = false;
 
   alternarMenu() {

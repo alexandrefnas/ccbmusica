@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -8,24 +8,25 @@ import { CommonModule } from '@angular/common';
   selector: 'tcx-alterar-senha',
   imports: [CommonModule, FormsModule],
   templateUrl: './alterar-senha.component.html',
-  styleUrl: './alterar-senha.component.css'
+  styleUrl: './alterar-senha.component.css',
 })
 export class AlterarSenhaComponent {
- //  email = '';
+  //  email = '';
   senhaAtual = '';
   novaSenha = '';
   carregando = false;
   mostrarSenhaAtual = false;
   mostrarNovaSenha = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+  ) {}
 
-  visualizador(tipo:string) {
-    if(tipo ==='atual')
-    this.mostrarSenhaAtual = !this.mostrarSenhaAtual;
-    if(tipo ==='nova')
-    this.mostrarNovaSenha = !this.mostrarNovaSenha;
-  };
+  visualizador(tipo: string) {
+    if (tipo === 'atual') this.mostrarSenhaAtual = !this.mostrarSenhaAtual;
+    if (tipo === 'nova') this.mostrarNovaSenha = !this.mostrarNovaSenha;
+  }
 
   async alterarSenha() {
     const email = this.auth.usuarioEmail?.email;
@@ -41,7 +42,7 @@ export class AlterarSenhaComponent {
       await this.auth.reautenticarEAlterarSenha(
         email,
         this.senhaAtual,
-        this.novaSenha
+        this.novaSenha,
       );
       alert('Senha alterada com sucesso!');
       // this.email = '';

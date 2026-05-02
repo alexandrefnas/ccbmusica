@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { ModalComponent } from '../../modal/modal/modal.component';
-import { ButtonComponent } from '../../component/button/button.component';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ModalComponent } from '../../../modal/modal/modal.component';
+import { ButtonComponent } from '../../../component/button/button.component';
 import {
   FormBuilder,
   FormControl,
@@ -9,11 +9,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
-import { TextComponent } from '../../component/inputs/text/text.component';
-import { SelectComponent } from '../../component/inputs/select/select.component';
-import { TableComponent } from '../../component/table/table.component';
+import { AuthService } from '../../../services/auth.service';
+import { TextComponent } from '../../../component/inputs/text/text.component';
+import { SelectComponent } from '../../../component/inputs/select/select.component';
+import { TableComponent } from '../../../component/table/table.component';
 import { CommonModule } from '@angular/common';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'tcx-usuarios',
@@ -147,6 +148,7 @@ export class UsuariosComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
+    private cd: ChangeDetectorRef,
   ) {
     this.dadosForms = this.fb.group({
       nome: ['', Validators.required],
@@ -169,22 +171,33 @@ export class UsuariosComponent implements OnInit {
     this.mostrarModal = true;
   }
 
+  // carregarDados(): void {
+  //   const ref = this.auth;
+  //   const collectionRef = ref && ref['firestore'] ? ref['firestore'] : null;
+
+  //   if (!collectionRef) {
+  //     console.error('Firestore não está inicializado.');
+  //     return;
+  //   }
+
+  //   this.auth.getUsuario().subscribe((u) => {
+  //     this.listaUsuarios = u.sort((a, b) => {
+  //       const nomeA = a.nome?.toLowerCase() || '';
+  //       const nomeB = b.nome?.toLowerCase() || '';
+  //       return nomeA.localeCompare(nomeB);
+  //     });
+  //     console.log(this.listaUsuarios);
+  //   });
+  // }
+
   carregarDados(): void {
-    const ref = this.auth;
-    const collectionRef = ref && ref['firestore'] ? ref['firestore'] : null;
-
-    if (!collectionRef) {
-      console.error('Firestore não está inicializado.');
-      return;
-    }
-
-    this.auth.getUsuario().subscribe((u) => {
-      this.listaUsuarios = u.sort((a, b) => {
-        const nomeA = a.nome?.toLowerCase() || '';
-        const nomeB = b.nome?.toLowerCase() || '';
-        return nomeA.localeCompare(nomeB);
-      });
-      console.log(this.listaUsuarios);
+    this.auth.getUsuario().subscribe((usuarios) => {
+      this.listaUsuarios = [...usuarios].sort((a, b) =>
+        (a.nome?.toLowerCase() || '').localeCompare(
+          b.nome?.toLowerCase() || '',
+        ),
+      );
+      this.cd.markForCheck(); // força atualização
     });
   }
 
@@ -204,10 +217,9 @@ export class UsuariosComponent implements OnInit {
 
   async onSalvar() {
     this.carregando = true;
-console.log('USUARIO LOGADO:', this.auth.usuario);
-console.log('UID:', this.auth.usuario?.uid);
-console.log('PERFIL:', this.auth.usuario?.perfil);
-
+    console.log('USUARIO LOGADO:', this.auth.usuario);
+    console.log('UID:', this.auth.usuario?.uid);
+    console.log('PERFIL:', this.auth.usuario?.perfil);
 
     const usuarioLogado = this.auth.usuario;
 

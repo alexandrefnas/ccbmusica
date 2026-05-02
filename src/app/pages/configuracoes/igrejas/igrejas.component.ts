@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ModalComponent } from '../../modal/modal/modal.component';
-import { ButtonComponent } from '../../component/button/button.component';
-import { TextComponent } from '../../component/inputs/text/text.component';
-import { SelectComponent } from '../../component/inputs/select/select.component';
+import { ModalComponent } from '../../../modal/modal/modal.component';
+import { ButtonComponent } from '../../../component/button/button.component';
+import { TextComponent } from '../../../component/inputs/text/text.component';
+import { SelectComponent } from '../../../component/inputs/select/select.component';
 import {
   FormBuilder,
   FormControl,
@@ -11,11 +11,15 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { TableComponent } from '../../component/table/table.component';
-import { FirestoreService, Igrejas, Setor } from '../../services/firestore.service';
+import { TableComponent } from '../../../component/table/table.component';
+import {
+  FirestoreService,
+  Igrejas,
+  Setor,
+} from '../../../services/firestore.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { confirmarAcao } from '../../../shared/shared.service';
-import { forkJoin, take } from 'rxjs';
+import { confirmarAcao } from '../../../../shared/shared.service';
+import { combineLatest, forkJoin, take } from 'rxjs';
 
 @Component({
   selector: 'tcx-igrejas',
@@ -39,10 +43,10 @@ export class IgrejasComponent implements OnInit {
   listaSetor: { value: string; label: string }[] = [];
 
   // Campos TABELA
-  camposColunas = ['nomeCongregacao', 'idSetor', 'localizacao'];
+  camposColunas = ['nomeCongregacao', 'nomeSetor', 'localizacao'];
   tituloColunas = {
     nomeCongregacao: 'Congregação',
-    idSetor: 'Setor',
+    nomeSetor: 'Setor',
     localizacao: 'Localização',
   };
 
@@ -52,7 +56,7 @@ export class IgrejasComponent implements OnInit {
 
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeCongregacao: 'center',
-    idSetor: 'center',
+    nomeSetor: 'center',
     localizacao: 'center',
   };
 
@@ -63,7 +67,7 @@ export class IgrejasComponent implements OnInit {
 
   tamanhoColunas = {
     nomeCongregacao: { width: '45%' },
-    idSetor: { width: '25%' },
+    nomeSetor: { width: '25%' },
     localizacao: { width: '25%' },
   };
 
@@ -93,20 +97,21 @@ export class IgrejasComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {
     this.dadosForms = this.fb.group({
       nomeCongregacao: ['', Validators.required],
       idSetor: ['', Validators.required],
       localizacao: [''],
     });
+    this.carregarDados();
   }
 
   ngOnInit(): void {
     this.firestoreService.getSetor().subscribe((lista: Setor[]) => {
       // this.listaLinks = lista;
       this.listaSetor = lista.map((l) => ({
-        value: l.nomeSetor,
+        value: l.id!,
         label: l.nomeSetor,
       }));
     });
@@ -139,7 +144,7 @@ export class IgrejasComponent implements OnInit {
 
     if (this.dadosParaEditar) {
       const alterado = Object.keys(baseData).some(
-        (key) => baseData[key] !== this.dadosParaEditar[key]
+        (key) => baseData[key] !== this.dadosParaEditar[key],
       );
 
       if (!alterado) {
@@ -160,7 +165,7 @@ export class IgrejasComponent implements OnInit {
             'Fechar',
             {
               duration: 4000,
-            }
+            },
           );
           this.fecharModal();
         });
@@ -173,38 +178,56 @@ export class IgrejasComponent implements OnInit {
           'Fechar',
           {
             duration: 4000,
-          }
+          },
         );
         this.fecharModal();
       });
     }
   }
 
+  // carregarDados(): void {
+  //   forkJoin({
+  //     igrejas: this.firestoreService.getIgrejas().pipe(take(1)),
+  //     setores: this.firestoreService.getSetor().pipe(take(1)),
+  //   }).subscribe(({ igrejas, setores }) => {
+  //     let dadosIgrejas = igrejas.map((igreja) => {
+  //       const setorFiltro = setores.find((c) => c.id === igreja.idSetor);
+  //       return {
+  //         ...igreja,
+  //         nomeSetor: setorFiltro?.nomeSetor ?? 'Setor não encontrado',
+  //         nomeCidade: setorFiltro?.nomeCidade ?? '',
+  //         estado: setorFiltro?.estado ?? '',
+  //       };
+  //     });
+
+  //     const igrejasOrdenadas = dadosIgrejas.sort((a, b) => {
+  //       const nomeA = a.nomeCongregacao?.toLowerCase() || '';
+  //       const nomeB = b.nomeCongregacao?.toLowerCase() || '';
+  //       return nomeA.localeCompare(nomeB);
+  //     });
+
+  //     this.dados = [...igrejasOrdenadas]; // 🔁 Cria nova referência
+  //     // console.log('Dados carregados: ', this.dados);
+  //   });
+  // }
+
   carregarDados(): void {
-    forkJoin({
-      igrejas: this.firestoreService.getIgrejas().pipe(take(1)),
-      setores: this.firestoreService.getSetor().pipe(take(1)),
-    }).subscribe(({ igrejas, setores }) => {
-      let dadosIgrejas = igrejas.map((igreja) => {
+    combineLatest([
+      this.firestoreService.getIgrejas(),
+      this.firestoreService.getSetor(),
+    ]).subscribe(([igrejas, setores]) => {
+      const dadosIgrejas = igrejas.map((igreja) => {
         const setorFiltro = setores.find((c) => c.id === igreja.idSetor);
         return {
           ...igreja,
-          nomeSetor: setorFiltro
-            ? setorFiltro.nomeSetor
-            : 'Setor não encontrado',
-          nomeCidade: setorFiltro?.nomeCidade ?? '',
-          estado: setorFiltro?.estado ?? '',
+          nomeSetor: setorFiltro?.nomeSetor ?? 'Setor não encontrado',
         };
       });
 
-      const igrejasOrdenadas = dadosIgrejas.sort((a, b) => {
-        const nomeA = a.nomeCongregacao?.toLowerCase() || '';
-        const nomeB = b.nomeCongregacao?.toLowerCase() || '';
-        return nomeA.localeCompare(nomeB);
-      });
-
-      this.dados = [...igrejasOrdenadas]; // 🔁 Cria nova referência
-      // console.log('Dados carregados: ', this.dados);
+      // Ordenar se necessário
+      this.dados = [...dadosIgrejas].sort((a, b) =>
+        (a.nomeCongregacao || '').localeCompare(b.nomeCongregacao || ''),
+      );
     });
   }
 
@@ -228,7 +251,7 @@ export class IgrejasComponent implements OnInit {
 
   async excluir(dados: Igrejas): Promise<void> {
     const confirmacao = confirm(
-      `Tems certeza que deseja excluir "${dados.nomeCongregacao}"?`
+      `Tems certeza que deseja excluir "${dados.nomeCongregacao}"?`,
     );
     if (!confirmacao) {
       return;
@@ -242,7 +265,7 @@ export class IgrejasComponent implements OnInit {
             'Fechar',
             {
               duration: 4000,
-            }
+            },
           );
         });
         // console.log('Cliente excluído:', dados);
