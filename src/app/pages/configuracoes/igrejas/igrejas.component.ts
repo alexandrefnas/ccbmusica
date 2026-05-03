@@ -20,6 +20,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { confirmarAcao } from '../../../../shared/shared.service';
 import { combineLatest, forkJoin, take } from 'rxjs';
 import { TableComponent } from '../../../component/table/table.component';
+import { upper } from '../../../services/select.service';
 
 @Component({
   selector: 'tcx-igrejas',
@@ -135,7 +136,12 @@ export class IgrejasComponent implements OnInit {
       return;
     }
 
-    const baseData = this.dadosForms.value;
+    // const baseData = this.dadosForms.value;
+
+    const baseData = {
+      ...this.dadosForms.value,
+      nomeCongregacao: upper(this.dadosForms.value.nomeCongregacao),
+    };
 
     const mensagem = this.dadosParaEditar
       ? `Deseja realmente alterar ${this.dadosParaEditar.nomeCongregacao}?`

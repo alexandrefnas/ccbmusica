@@ -14,7 +14,8 @@ import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { confirmarAcao } from '../../../../shared/shared.service';
 import { FirestoreService, Setor } from '../../../services/firestore.service';
-import { TableComponent } from "../../../component/table/table.component";
+import { TableComponent } from '../../../component/table/table.component';
+import { upper } from '../../../services/select.service';
 
 @Component({
   selector: 'tcx-setor',
@@ -25,8 +26,8 @@ import { TableComponent } from "../../../component/table/table.component";
     ModalComponent,
     TextComponent,
     SelectComponent,
-    TableComponent
-],
+    TableComponent,
+  ],
   templateUrl: './setor.component.html',
   styleUrl: './setor.component.css',
 })
@@ -209,7 +210,14 @@ export class SetorComponent implements OnInit {
       return;
     }
 
-    const baseData = this.dadosForms.value;
+    // const baseData = this.dadosForms.value;
+
+    const baseData = {
+      ...this.dadosForms.value,
+      nomeSetor: upper(this.dadosForms.value.nomeSetor),
+      nomeCidade: upper(this.dadosForms.value.nomeCidade),
+      estado: upper(this.dadosForms.value.estado),
+    };
 
     const mensagem = this.dadosParaEditar
       ? `Deseja realmente alterar ${this.dadosParaEditar.nomeSetor}?`
@@ -264,4 +272,6 @@ export class SetorComponent implements OnInit {
     this.mostrarModal = false;
     this.dadosForms.reset();
   }
+
+
 }

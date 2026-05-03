@@ -18,6 +18,7 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { confirmarAcao } from '../../../../shared/shared.service';
 import { TableComponent } from '../../../component/table/table.component';
+import { upper } from '../../../services/select.service';
 
 @Component({
   selector: 'tcx-instrumentos',
@@ -253,7 +254,15 @@ export class InstrumentosComponent {
       return;
     }
 
-    const baseData = this.dadosForms.value;
+    // const baseData = this.dadosForms.value;
+
+    const baseData = {
+      ...this.dadosForms.value,
+      nomeInstrumento: upper(this.dadosForms.value.nomeInstrumento),
+      familia: upper(this.dadosForms.value.familia),
+      estvozPrincipalado: upper(this.dadosForms.value.vozPrincipal),
+      vozAlternativa: upper(this.dadosForms.value.vozAlternativa),
+    };
 
     const mensagem = this.dadosParaEditar
       ? `Deseja realmente alterar ${this.dadosParaEditar.nomeInstrumento}?`

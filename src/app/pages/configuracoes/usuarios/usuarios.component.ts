@@ -10,10 +10,17 @@ import {
 } from '@angular/forms';
 import { ModalComponent } from '../../../modal/modal/modal.component';
 import { ButtonComponent } from '../../../component/button/button.component';
-import { AuthService } from '../../../services/auth.service';
+import { AuthService, Usuarios } from '../../../services/auth.service';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { TableComponent } from '../../../component/table/table.component';
+import {
+  LISTA_TIPO_USUARIO,
+  Modulo,
+  Perfil,
+  TIPO_PERFIL,
+  upper,
+} from '../../../services/select.service';
 
 @Component({
   selector: 'tcx-usuarios',
@@ -33,25 +40,29 @@ import { TableComponent } from '../../../component/table/table.component';
 export class UsuariosComponent implements OnInit {
   title = 'TITULO';
   mostrarModal = false;
+  liberacoes = false;
+  dadosParaEditar: any | null = null;
+  modulos: Modulo[] = [
+    'candidatos',
+    'igrejas',
+    'instrumentos',
+    'setores',
+    'usuarios',
+  ];
 
   nome = '';
   email = '';
   senha = '';
-  perfil = 'usuario';
+  perfil: Perfil = 'usuario';
   carregando = false;
 
-  listaTipoUsuario = [
-    { value: 'admin', label: 'Admin' },
-    { value: 'secretario', label: 'Secretário(a)' },
-    { value: 'regional', label: 'Regional' },
-    { value: 'encarregado', label: 'Encarregado' },
-    { value: 'usuario', label: 'Instrutor' },
-  ];
+  listaTipoUsuario = LISTA_TIPO_USUARIO;
 
-  camposColunas = ['nome', 'email'];
+  camposColunas = ['nome', 'email', 'perfil'];
   tituloColunas = {
     nome: 'Nome',
     email: 'Email',
+    perfil: 'Perfil',
   };
 
   listaUsuarios: any[] = [];
@@ -59,90 +70,112 @@ export class UsuariosComponent implements OnInit {
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     // mostrarAcoes: 'center',
     nome: 'center',
+    perfil: 'center',
   };
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
+    perfil: 'center',
     // valor: 'right',
   };
 
   tamanhoColunas = {
-    nome: { width: '50%' },
-    email: { width: '50%' },
+    nome: { width: '40%' },
+    email: { width: '35%' },
+    perfil: { width: '25%' },
     // mostrarAcoes: { width: '75px' },
   };
 
+  // Buttons
+  acoes = [
+    {
+      label: '✏️',
+      descricao: 'Editar',
+      classe: 'acao-editar',
+      visivel: (item: any) => true,
+      callback: (item: any) => this.editar(item),
+    }
+    // {
+    //   label: '🗑️',
+    //   descricao: 'Excluir',
+    //   classe: 'acao-excluir',
+    //   visivel: (item: any) => true,
+    //   callback: (item: any) => this.excluir(item),
+    // },
+  ];
+  ////Fim
+
   dadosForms: FormGroup;
 
-  tipoPerfil: any = {
-    admin: {
-      acessos: {
-        candidatos: { read: true, create: true, update: true, delete: true },
-        igrejas: { read: true, create: true, update: true, delete: true },
-        instrumentos: { read: true, create: true, update: true, delete: true },
-        setores: { read: true, create: true, update: true, delete: true },
-        usuarios: { read: true, create: true, update: true, delete: true },
-      },
-    },
+  // tipoPerfil: any = {
+  //   admin: {
+  //     acessos: {
+  //       candidatos: { read: true, create: true, update: true, delete: true },
+  //       igrejas: { read: true, create: true, update: true, delete: true },
+  //       instrumentos: { read: true, create: true, update: true, delete: true },
+  //       setores: { read: true, create: true, update: true, delete: true },
+  //       usuarios: { read: true, create: true, update: true, delete: true },
+  //     },
+  //   },
 
-    regional: {
-      acessos: {
-        candidatos: { read: true, create: true, update: true, delete: true },
-        igrejas: { read: true, create: false, update: false, delete: false },
-        instrumentos: {
-          read: true,
-          create: false,
-          update: false,
-          delete: false,
-        },
-        setores: { read: false, create: false, update: false, delete: false },
-        usuarios: { read: true, create: true, update: true, delete: true },
-      },
-    },
-    secretario: {
-      acessos: {
-        candidatos: { read: true, create: true, update: true, delete: true },
-        igrejas: { read: true, create: false, update: false, delete: false },
-        instrumentos: {
-          read: true,
-          create: false,
-          update: false,
-          delete: false,
-        },
-        setores: { read: false, create: false, update: false, delete: false },
-        usuarios: { read: true, create: true, update: true, delete: true },
-      },
-    },
+  //   regional: {
+  //     acessos: {
+  //       candidatos: { read: true, create: true, update: true, delete: true },
+  //       igrejas: { read: true, create: false, update: false, delete: false },
+  //       instrumentos: {
+  //         read: true,
+  //         create: false,
+  //         update: false,
+  //         delete: false,
+  //       },
+  //       setores: { read: false, create: false, update: false, delete: false },
+  //       usuarios: { read: true, create: true, update: true, delete: true },
+  //     },
+  //   },
+  //   secretario: {
+  //     acessos: {
+  //       candidatos: { read: true, create: true, update: true, delete: true },
+  //       igrejas: { read: true, create: false, update: false, delete: false },
+  //       instrumentos: {
+  //         read: true,
+  //         create: false,
+  //         update: false,
+  //         delete: false,
+  //       },
+  //       setores: { read: false, create: false, update: false, delete: false },
+  //       usuarios: { read: true, create: true, update: true, delete: true },
+  //     },
+  //   },
 
-    encarregado: {
-      acessos: {
-        candidatos: { read: true, create: true, update: true, delete: true },
-        igrejas: { read: false, create: false, update: false, delete: false },
-        instrumentos: {
-          read: false,
-          create: false,
-          update: false,
-          delete: false,
-        },
-        setores: { read: false, create: false, update: false, delete: false },
-        usuarios: { read: false, create: false, update: false, delete: false },
-      },
-    },
+  //   encarregado: {
+  //     acessos: {
+  //       candidatos: { read: true, create: true, update: true, delete: true },
+  //       igrejas: { read: false, create: false, update: false, delete: false },
+  //       instrumentos: {
+  //         read: false,
+  //         create: false,
+  //         update: false,
+  //         delete: false,
+  //       },
+  //       setores: { read: false, create: false, update: false, delete: false },
+  //       usuarios: { read: false, create: false, update: false, delete: false },
+  //     },
+  //   },
 
-    usuario: {
-      acessos: {
-        candidatos: { read: true, create: true, update: true, delete: false },
-        igrejas: { read: false, create: false, update: false, delete: false },
-        instrumentos: {
-          read: false,
-          create: false,
-          update: false,
-          delete: false,
-        },
-        setores: { read: false, create: false, update: false, delete: false },
-        usuarios: { read: false, create: false, update: false, delete: false },
-      },
-    },
-  };
+  //   usuario: {
+  //     acessos: {
+  //       candidatos: { read: true, create: true, update: true, delete: false },
+  //       igrejas: { read: false, create: false, update: false, delete: false },
+  //       instrumentos: {
+  //         read: false,
+  //         create: false,
+  //         update: false,
+  //         delete: false,
+  //       },
+  //       setores: { read: false, create: false, update: false, delete: false },
+  //       usuarios: { read: false, create: false, update: false, delete: false },
+  //     },
+  //   },
+  // };
 
   constructor(
     private fb: FormBuilder,
@@ -216,9 +249,9 @@ export class UsuariosComponent implements OnInit {
 
   async onSalvar() {
     this.carregando = true;
-    console.log('USUARIO LOGADO:', this.auth.usuario);
-    console.log('UID:', this.auth.usuario?.uid);
-    console.log('PERFIL:', this.auth.usuario?.perfil);
+    // console.log('USUARIO LOGADO:', this.auth.usuario);
+    // console.log('UID:', this.auth.usuario?.uid);
+    // console.log('PERFIL:', this.auth.usuario?.perfil);
 
     const usuarioLogado = this.auth.usuario;
 
@@ -229,14 +262,14 @@ export class UsuariosComponent implements OnInit {
     }
 
     try {
-      const perfilConfig = this.tipoPerfil[this.perfil];
-
+      // const perfilConfig = this.tipoPerfil[this.perfil];
+      const perfilConfig = TIPO_PERFIL[this.perfil];
       if (!perfilConfig) {
         alert('Perfil inválido');
         return;
       }
       await this.auth.cadastrar(this.email, this.senha, {
-        nome: this.nome,
+        nome: upper(this.nome),
         perfil: this.perfil,
         acessos: perfilConfig.acessos,
       });
@@ -253,6 +286,19 @@ export class UsuariosComponent implements OnInit {
     } finally {
       this.carregando = false;
     }
+  }
+
+  editar(select: Usuarios): void {
+    this.title = 'Editar Instrumentos';
+    this.liberacoes = true;
+    this.dadosParaEditar = { ...select };
+
+    this.dadosForms.patchValue({
+      perfil: select.perfil,
+      acessos: select.acessos ?? TIPO_PERFIL[select.perfil as Perfil].acessos,
+    });
+
+    console.log(this.dadosParaEditar);
   }
 
   getControl(controlName: string): FormControl {

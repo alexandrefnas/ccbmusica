@@ -17,9 +17,15 @@ import {
   formatarDataString,
 } from '../../../shared/shared.service';
 import { TableComponent } from '../../component/table/table.component';
-import { Candidatos, FirestoreService, Igrejas, Instrumentos } from '../../services/firestore.service';
+import {
+  Candidatos,
+  FirestoreService,
+  Igrejas,
+  Instrumentos,
+} from '../../services/firestore.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { combineLatest } from 'rxjs';
+import { upper } from '../../services/select.service';
 
 @Component({
   selector: 'tcx-alunos',
@@ -130,7 +136,7 @@ export class AlunosComponent implements OnInit {
       idInstrumento: [''],
       afinacao: [''],
     });
-    // this.carregarDados();
+    this.carregarDados();
   }
 
   ngOnInit(): void {
@@ -138,16 +144,18 @@ export class AlunosComponent implements OnInit {
       // this.listaLinks = lista;
       this.listaIgreja = lista.map((l) => ({
         value: l.id!,
-        label: l.nomeCongregacao,
+        label: l.nomeCongregacao?.toUpperCase() || '',
       }));
     });
-    this.firestoreService.getInstrumento().subscribe((lista: Instrumentos[]) => {
-      // this.listaLinks = lista;
-      this.listaInstrumento = lista.map((l) => ({
-        value: l.id!,
-        label: l.nomeInstrumento,
-      }));
-    });
+    this.firestoreService
+      .getInstrumento()
+      .subscribe((lista: Instrumentos[]) => {
+        // this.listaLinks = lista;
+        this.listaInstrumento = lista.map((l) => ({
+          value: l.id!,
+          label: l.nomeInstrumento?.toUpperCase() || '',
+        }));
+      });
 
     this.carregarDados();
   }
@@ -178,14 +186,21 @@ export class AlunosComponent implements OnInit {
       this.firestoreService.getCandidato(),
       this.firestoreService.getIgrejas(),
       this.firestoreService.getInstrumento(),
-    ]).subscribe(([candidato, igrejas,  instrumento]) => {
+    ]).subscribe(([candidato, igrejas, instrumento]) => {
       const dadosCandidatos = candidato.map((c) => {
         const igrejaFiltro = igrejas.find((s) => s.id === c.idComum);
-        const InstrumentoFiltro = instrumento.find((i) => i.id === c.idInstrumento);
+        const InstrumentoFiltro = instrumento.find(
+          (i) => i.id === c.idInstrumento,
+        );
         return {
           ...c,
-          nomeComum: igrejaFiltro?.nomeCongregacao ?? 'não encontrado',
-          nomeInstrumento: InstrumentoFiltro?.nomeInstrumento ?? 'não encontrado',
+          nomeAluno: c.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
+          nomeComum:
+            igrejaFiltro?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
+            'NÃO CADASTRADO',
+          nomeInstrumento:
+            InstrumentoFiltro?.nomeInstrumento?.toLocaleUpperCase('pt-BR') ||
+            'SEM INSTRUMENTO',
         };
       });
 
@@ -195,7 +210,6 @@ export class AlunosComponent implements OnInit {
       );
     });
   }
-
 
   onSalvar(): void {
     if (!this.dadosForms.valid) {
@@ -207,8 +221,21 @@ export class AlunosComponent implements OnInit {
     const date = formatarDataString(
       new Date(this.dadosForms.value.dataNascimento),
     );
+
+    // const baseData = {
+    //   ...this.dadosForms.value,
+    //   nomeAluno:
+    //     this.dadosForms.value.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
+    //   afinacao:
+    //     this.dadosForms.value.afinacao?.toLocaleUpperCase('pt-BR') || '',
+    //   dataNascimento: date,
+    // };
+
     const baseData = {
       ...this.dadosForms.value,
+      nomeAluno: upper(this.dadosForms.value.nomeAluno),
+      afinacao: upper(this.dadosForms.value.afinacao),
+      vozAlternativa: upper(this.dadosForms.value.vozAlternativa),
       dataNascimento: date,
     };
 
