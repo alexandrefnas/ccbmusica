@@ -124,6 +124,15 @@
 } */
 
 .acessos-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* max-width: auto; */
+  padding: 15px 0;
+  margin: 0 auto 0 0;
+}
+
+.acessos-container > div[formGroupName="acessos"] {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -132,18 +141,26 @@
 /* linha do módulo */
 .modulo {
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   align-items: center;
-  background: #1e1e1e;
+  gap: 15px;
+  /* background: #1e1e1e;
+color: white; */
   padding: 10px 14px;
   border-radius: 8px;
+
+  border: 1px solid #ccc;
+  box-shadow:
+    inset -1px -1px 0 #fff,
+    inset 1px 1px 0 #999;
 }
 
 /* nome do módulo */
 .modulo-nome {
   font-weight: bold;
-  color: #fff;
-  min-width: 140px;
+  /* color: #fff; */
+  min-width: 100px;
+  max-width: 250px;
 }
 
 /* grupo de permissões */
@@ -160,7 +177,7 @@
   position: relative;
   cursor: pointer;
   font-size: 12px;
-  color: #ccc;
+  color: black;
 }
 
 /* esconder checkbox padrão */
@@ -173,6 +190,7 @@
   width: 38px;
   height: 20px;
   background: #555;
+  /* color: white; */
   border-radius: 20px;
   position: relative;
   transition: 0.3s;
@@ -180,7 +198,7 @@
 
 /* bolinha */
 .slider::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 16px;
   height: 16px;
@@ -205,7 +223,6 @@
   font-size: 11px;
 }
 
-
 /* RESPONSIVIDADE */
 /* Mobile */
 @media (max-width: 576px) {
@@ -214,6 +231,32 @@
     width: 100%;
     overflow: hidden;
     min-width: 300px;
+  }
+
+  .acessos-container > div[formGroupName="acessos"] {
+    gap: 5px;
+  }
+
+  .modulo {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .acessos-container p {
+    width: 100%;
+    text-align: left;
+  }
+
+  .modulo-nome {
+    width: 100%;
+    text-align: left;
+  }
+
+  .modulo-nome,
+  .switch,
+  .label {
+    font-size: 12px;
+    font-weight: normal;
   }
 }
 

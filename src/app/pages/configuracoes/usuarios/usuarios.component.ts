@@ -75,6 +75,7 @@ export class UsuariosComponent implements OnInit {
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
     perfil: 'center',
+    mostrarAcoes: 'center',
     // valor: 'right',
   };
 
@@ -93,7 +94,7 @@ export class UsuariosComponent implements OnInit {
       classe: 'acao-editar',
       visivel: (item: any) => true,
       callback: (item: any) => this.editar(item),
-    }
+    },
     // {
     //   label: '🗑️',
     //   descricao: 'Excluir',
@@ -288,9 +289,46 @@ export class UsuariosComponent implements OnInit {
     }
   }
 
+  usuarioSelecionado: string ='';
   editar(select: Usuarios): void {
     this.title = 'Editar Instrumentos';
     this.liberacoes = true;
+    this.usuarioSelecionado = select.nome.toUpperCase() + ' - '+ select.perfil.toUpperCase();
+    this.dadosForms = this.fb.group({
+      perfil: [''],
+      acessos: this.fb.group({
+        candidatos: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        igrejas: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        instrumentos: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        setores: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        usuarios: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+      }),
+    });
     this.dadosParaEditar = { ...select };
 
     this.dadosForms.patchValue({
@@ -311,5 +349,8 @@ export class UsuariosComponent implements OnInit {
 
   fecharModal() {
     this.mostrarModal = false;
+  }
+  get cancel(): boolean {
+    return this.liberacoes =  !this.liberacoes;
   }
 }

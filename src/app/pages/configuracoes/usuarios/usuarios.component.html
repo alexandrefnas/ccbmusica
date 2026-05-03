@@ -11,65 +11,65 @@
   </div>
   <div id="tela__container-tabela" *ngIf="!liberacoes">
     <tcx-table
-    [colunas]="camposColunas"
-    [colunasLabels]="tituloColunas"
-    [dados]="listaUsuarios"
-    [tamanhosColunas]="tamanhoColunas"
-    [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
-    [alinhamentosColunas]="alinhamentoColuna"
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [dados]="listaUsuarios"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
       [mostrarAcoes]="true"
       [acoesTabela]="acoes"
     />
   </div>
-  <div id="tela__container-tabela" *ngIf="liberacoes">
-<form [formGroup]="dadosForms" class="acessos-container">
-  <div formGroupName="acessos">
+  <!-- <div id="tela__container-tabela" *ngIf="liberacoes"> -->
+    <form [formGroup]="dadosForms" class="acessos-container" *ngIf="liberacoes">
+      <p>Acessos do Usuário: {{ usuarioSelecionado }}</p>
+      <div formGroupName="acessos">
+        <div
+          class="modulo"
+          *ngFor="let modulo of modulos"
+          [formGroupName]="modulo"
+        >
+          <div class="modulo-nome">
+            {{ modulo | titlecase }}
+          </div>
 
-    <div
-      class="modulo"
-      *ngFor="let modulo of modulos"
-      [formGroupName]="modulo"
-    >
-      <div class="modulo-nome">
-        {{ modulo | titlecase }}
+          <div class="permissoes">
+            <!-- READ -->
+            <label class="switch">
+              <input type="checkbox" formControlName="read" />
+              <span class="slider"></span>
+              <span class="label">Ler</span>
+            </label>
+
+            <!-- CREATE -->
+            <label class="switch">
+              <input type="checkbox" formControlName="create" />
+              <span class="slider"></span>
+              <span class="label">Criar</span>
+            </label>
+
+            <!-- UPDATE -->
+            <label class="switch">
+              <input type="checkbox" formControlName="update" />
+              <span class="slider"></span>
+              <span class="label">Editar</span>
+            </label>
+
+            <!-- DELETE -->
+            <label class="switch">
+              <input type="checkbox" formControlName="delete" />
+              <span class="slider"></span>
+              <span class="label">Excluir</span>
+            </label>
+          </div>
+        </div>
       </div>
-
-      <div class="permissoes">
-
-        <!-- READ -->
-        <label class="switch">
-          <input type="checkbox" formControlName="read" />
-          <span class="slider"></span>
-          <span class="label">Ler</span>
-        </label>
-
-        <!-- CREATE -->
-        <label class="switch">
-          <input type="checkbox" formControlName="create" />
-          <span class="slider"></span>
-          <span class="label">Criar</span>
-        </label>
-
-        <!-- UPDATE -->
-        <label class="switch">
-          <input type="checkbox" formControlName="update" />
-          <span class="slider"></span>
-          <span class="label">Editar</span>
-        </label>
-
-        <!-- DELETE -->
-        <label class="switch">
-          <input type="checkbox" formControlName="delete" />
-          <span class="slider"></span>
-          <span class="label">Excluir</span>
-        </label>
-
-      </div>
+    </form>
+    <div style="height: 40px">
+      <button class="buttons" (click)="(cancel)">Cancelar</button>
     </div>
-
-  </div>
-</form>
-  </div>
+  <!-- </div> -->
 </div>
 
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
