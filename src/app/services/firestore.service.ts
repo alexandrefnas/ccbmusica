@@ -16,6 +16,14 @@ export interface Igrejas {
   localizacao: string;
 }
 
+export interface Instrumentos {
+  id?: string;
+  nomeInstrumento: string;
+  familia: string;
+  vozAlternativa: string;
+  vozPrincipal: string;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -90,5 +98,40 @@ export class FirestoreService {
     return updateDoc(dadosDocRef, dados);
   }
 
-  // Fim 
+  // Fim
+
+
+//// Instrumentos
+  // Adicionar
+  async addInstrumento(dados: Instrumentos) {
+    const dadosfasRef = collection(this.firestore, 'instrumentos');
+    const docRef = await addDoc(dadosfasRef, dados);
+
+    // Atualiza o documento adicionando o ID dentro dele:
+    await setDoc(docRef, { ...dados, id: docRef.id }, { merge: true });
+
+    return docRef;
+  }
+
+  // Pesquisar
+  getInstrumento() {
+    const dadosCollection = collection(this.firestore, 'instrumentos');
+    return collectionData(dadosCollection, {
+      idField: 'id',
+    }) as Observable<Instrumentos[]>;
+  }
+
+  // Deletar
+  async deleteInstrumento(id: string) {
+    const dadosDocRef = doc(this.firestore, 'instrumentos', id);
+    return deleteDoc(dadosDocRef);
+  }
+
+  // Atualizar
+  async updateInstrumento(id: string, dados: Partial<Instrumentos>) {
+    const dadosDocRef = doc(this.firestore, 'instrumentos', id);
+    return updateDoc(dadosDocRef, dados);
+  }
+
+  // Fim
 }

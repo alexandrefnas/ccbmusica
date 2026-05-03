@@ -1,0 +1,77 @@
+<div class="container__tela">
+  <div id="tela__barra-menu">
+    <div id="barra-titulo__container">
+      <h2 style="font-weight: normal; color: grey">INSTRUMENTOS</h2>
+    </div>
+    <div class="button-container">
+      <!-- <tcx-button label="Novo" (click)="buttonClick()"></tcx-button> -->
+      <button class="buttons" (click)="buttonClick()">
+        <i class="bi bi-file-earmark-plus"></i> Novo
+      </button>
+    </div>
+  </div>
+  <div id="tela__container-tabela">
+    <tcx-table
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [dados]="dados"
+      [mostrarAcoes]="true"
+      [acoesTabela]="acoes"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+    />
+  </div>
+</div>
+
+<tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
+  <div class="templates__form">
+    <form [formGroup]="dadosForms" (ngSubmit)="onSalvar()">
+      <div class="linha">
+        <div class="input-text" id="input-nomeSetor">
+          <tcx-text
+            label="Nome do Instrumento"
+            type="name"
+            formControlName="nomeInstrumento"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+        <div class="input-select">
+          <tcx-select
+            [label]="'Família'"
+            [placeholder]="''"
+            [niveis]="listaFamilia"
+            [formControl]="getControl('familia')"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+        <div class="input-select">
+          <tcx-select
+            [label]="'Voz Principal'"
+            [placeholder]="''"
+            [niveis]="listaVoz"
+            [formControl]="getControl('vozPrincipal')"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+        <div class="input-select">
+          <tcx-select
+            [label]="'Voz Alternativa'"
+            [placeholder]="''"
+            [niveis]="listaVoz"
+            [formControl]="getControl('vozAlternativa')"
+          />
+        </div>
+      </div>
+      <!-- <div class="linha2"></div> -->
+      <div class="linhaButton">
+        <div class="form__button">
+          <tcx-button label="Salvar" type="submit"></tcx-button>
+        </div>
+      </div>
+    </form>
+  </div>
+</tcx-modal>
