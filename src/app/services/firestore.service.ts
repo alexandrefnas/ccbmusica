@@ -24,6 +24,15 @@ export interface Instrumentos {
   vozPrincipal: string;
 }
 
+export interface Candidatos {
+  id?: string;
+  nomeAluno: string;
+  dataNascimento: string;
+  idComum: string;
+  idInstrumento: string;
+  afinacao: string;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +41,7 @@ export class FirestoreService {
 
   constructor(private firestore: Firestore) {}
 
-//// Setor
+//// Igreja
   // Adicionar
   async addIgrejas(dados: Igrejas) {
     const dadosfasRef = collection(this.firestore, 'igrejas');
@@ -132,6 +141,39 @@ export class FirestoreService {
     const dadosDocRef = doc(this.firestore, 'instrumentos', id);
     return updateDoc(dadosDocRef, dados);
   }
+  // Fim
 
+
+//// Candidato
+  // Adicionar
+  async addCandidato(dados: Candidatos) {
+    const dadosfasRef = collection(this.firestore, 'candidatos');
+    const docRef = await addDoc(dadosfasRef, dados);
+
+    // Atualiza o documento adicionando o ID dentro dele:
+    await setDoc(docRef, { ...dados, id: docRef.id }, { merge: true });
+
+    return docRef;
+  }
+
+  // Pesquisar
+  getCandidato() {
+    const dadosCollection = collection(this.firestore, 'candidatos');
+    return collectionData(dadosCollection, {
+      idField: 'id',
+    }) as Observable<Candidatos[]>;
+  }
+
+  // Deletar
+  async deleteCandidato(id: string) {
+    const dadosDocRef = doc(this.firestore, 'candidatos', id);
+    return deleteDoc(dadosDocRef);
+  }
+
+  // Atualizar
+  async updateCandidato(id: string, dados: Partial<Candidatos>) {
+    const dadosDocRef = doc(this.firestore, 'candidatos', id);
+    return updateDoc(dadosDocRef, dados);
+  }
   // Fim
 }

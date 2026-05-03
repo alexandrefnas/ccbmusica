@@ -129,6 +129,7 @@ export class SetorComponent implements OnInit {
       nomeCidade: ['', Validators.required],
       estado: ['MG', Validators.required],
     });
+    this.carregarDados();
   }
 
   ngOnInit(): void {

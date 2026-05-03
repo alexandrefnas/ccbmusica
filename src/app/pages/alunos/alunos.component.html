@@ -10,7 +10,18 @@
       </button>
     </div>
   </div>
-  <div id="tela__container-tabela"></div>
+  <div id="tela__container-tabela">
+    <tcx-table
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [dados]="dados"
+      [mostrarAcoes]="true"
+      [acoesTabela]="acoes"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+    />
+  </div>
 </div>
 
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
@@ -30,10 +41,10 @@
       <div class="linha">
         <div class="input-select" id="input-congregacao">
           <tcx-select
-            [label]="'Comum Congregaçã'"
+            [label]="'Comum Congregação'"
             [placeholder]="''"
-            [niveis]="listaCongregacao"
-            [formControl]="getControl('idCongregacao')"
+            [niveisLimitados]="listaIgreja"
+            [formControl]="getControl('idComum')"
             [required]="true"
             errorMessage="Campo obrigatório"
           />
@@ -52,7 +63,7 @@
           <tcx-select
             [label]="'Instrumento'"
             [placeholder]="''"
-            [niveis]="listaInstrumento"
+            [niveisLimitados]="listaInstrumento"
             [formControl]="getControl('idInstrumento')"
             [required]="false"
           />
@@ -61,7 +72,7 @@
           <tcx-select
             [label]="'Afinação'"
             [placeholder]="''"
-            [niveis]="listaAfinacao"
+            [niveisLimitados]="listaAfinacao"
             [formControl]="getControl('afinacao')"
             [required]="false"
           />

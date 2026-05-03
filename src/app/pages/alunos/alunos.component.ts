@@ -1,8 +1,4 @@
-import { Component } from '@angular/core';
-import { ModalComponent } from '../../modal/modal/modal.component';
-import { ButtonComponent } from '../../component/button/button.component';
-import { TextComponent } from '../../component/inputs/text/text.component';
-import { SelectComponent } from '../../component/inputs/select/select.component';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -11,8 +7,19 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ModalComponent } from '../../modal/modal/modal.component';
+import { ButtonComponent } from '../../component/button/button.component';
+import { TextComponent } from '../../component/inputs/text/text.component';
+import { SelectComponent } from '../../component/inputs/select/select.component';
 import { DataComponent } from '../../component/inputs/data/data.component';
-import { converterISOParaBR, formatarDataString } from '../../../shared/shared.service';
+import {
+  confirmarAcao,
+  formatarDataString,
+} from '../../../shared/shared.service';
+import { TableComponent } from '../../component/table/table.component';
+import { Candidatos, FirestoreService, Igrejas, Instrumentos } from '../../services/firestore.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'tcx-alunos',
@@ -24,16 +31,17 @@ import { converterISOParaBR, formatarDataString } from '../../../shared/shared.s
     TextComponent,
     SelectComponent,
     DataComponent,
+    TableComponent,
   ],
   templateUrl: './alunos.component.html',
   styleUrl: './alunos.component.css',
 })
-export class AlunosComponent {
+export class AlunosComponent implements OnInit {
   title = 'TITULO';
   mostrarModal = false;
 
-  listaCongregacao = [{ value: '01', label: 'Teste' }];
-  listaInstrumento = [{ value: '01', label: 'Teste' }];
+  listaIgreja: { value: string; label: string }[] = [];
+  listaInstrumento: { value: string; label: string }[] = [];
   listaAfinacao = [
     { value: 'DÓ', label: 'DÓ' },
     { value: 'FÁ', label: 'FÁ' },
@@ -43,16 +51,105 @@ export class AlunosComponent {
     { value: 'SIB', label: 'SIB' },
   ];
 
+  // DADOS TABELA
+  camposColunas = [
+    'nomeAluno',
+    'dataNascimento',
+    'nomeComum',
+    'nomeInstrumento',
+    'afinacao',
+  ];
+
+  tituloColunas = {
+    nomeAluno: 'Aluno',
+    dataNascimento: 'Data Nascimento',
+    nomeComum: 'Comum',
+    nomeInstrumento: 'Instrumento',
+    afinacao: 'Afinação',
+  };
+
+  dados: any[] = [];
+  dadosParaEditar: any | null = null;
+
+  alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
+    nomeAluno: 'center',
+    dataNascimento: 'center',
+    nomeComum: 'center',
+    nomeInstrumento: 'center',
+    afinacao: 'center',
+  };
+
+  alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
+    nomeAluno: 'left',
+    dataNascimento: 'center',
+    nomeComum: 'left',
+    nomeInstrumento: 'left',
+    afinacao: 'center',
+  };
+
+  tamanhoColunas = {
+    nomeAluno: { width: '45%' },
+    dataNascimento: { width: '15%' },
+    nomeComum: { width: '20%' },
+    nomeInstrumento: { width: '20%' },
+    afinacao: { width: '20%' },
+  };
+
+  // Buttons
+  acoes = [
+    {
+      label: '✏️',
+      descricao: 'Editar',
+      classe: 'acao-editar',
+      visivel: (item: any) => true,
+      callback: (item: any) => this.editar(item),
+    },
+    {
+      label: '🗑️',
+      descricao: 'Excluir',
+      classe: 'acao-excluir',
+      visivel: (item: any) => true,
+      callback: (item: any) => this.excluir(item),
+    },
+  ];
+  //
+
+  //Fim
+
   dadosForms: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private firestoreService: FirestoreService,
+    private snackBar: MatSnackBar,
+  ) {
     this.dadosForms = this.fb.group({
       nomeAluno: ['', Validators.required],
-      idCongregacao: ['', Validators.required],
-      dataNascimento: [''],
+      dataNascimento: ['', Validators.required],
+      idComum: ['', Validators.required],
       idInstrumento: [''],
       afinacao: [''],
     });
+    // this.carregarDados();
+  }
+
+  ngOnInit(): void {
+    this.firestoreService.getIgrejas().subscribe((lista: Igrejas[]) => {
+      // this.listaLinks = lista;
+      this.listaIgreja = lista.map((l) => ({
+        value: l.id!,
+        label: l.nomeCongregacao,
+      }));
+    });
+    this.firestoreService.getInstrumento().subscribe((lista: Instrumentos[]) => {
+      // this.listaLinks = lista;
+      this.listaInstrumento = lista.map((l) => ({
+        value: l.id!,
+        label: l.nomeInstrumento,
+      }));
+    });
+
+    this.carregarDados();
   }
 
   getControl(controlName: string): FormControl {
@@ -63,23 +160,150 @@ export class AlunosComponent {
     return control as FormControl;
   }
 
+  // carregarDadosOFF(): void {
+  //   this.firestoreService.getCandidato().subscribe((date) => {
+  //     const dateOrdenados = date.sort((a, b) => {
+  //       const nomeA = a.nomeAluno?.toLowerCase() || '';
+  //       const nomeB = b.nomeAluno?.toLowerCase() || '';
+  //       return nomeA.localeCompare(nomeB);
+  //     });
+
+  //     this.dados = [...dateOrdenados]; // 🔁 Cria nova referência
+  //     console.log('Dados carregados: ', this.dados);
+  //   });
+  // }
+
+  carregarDados(): void {
+    combineLatest([
+      this.firestoreService.getCandidato(),
+      this.firestoreService.getIgrejas(),
+      this.firestoreService.getInstrumento(),
+    ]).subscribe(([candidato, igrejas,  instrumento]) => {
+      const dadosCandidatos = candidato.map((c) => {
+        const igrejaFiltro = igrejas.find((s) => s.id === c.idComum);
+        const InstrumentoFiltro = instrumento.find((i) => i.id === c.idInstrumento);
+        return {
+          ...c,
+          nomeComum: igrejaFiltro?.nomeCongregacao ?? 'não encontrado',
+          nomeInstrumento: InstrumentoFiltro?.nomeInstrumento ?? 'não encontrado',
+        };
+      });
+
+      // Ordenar se necessário
+      this.dados = [...dadosCandidatos].sort((a, b) =>
+        (a.nomeAluno || '').localeCompare(b.nomeAluno || ''),
+      );
+    });
+  }
+
+
   onSalvar(): void {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
       alert('Formulário inválido. Preencha os campos obrigatórios.');
       return;
     }
-    const date = formatarDataString(new Date(this.dadosForms.value.dataNascimento));
+
+    const date = formatarDataString(
+      new Date(this.dadosForms.value.dataNascimento),
+    );
     const baseData = {
       ...this.dadosForms.value,
       dataNascimento: date,
-}
+    };
+
+    const mensagem = this.dadosParaEditar
+      ? `Deseja realmente alterar ${this.dadosParaEditar.nomeAluno}?`
+      : `Deseja realmente salvar ${baseData.nomeAluno}?`;
     console.log(baseData);
+    if (this.dadosParaEditar) {
+      const alterado = Object.keys(baseData).some(
+        (key) => baseData[key] !== this.dadosParaEditar[key],
+      );
+
+      if (!alterado) {
+        this.snackBar.open('Nenhuma alteração detectada.', 'Fechar', {
+          duration: 3000,
+        });
+        this.fecharModal();
+        return;
+      }
+
+      if (!confirmarAcao(mensagem)) return;
+
+      this.firestoreService
+        .updateCandidato(this.dadosParaEditar.id!, baseData)
+        .then(() => {
+          this.snackBar.open(
+            `${baseData.nomeAluno} alterado com sucesso!`,
+            'Fechar',
+            {
+              duration: 4000,
+            },
+          );
+          this.fecharModal();
+        });
+    } else {
+      if (!confirmarAcao(mensagem)) return;
+
+      this.firestoreService.addCandidato(baseData).then(() => {
+        this.snackBar.open(
+          `${baseData.nomeAluno} salvo com sucesso!`,
+          'Fechar',
+          {
+            duration: 4000,
+          },
+        );
+        this.fecharModal();
+      });
+    }
   }
 
   buttonClick(): void {
     this.title = 'Cadastro Alunos';
     this.mostrarModal = true;
+  }
+
+  editar(select: Candidatos): void {
+    this.title = 'Editar Instrumentos';
+    this.mostrarModal = true;
+    this.dadosParaEditar = { ...select };
+
+    this.dadosForms.patchValue({
+      nomeAluno: select.nomeAluno || '',
+      dataNascimento: select.dataNascimento || '',
+      idComum: select.idComum || '',
+      idInstrumento: select.idInstrumento || '',
+      afinacao: select.afinacao || '',
+    });
+    console.log(this.dadosParaEditar);
+  }
+
+  async excluir(dados: Candidatos): Promise<void> {
+    const confirmacao = confirm(
+      `Tems certeza que deseja excluir "${dados.nomeAluno}"?`,
+    );
+    if (!confirmacao) {
+      return;
+    }
+
+    if (dados.id) {
+      try {
+        await this.firestoreService.deleteCandidato(dados.id).then(() => {
+          this.snackBar.open(
+            `${dados.nomeAluno} deletado com sucesso!`,
+            'Fechar',
+            {
+              duration: 4000,
+            },
+          );
+        });
+        // console.log('Cliente excluído:', dados);
+        this.carregarDados();
+      } catch (error) {
+        console.error(`Erro ao excluir: "${dados.nomeAluno}" `, error);
+      }
+    }
   }
 
   fecharModal() {

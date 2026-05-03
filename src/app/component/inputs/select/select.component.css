@@ -1,26 +1,28 @@
 :host {
-  display: flex;
-  justify-content: center;
+  display: block;
+  /* justify-content: center; */
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
 }
 
 .form-field {
   position: relative;
   width: 100%;
   z-index: auto;
+border-radius: 5px;
 }
 
 .form-input {
   width: 100%;
-  height: 35px;
-  padding: 16px 8px 3px;
-  /* padding-right: 28px; */
+  height: 40px;
+  padding: 16px 8px 3px 12px;
   border-radius: 4px;
 
   border: 1px solid #ccc;
-  box-shadow: inset -1px -1px 0 #fff, inset 1px 1px 0 #999;
+  box-shadow:
+    inset -1px -1px 0 #fff,
+    inset 1px 1px 0 #999;
   font-size: 12px;
   outline: none;
   transition: border-color 0.3s;
@@ -32,20 +34,15 @@
   cursor: pointer;
 }
 
+.dropdown,
+.form-input,
+.custom-select {
+  background-color: #fff;
+}
+
 .input-wrapper {
   position: relative;
   width: 100%;
-}
-
-select.form-input {
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 8px 10px;
-  padding-right: 28px;
-}
-
-select.form-input {
-  appearance: auto;
 }
 
 .form-input:focus {
@@ -54,7 +51,7 @@ select.form-input {
 
 .form-label {
   position: absolute;
-  top: 10px;
+  top: 15px;
   left: 12px;
   color: #999;
   font-size: 12px;
@@ -72,11 +69,56 @@ select.form-input {
 .form-error {
   color: #f44336;
   font-size: 10px;
-  /* margin-top: 4px; */
   margin-left: 5px;
   transition: all 0.3s ease;
 }
 
 option.list-format {
   background-color: #e9e7eb;
+  height: 200px !important;
+}
+
+.dropdown {
+  position: absolute;
+  width: 100%;
+  /* background: #ccc; */
+  border: 1px solid #ccc;
+  z-index: 999;
+
+  max-height: 200px; /* 👈 controla quantidade visível */
+  overflow-y: auto;
+}
+
+.option {
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.option:hover {
+  background: #eee;
+}
+
+.custom-select {
+  display: flex;
+  align-items: center;
+    white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  position: relative;
+  padding-right: 30px;
+}
+
+.custom-select::after {
+  content: "▼";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.2s;
+}
+
+.custom-select.open::after {
+  transform: translateY(-50%) rotate(180deg);
 }

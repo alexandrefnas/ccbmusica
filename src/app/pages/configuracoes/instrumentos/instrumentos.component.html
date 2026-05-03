@@ -41,7 +41,7 @@
           <tcx-select
             [label]="'Família'"
             [placeholder]="''"
-            [niveis]="listaFamilia"
+            [niveisLimitados]="listaFamilia"
             [formControl]="getControl('familia')"
             [required]="true"
             errorMessage="Campo obrigatório"
@@ -51,7 +51,7 @@
           <tcx-select
             [label]="'Voz Principal'"
             [placeholder]="''"
-            [niveis]="listaVoz"
+            [niveisLimitados]="listaVoz"
             [formControl]="getControl('vozPrincipal')"
             [required]="true"
             errorMessage="Campo obrigatório"
@@ -61,7 +61,7 @@
           <tcx-select
             [label]="'Voz Alternativa'"
             [placeholder]="''"
-            [niveis]="listaVoz"
+            [niveisLimitados]="listaVoz"
             [formControl]="getControl('vozAlternativa')"
           />
         </div>
