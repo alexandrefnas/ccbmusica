@@ -6,9 +6,12 @@
 }
 
 .container__Menu {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   width: 100%;
   height: auto;
-font-size: 14px;
+  font-size: 14px;
   /* gap: 15px; */
 }
 
@@ -27,7 +30,9 @@ font-size: 14px;
   text-decoration: none;
   color: #333;
   display: block;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
 }
 
 .demonstrativo__tabela a:hover {
@@ -58,7 +63,9 @@ font-size: 14px;
 tr {
   /* border-bottom: 1px solid #ddd; */
   /* border: solid 1px #ddd; */
-  box-shadow: inset -1px -1px 0 black, inset 1px 1px 0 white;
+  box-shadow:
+    inset -1px -1px 0 black,
+    inset 1px 1px 0 white;
   border-radius: 5px;
 }
 
@@ -67,5 +74,7 @@ tr:hover {
 }
 
 tr:active {
-  box-shadow: inset -1px -1px 0 white, inset 1px 1px 0 black;
+  box-shadow:
+    inset -1px -1px 0 white,
+    inset 1px 1px 0 black;
 }

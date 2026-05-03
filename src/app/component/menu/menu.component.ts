@@ -47,7 +47,7 @@ export class MenuComponent {
   manutencao = [
     { label: 'Alterar Senha', rota: '/as', tabela: 'usuarios' },
     // { label: 'Alunos', rota: '/alunos', tabela: 'candidatos' },
-    { label: 'Instrumentos', rota: '/instrumentos', tabela: 'instrumentos' },
+    { label: 'Instrumentos', rota: '/instrumento', tabela: 'instrumentos' },
     { label: 'Igrejas', rota: '/igrejas', tabela: 'igrejas' },
     { label: 'Setores', rota: '/setor', tabela: 'setores' },
     { label: 'Usuários', rota: '/usuarios', tabela: 'usuarios' },
@@ -92,7 +92,9 @@ export class MenuComponent {
 
   abrirRota(rota: string): void {
     this.router.navigateByUrl(rota);
-    this.appcomp.menuOculto = !this.appcomp.menuOculto;
+    this.appcomp.fecharMenu();
+
+    // this.appcomp.alternarMenu = !this.appcomp.menuOculto;
   }
 
   get cadastroFiltrados() {

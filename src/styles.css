@@ -5,7 +5,6 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-
 }
 
 body {
@@ -31,3 +30,46 @@ body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 14px;
+  flex-wrap: nowrap;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-shadow:
+    inset 1px 1px 0 #fff,
+    inset -1px -1px 0 #999;
+}
+
+.buttons:active {
+  border: 1px solid #ccc;
+  box-shadow:
+    inset -1px -1px 0 #fff,
+    inset 1px 1px 0 #999;
+  transform: translateY(2px);
+}
+
+/* RESPONSIVIDADE */
+/* Mobile */
+@media (max-width: 576px) {
+ 
+}
+
+/* Table */
+@media (min-width: 768px) and (max-width: 992px) {
+}
+
+/* Desktop */
+@media (min-width: 992px) and (max-width: 1200px) {
+}
+
+/* Extra Large Devices */
+@media (min-width: 1200px) {
+}
+/* FIM RESPONSIVIDADE */

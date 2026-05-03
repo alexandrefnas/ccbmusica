@@ -1,0 +1,106 @@
+:host {
+  display: block;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
+  max-width: 100%;
+}
+
+.tcx-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* font-family: Arial, sans-serif; */
+}
+
+.tcx-table th,
+.tcx-table td {
+  border: 1px solid #ccc;
+  padding: 4px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tcx-table td.sticky-acoes,
+.tcx-table th:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
+
+th {
+  background: linear-gradient(to bottom, #282c31, #888c92);
+  font-weight: 600;
+  color: white;
+}
+
+tr:hover {
+  background-color: #b1d6f7 !important; /* leve azul no hover */
+}
+
+tr:hover td.sticky-acoes {
+  background-color: #b1d6f7 !important; /* leve azul no hover */
+}
+
+/* Classes para destaque de linha via destacarLinhas */
+.linha-vermelha {
+  background-color: #ffdddd !important;
+  color: #b33a3a;
+  font-weight: bold;
+}
+
+.linha-sucesso {
+  background-color: #e6ffea !important;
+  color: #2e7d32;
+}
+
+.linha-aviso {
+  background-color: #fff9c4 !important;
+  color: #8a6d3b;
+}
+
+/* Coluna de ações fixada à direita */
+.sticky-acoes {
+  width: auto;
+  position: sticky;
+  right: 0;
+  background: #fff;
+  z-index: 2;
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Botões de ação */
+.container__mostrar-acoes {
+  display: inline-flex;
+  /* flex-wrap: wrap; */
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.mostrar-acoes__button {
+  display: inline-block;
+}
+
+/* Ajuste para o ale-button */
+/* ale-button {
+  display: inline-block;
+  min-width: 28px;
+  font-size: 0.875rem;
+} */
+
+/* / / */
+.buttons-stile {
+  padding: 3px;
+  border: 1px solid #ccc;
+  box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  font-size: 10px;
+}
+.buttons-stile:active {
+  border: 1px solid #ccc;
+  box-shadow: inset -1px -1px 0 #fff, inset 1px 1px 0 #999;
+  transform: translateY(2px);
+}
+/* // */

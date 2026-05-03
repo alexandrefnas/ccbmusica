@@ -11,7 +11,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { TableComponent } from '../../../component/table/table.component';
 import {
   FirestoreService,
   Igrejas,
@@ -20,6 +19,7 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { confirmarAcao } from '../../../../shared/shared.service';
 import { combineLatest, forkJoin, take } from 'rxjs';
+import { TableComponent } from '../../../component/table/table.component';
 
 @Component({
   selector: 'tcx-igrejas',
@@ -61,14 +61,15 @@ export class IgrejasComponent implements OnInit {
   };
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
-    nomeCongregacao: 'center',
+    nomeCongregacao: 'left',
+    nomeSetor: 'center',
     localizacao: 'center',
   };
 
   tamanhoColunas = {
-    nomeCongregacao: { width: '45%' },
+    nomeCongregacao: { width: '25%' },
     nomeSetor: { width: '25%' },
-    localizacao: { width: '25%' },
+    localizacao: { width: '45%' },
   };
 
   // Buttons

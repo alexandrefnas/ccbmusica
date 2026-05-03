@@ -1,14 +1,14 @@
 <div class="container">
   <!-- <div class="container__tela"> -->
   <div class="conteiner__menu-topo" *ngIf="logado">
-    <div>
-      <button (click)="alternarMenu()" class="toggle-btn">☰</button>
+    <div class="menu-topo-left">
+      <button (click)="alternarMenu()" class="toggle-btn"><i class="bi bi-list"></i></button>
     </div>
-    <div>
-      <button (click)="logout()" class="toggle-btn">Sair</button>
+    <div class="menu-topo-right">
+      <button (click)="logout()" class="toggle-btn"><i class="bi bi-power"></i></button>
     </div>
   </div>
-  <div class="container__screen">
+  <!-- <div class="container__screen">
     <div class="container__menu-lateral" [class.oculto]="!menuOculto" *ngIf="logado">
       <tcx-menu />
     </div>
@@ -16,5 +16,29 @@
     <div class="container__router">
       <router-outlet />
     </div>
+  </div> -->
+<div class="container__screen">
+
+  <!-- Overlay -->
+  <div
+    class="overlay"
+    *ngIf="menuMobileAberto"
+    (click)="fecharMenuMobile()">
   </div>
+
+  <!-- Menu -->
+  <div
+    class="container__menu-lateral"
+    [class.oculto]="menuOculto"
+    [class.mobile-aberto]="menuMobileAberto"
+    *ngIf="logado">
+    <tcx-menu />
+  </div>
+
+  <!-- Conteúdo -->
+  <div class="container__router">
+    <router-outlet />
+  </div>
+
+</div>
 </div>

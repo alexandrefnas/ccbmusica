@@ -10,11 +10,11 @@ import {
 } from '@angular/forms';
 import { ButtonComponent } from '../../../component/button/button.component';
 import { ModalComponent } from '../../../modal/modal/modal.component';
-import { TableComponent } from '../../../component/table/table.component';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { confirmarAcao } from '../../../../shared/shared.service';
 import { FirestoreService, Setor } from '../../../services/firestore.service';
+import { TableComponent } from "../../../component/table/table.component";
 
 @Component({
   selector: 'tcx-setor',
@@ -25,8 +25,8 @@ import { FirestoreService, Setor } from '../../../services/firestore.service';
     ModalComponent,
     TextComponent,
     SelectComponent,
-    TableComponent,
-  ],
+    TableComponent
+],
   templateUrl: './setor.component.html',
   styleUrl: './setor.component.css',
 })
@@ -34,37 +34,40 @@ export class SetorComponent implements OnInit {
   title = 'TITULO';
   mostrarModal = false;
 
-  listaEstados = [
-    { value: 'AC', label: 'AC' },
-    { value: 'AL', label: 'AL' },
-    { value: 'AP', label: 'AP' },
-    { value: 'AM', label: 'AM' },
-    { value: 'BA', label: 'BA' },
-    { value: 'CE', label: 'CE' },
-    { value: 'DF', label: 'DF' },
-    { value: 'ES', label: 'ES' },
-    { value: 'GO', label: 'GO' },
-    { value: 'MA', label: 'MA' },
-    { value: 'MS', label: 'MS' },
-    { value: 'MT', label: 'MT' },
-    { value: 'MG', label: 'MG' },
-    { value: 'PA', label: 'PA' },
-    { value: 'PB', label: 'PB' },
-    { value: 'PR', label: 'PR' },
-    { value: 'PE', label: 'PE' },
-    { value: 'PI', label: 'PI' },
-    { value: 'RJ', label: 'RJ' },
-    { value: 'RN', label: 'RN' },
-    { value: 'RS', label: 'RS' },
-    { value: 'RO', label: 'RO' },
-    { value: 'RR', label: 'RR' },
-    { value: 'SC', label: 'SC' },
-    { value: 'SP', label: 'SP' },
-    { value: 'SE', label: 'SE' },
-    { value: 'TO', label: 'TO' },
-  ];
+  listaEstados = [{ value: 'MG', label: 'MG' }];
+
+  // listaEstados = [
+  //   { value: 'AC', label: 'AC' },
+  //   { value: 'AL', label: 'AL' },
+  //   { value: 'AP', label: 'AP' },
+  //   { value: 'AM', label: 'AM' },
+  //   { value: 'BA', label: 'BA' },
+  //   { value: 'CE', label: 'CE' },
+  //   { value: 'DF', label: 'DF' },
+  //   { value: 'ES', label: 'ES' },
+  //   { value: 'GO', label: 'GO' },
+  //   { value: 'MA', label: 'MA' },
+  //   { value: 'MS', label: 'MS' },
+  //   { value: 'MT', label: 'MT' },
+  //   { value: 'MG', label: 'MG' },
+  //   { value: 'PA', label: 'PA' },
+  //   { value: 'PB', label: 'PB' },
+  //   { value: 'PR', label: 'PR' },
+  //   { value: 'PE', label: 'PE' },
+  //   { value: 'PI', label: 'PI' },
+  //   { value: 'RJ', label: 'RJ' },
+  //   { value: 'RN', label: 'RN' },
+  //   { value: 'RS', label: 'RS' },
+  //   { value: 'RO', label: 'RO' },
+  //   { value: 'RR', label: 'RR' },
+  //   { value: 'SC', label: 'SC' },
+  //   { value: 'SP', label: 'SP' },
+  //   { value: 'SE', label: 'SE' },
+  //   { value: 'TO', label: 'TO' },
+  // ];
 
   // Campos TABELA
+
   camposColunas = ['nomeSetor', 'nomeCidade', 'estado'];
   tituloColunas = {
     nomeSetor: 'Setor',
@@ -124,7 +127,7 @@ export class SetorComponent implements OnInit {
     this.dadosForms = this.fb.group({
       nomeSetor: ['', Validators.required],
       nomeCidade: ['', Validators.required],
-      estado: ['', Validators.required],
+      estado: ['MG', Validators.required],
     });
   }
 

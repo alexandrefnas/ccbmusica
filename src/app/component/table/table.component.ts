@@ -1,19 +1,49 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { converterISOParaBR } from '../../../shared/shared.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { ButtonComponent } from '../button/button.component';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
+import { Observable } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'tcx-table',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css',
 })
-export class TableComponent {
+export class TableComponent implements OnInit, OnChanges {
+  @Input() dados: any[] | null = [];
+  usuario: any;
+
+  @Input() filtros!: Observable<any[]>;
+  @Input() mensagemVazio: string = '';
+  @Input() mostrarAcoes: boolean = false;
+
+  // linhaSelecionadaId: string | null = null;
+
+  @Input() destacarLinhas: {
+    condicao: (item: any) => boolean;
+    estiloClasse: string;
+  }[] = [];
+
+  @Input() transformacoesColunas: {
+    [key: string]: 'uppercase' | 'lowercase' | 'capitalize';
+  } = {};
+
+  colunaOrdenada: string | null = null;
+  direcaoOrdenacao: 'asc' | 'desc' = 'asc';
   @Input() colunas: string[] = [];
-  @Input() dados: any[] = [];
+  @Input() colunasLabels!: { [key: string]: string };
+  @Input() colunasOrdenaveis: string[] = [];
+  @Input() alinhamentosColunasTitulo: {
+    [key: string]: 'left' | 'center' | 'right';
+  } = {};
+  @Input() alinhamentosColunas: { [key: string]: 'left' | 'center' | 'right' } =
+    {};
   @Input() tamanhosColunas: {
     [key: string]: {
       width?: string;
@@ -21,21 +51,7 @@ export class TableComponent {
       maxWidth?: string;
     };
   } = {};
-  @Input() numColuna: number = 0;
-  @Input() alinhamentosColunas: { [key: string]: 'left' | 'center' | 'right' } =
-    {};
-  @Input() alinhamentosColunasTitulo: {
-    [key: string]: 'left' | 'center' | 'right';
-  } = {};
-  @Input() formatoColunas: {
-    [key: string]: 'texto' | 'moeda' | 'data' | 'cnpj';
-  } = {};
-  @Input() colunasLabels!: { [key: string]: string };
-  @Input() linksDinamicos: { value: string; url: string }[] = [];
-  @Input() destacarLinhas: {
-    condicao: (item: any) => boolean;
-    estiloClasse: string;
-  }[] = [];
+
   @Input() acoesTabela: {
     label: string;
     descricao?: string;
@@ -43,116 +59,87 @@ export class TableComponent {
     callback: (item: any) => void;
     visivel?: (item: any) => boolean;
   }[] = [];
-  @Input() mostrarAcoes: boolean = false;
 
-  usuario: any;
   constructor(public auth: AuthService) {}
 
-  // ngOnInit(): void {
-  //   this.auth.getUsuarioAtualObservable().subscribe((user) => {
-  //     this.usuario = user;
-  //   });
-  // }
-  // ngOnChanges(changes: SimpleChanges): void {
-  //   if (changes['dados']) {
-  //     console.log('📊 Dados recebidos pelo componente tabela:', this.dados);
-  //   }
-  // }
+  ngOnInit(): void {
+    this.auth.getUsuarioAtualObservable().subscribe((user) => {
+      this.usuario = user;
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['dados'] && this.colunaOrdenada) {
+      this.aplicarOrdenacao();
+    }
+  }
 
   getEstiloColunaTitulo(coluna: string): any {
+    const estilo = this.tamanhosColunas[coluna] || {};
     return {
-      ...(this.tamanhosColunas[coluna] || {}),
+      width: estilo.width || 'auto',
+      'min-width': estilo.minWidth || 'auto',
+      'max-width': estilo.maxWidth || 'none',
       'text-align': this.alinhamentosColunasTitulo[coluna] || 'left',
     };
   }
 
   getEstiloColuna(coluna: string): any {
+    const estilo = this.tamanhosColunas[coluna] || {};
     return {
-      ...(this.tamanhosColunas[coluna] || {}),
+      width: estilo.width || 'auto',
+      'min-width': estilo.minWidth || 'auto',
+      'max-width': estilo.maxWidth || 'none',
       'text-align': this.alinhamentosColunas[coluna] || 'left',
+      'text-transform': this.transformacoesColunas[coluna] || 'none',
     };
+  }
+
+  ordenarPor(coluna: string) {
+    if (!this.podeOrdenar(coluna)) return;
+
+    if (this.colunaOrdenada === coluna) {
+      this.direcaoOrdenacao = this.direcaoOrdenacao === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.colunaOrdenada = coluna;
+      this.direcaoOrdenacao = 'asc';
+    }
+
+    this.aplicarOrdenacao();
+  }
+
+  podeOrdenar(coluna: string): boolean {
+    return (
+      this.colunasOrdenaveis.length === 0 ||
+      this.colunasOrdenaveis.includes(coluna)
+    );
+  }
+
+  private aplicarOrdenacao() {
+    if (!this.colunaOrdenada) return;
+
+    const coluna = this.colunaOrdenada;
+    const direcao = this.direcaoOrdenacao;
+
+    this.dados = [...(this.dados ?? [])].sort((a, b) => {
+      let valorA = a[coluna];
+      let valorB = b[coluna];
+
+      if (valorA == null) return 1;
+      if (valorB == null) return -1;
+
+      valorA = valorA.toString().toLowerCase();
+      valorB = valorB.toString().toLowerCase();
+
+      if (valorA < valorB) return direcao === 'asc' ? -1 : 1;
+      if (valorA > valorB) return direcao === 'asc' ? 1 : -1;
+      return 0;
+    });
   }
 
   getClassesDestaque(item: any): string[] {
     return this.destacarLinhas
       .filter((d) => d.condicao(item))
       .map((d) => d.estiloClasse);
-  }
-
-  isLink(valor: string): { value: string; url: string } | null {
-    return this.linksDinamicos.find((link) => link.value === valor) || null;
-  }
-
-  formatarValor(valor: any, formato: string): string {
-    switch (formato) {
-      case 'moeda':
-        if (!valor || valor === 0) return '';
-        return new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        }).format(valor);
-
-      case 'numero':
-        if (valor === null || valor === undefined) return '';
-        return new Intl.NumberFormat('pt-BR', {
-          maximumFractionDigits: 0,
-        }).format(valor);
-
-      case 'decimal':
-        if (valor === null || valor === undefined) return '';
-        return new Intl.NumberFormat('pt-BR', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(valor);
-
-      case 'porcentagem':
-        if (valor === null || valor === undefined) return '';
-        return `${new Intl.NumberFormat('pt-BR', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(valor)}%`;
-
-      case 'cnpj':
-        if (!valor) return '';
-        const cnpj = valor.toString().replace(/\D/g, '');
-        if (cnpj.length === 14) {
-          return cnpj.replace(
-            /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-            '$1.$2.$3/$4-$5'
-          );
-        }
-        return valor;
-
-      case 'cpf':
-        if (!valor) return '';
-        const cpf = valor.toString().replace(/\D/g, '');
-        if (cpf.length === 11) {
-          return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-        }
-        return valor;
-
-      case 'data':
-        if (!valor) return '';
-        if (typeof valor === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(valor)) {
-          return converterISOParaBR(valor);
-        }
-        if (valor instanceof Date) {
-          return new Intl.DateTimeFormat('pt-BR').format(valor);
-        }
-        if (valor?.seconds) {
-          return new Intl.DateTimeFormat('pt-BR').format(
-            new Date(valor.seconds * 1000)
-          );
-        }
-        return valor;
-
-      case 'texto':
-      default:
-        return valor != null ? valor.toString() : '';
-    }
-  }
-
-  abrirVisualizacao(item: any) {
-    // opcional, pode emitir para o pai
   }
 }

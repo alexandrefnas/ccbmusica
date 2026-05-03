@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ModalComponent } from '../../../modal/modal/modal.component';
-import { ButtonComponent } from '../../../component/button/button.component';
+import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   FormControl,
@@ -9,12 +8,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ModalComponent } from '../../../modal/modal/modal.component';
+import { ButtonComponent } from '../../../component/button/button.component';
 import { AuthService } from '../../../services/auth.service';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { TableComponent } from '../../../component/table/table.component';
-import { CommonModule } from '@angular/common';
-import { map } from 'rxjs';
 
 @Component({
   selector: 'tcx-usuarios',

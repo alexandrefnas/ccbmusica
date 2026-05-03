@@ -9,6 +9,7 @@ import { loginGuard } from './guards/login.guard';
 import { PerfilGuard } from './guards/perfil.guard';
 import { LoginComponent } from './pages/login/login.component';
 import { PermissaoGuard } from './guards/permissao.guard';
+import { InstrumentosComponent } from './pages/configuracoes/instrumentos/instrumentos.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [loginGuard] },
@@ -16,6 +17,12 @@ export const routes: Routes = [
   {
     path: 'setor',
     component: SetorComponent,
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { tabela: 'setores', tipo: 'read' },
+  },
+  {
+    path: 'instrumento',
+    component: InstrumentosComponent,
     canActivate: [AuthGuard, PermissaoGuard],
     data: { tabela: 'setores', tipo: 'read' },
   },

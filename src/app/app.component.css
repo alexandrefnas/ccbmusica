@@ -21,8 +21,8 @@
   background: linear-gradient(to bottom, #2d89ef, #1b4f9c);
 }
 
-.conteiner__menu-topo div {
-  /* display: flex; */
+.menu-topo-left,
+.menu-topo-right {
   display: flex;
   justify-content: center;
   padding: 8px 0;
@@ -48,7 +48,7 @@
   /* height: 100%; */
 }
 
-.container__menu-lateral * {
+.container__menu-lateral {
   box-sizing: border-box;
   width: 200px;
   background-color: #dadada;
@@ -83,7 +83,7 @@
 
   background-color: #1b4f9c;
   color: white;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
   border-color: #ffffff79;
   transition: transform 0.1s ease;
@@ -93,3 +93,63 @@
 .toggle-btn:active {
   transform: translateY(2px);
 }
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 10;
+}
+
+/* RESPONSIVIDADE */
+/* Mobile */
+@media (max-width: 576px) {
+  .menu-topo-left {
+    display: flex;
+    justify-content: left;
+    padding: 8px 15px;
+  }
+
+  .menu-topo-right {
+    display: flex;
+    justify-content: right;
+    padding: 8px 15px;
+  }
+
+    .container__menu-lateral {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    height: 100%;
+    width: 250px;
+    z-index: 11;
+
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .container__menu-lateral.mobile-aberto {
+    transform: translateX(0);
+  }
+
+  /* IMPORTANTE: não usar width 0 no mobile */
+  .container__menu-lateral.oculto {
+    width: 250px;
+  }
+}
+
+/* Table */
+@media (min-width: 768px) and (max-width: 992px) {
+}
+
+/* Desktop */
+@media (min-width: 992px) and (max-width: 1200px) {
+}
+
+/* Extra Large Devices */
+@media (min-width: 1200px) {
+}
+/* FIM RESPONSIVIDADE */

@@ -14,7 +14,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { TextSelectComponent } from '../../component/inputs/text-select/text-select.component';
-import { TableComponent } from '../../component/table/table.component';
+import { TableComponent } from '../../component/tableOFF/table.component';
 
 @Component({
   selector: 'app-home',
@@ -153,7 +153,6 @@ export class HomeComponent {
     this.title = 'TESTE';
     this.mostrarModal = true;
   }
-
 
   fecharModal() {
     this.mostrarModal = false;

@@ -1,10 +1,13 @@
 <div class="container__tela">
-  <div id="barra-titulo__container">
-    <h2 style="font-weight: normal; color: grey">IGREJAS</h2>
-  </div>
   <div id="tela__barra-menu">
+    <div id="barra-titulo__container">
+      <h2 style="font-weight: normal; color: grey">IGREJAS</h2>
+    </div>
     <div class="button-container">
-      <tcx-button label="Novo" (click)="buttonClick()"></tcx-button>
+      <!-- <tcx-button label="Novo" (click)="buttonClick()"></tcx-button> -->
+      <button class="buttons" (click)="buttonClick()">
+        <i class="bi bi-file-earmark-plus"></i> Novo
+      </button>
     </div>
   </div>
   <div id="tela__container-tabela">

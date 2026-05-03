@@ -12,14 +12,42 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent {
   title = 'ccbmusica';
-  public menuOculto = false;
+  menuOculto = false; // desktop
+  menuMobileAberto = false; // mobile
+
   logado: boolean = false;
 
   alternarMenu() {
-    this.menuOculto = !this.menuOculto;
+    if (this.isMobile()) {
+      this.menuMobileAberto = !this.menuMobileAberto;
+    } else {
+      this.menuOculto = !this.menuOculto;
+    }
   }
 
-  constructor(private authService: AuthService, private router: Router) {
+  public fecharMenu() {
+    if (this.isMobile() || this.isTable()) {
+      this.menuMobileAberto = !this.menuMobileAberto;
+    }
+  }
+
+  fecharMenuMobile() {
+    this.menuMobileAberto = false;
+  }
+
+  isMobile(): boolean {
+    return window.innerWidth <= 576;
+  }
+
+  isTable(): boolean {
+    const result = window.innerWidth >= 577 && window.innerWidth <= 992;
+    return result;
+  }
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {
     this.authService.carregando$.subscribe((carregando) => {
       if (!carregando) {
         const logado = this.authService.estaLogado;

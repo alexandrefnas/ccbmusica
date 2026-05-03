@@ -1,59 +1,84 @@
-<!-- table.component.html -->
-<table class="tcx-table">
-  <thead>
-    <tr>
-      <th
-        *ngFor="let coluna of colunas"
-        [ngStyle]="getEstiloColunaTitulo(coluna)"
-      >
-        {{ colunasLabels[coluna] || coluna }}
-      </th>
-      <th
-        *ngIf="mostrarAcoes"
-        [ngStyle]="{ 'text-align': 'center', 'white-space': 'nowrap' }"
-      >
-        <!-- [ngStyle]="getEstiloColunaTitulo('mostrarAcoes')" -->
-        Ações
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let item of dados" [ngClass]="getClassesDestaque(item)">
-      <td *ngFor="let coluna of colunas" [ngStyle]="getEstiloColuna(coluna)">
-        <ng-container *ngIf="isLink(item[coluna]); else textoSimples">
-          <a [routerLink]="isLink(item[coluna])?.url">{{
-            isLink(item[coluna])?.value
-          }}</a>
-        </ng-container>
-        <ng-template #textoSimples>
-          {{ formatarValor(item[coluna], formatoColunas[coluna] || "texto") }}
-        </ng-template>
+<div class="table-wrapper">
+  <table class="tabela">
+    <tr *ngIf="!this.dados || this.dados.length === 0">
+      <td colspan="6" style="text-align: center; padding: 20px; width: 100%">
+        {{ mensagemVazio }}
       </td>
-      <td
-        *ngIf="mostrarAcoes"
-        class="sticky-acoes"
-        [ngStyle]="{ 'text-align': 'center', 'white-space': 'nowrap' }"
-        [ngClass]="getClassesDestaque(item)"
-      >
-        <!-- [ngStyle]="getEstiloColuna('mostrarAcoes')" -->
-        <div class="container__mostrar-acoes">
-          <ng-container *ngFor="let acao of acoesTabela">
-            <div
-              class="mostrar-acoes__button"
-              *ngIf="!acao.visivel || acao.visivel(item)"
-            >
-              <button
-                class="buttons-stile"
-                *ngIf="!acao.visivel || acao.visivel(item)"
-                [ngClass]="acao.classe || ''"
-                (click)="acao.callback(item)"
+    </tr>
+    <thead>
+      <tr>
+        <th
+          *ngFor="let coluna of colunas"
+          [ngStyle]="getEstiloColunaTitulo(coluna)"
+          (click)="ordenarPor(coluna)"
+          class="th-ordenavel"
+        >
+          <span class="th-conteudo">
+            {{ colunasLabels[coluna] || coluna }}
+
+            <span class="setas" *ngIf="podeOrdenar(coluna)">
+              <span *ngIf="colunaOrdenada !== coluna" class="seta neutra"
+                >⇅</span
               >
-                {{ acao.label }}
-              </button>
-            </div>
-          </ng-container>
-        </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
+              <span
+                *ngIf="colunaOrdenada === coluna && direcaoOrdenacao === 'asc'"
+                class="seta ativa"
+                >▲</span
+              >
+              <span
+                *ngIf="colunaOrdenada === coluna && direcaoOrdenacao === 'desc'"
+                class="seta ativa"
+                >▼</span
+              >
+            </span>
+          </span>
+        </th>
+        <th
+          *ngIf="mostrarAcoes"
+          class="sticky-acoes"
+          style="text-align: center"
+        >
+          Ações
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        *ngFor="let item of dados"
+        (click)="getClassesDestaque(item)"
+        [class.linha-selecionada]="destacarLinhas === item.id"
+      >
+        <td [ngStyle]="getEstiloColuna(coluna)" *ngFor="let coluna of colunas">
+          {{ item[coluna] }}
+        </td>
+
+        <td
+          *ngIf="mostrarAcoes"
+          class="sticky-acoes"
+          [ngClass]="getClassesDestaque(item)"
+        >
+          <!-- [ngStyle]="{ 'text-align': 'center', 'white-space': 'nowrap' }" -->
+          <!-- [ngStyle]="getEstiloColuna('mostrarAcoes')" -->
+          <div class="container__mostrar-acoes">
+            <ng-container *ngFor="let acao of acoesTabela">
+              <div
+                class="mostrar-acoes__button"
+                *ngIf="!acao.visivel || acao.visivel(item)"
+              >
+                <button
+                  class="buttons-stile"
+                  *ngIf="!acao.visivel || acao.visivel(item)"
+                  [ngClass]="acao.classe || ''"
+                  (click)="acao.callback(item)"
+                >
+                  {{ acao.label }}
+                </button>
+              </div>
+            </ng-container>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
