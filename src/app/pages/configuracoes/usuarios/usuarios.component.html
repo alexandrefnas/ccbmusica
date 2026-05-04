@@ -21,10 +21,24 @@
       [acoesTabela]="acoes"
     />
   </div>
-  <!-- <div id="tela__container-tabela" *ngIf="liberacoes"> -->
-    <form [formGroup]="dadosForms" class="acessos-container" *ngIf="liberacoes">
-      <p>Acessos do Usuário: {{ usuarioSelecionado }}</p>
+  <div class="tela__container-acessos" *ngIf="liberacoes">
+    <div class="title-acessos">
+      <p>Acessos do Usuário:</p>
+      <p>{{ usuarioSelecionado }}</p>
+    </div>
+    <form [formGroup]="dadosForms" class="acessos-container" (ngSubmit)="salvar()">
       <div formGroupName="acessos">
+        <div class="input-select">
+          <tcx-select
+            [label]="'Perfil'"
+            [placeholder]="''"
+            [niveisLimitados]="listaTipoUsuario"
+            [formControl]="getControl('perfil')"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+
         <div
           class="modulo"
           *ngFor="let modulo of modulos"
@@ -65,11 +79,20 @@
           </div>
         </div>
       </div>
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          gap: 20px;
+          padding: 10px;
+        "
+      >
+        <button class="buttons"  type="submit">Salvar</button>
+        <button class="buttons" (click)="cancel()">Cancelar</button>
+      </div>
     </form>
-    <div style="height: 40px">
-      <button class="buttons" (click)="(cancel)">Cancelar</button>
-    </div>
-  <!-- </div> -->
+  </div>
 </div>
 
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">

@@ -21,6 +21,8 @@ import {
   TIPO_PERFIL,
   upper,
 } from '../../../services/select.service';
+import { confirmarAcao } from '../../../../shared/shared.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'tcx-usuarios',
@@ -55,6 +57,7 @@ export class UsuariosComponent implements OnInit {
   senha = '';
   perfil: Perfil = 'usuario';
   carregando = false;
+  ignorarMudancaPerfil = false;
 
   listaTipoUsuario = LISTA_TIPO_USUARIO;
 
@@ -182,6 +185,7 @@ export class UsuariosComponent implements OnInit {
     private fb: FormBuilder,
     private auth: AuthService,
     private cd: ChangeDetectorRef,
+    private snackBar: MatSnackBar,
   ) {
     this.dadosForms = this.fb.group({
       nome: ['', Validators.required],
@@ -196,7 +200,27 @@ export class UsuariosComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.escutarMudancaPerfil();
     this.carregarDados();
+  }
+
+  private escutarMudancaPerfil() {
+    this.getControl('perfil')?.valueChanges.subscribe((perfil: Perfil) => {
+      if (this.ignorarMudancaPerfil) return;
+      if (!perfil) return;
+
+      const confirmar = confirm(
+        'Deseja aplicar as permissões padrão deste perfil?',
+      );
+
+      if (!confirmar) return;
+
+      const config = TIPO_PERFIL[perfil];
+
+      this.dadosForms.patchValue({
+        acessos: JSON.parse(JSON.stringify(config.acessos)),
+      });
+    });
   }
 
   buttonClick(): void {
@@ -276,6 +300,7 @@ export class UsuariosComponent implements OnInit {
       });
 
       alert('Usuário cadastrado com sucesso!');
+
       this.nome = '';
       this.email = '';
       this.senha = '';
@@ -289,11 +314,88 @@ export class UsuariosComponent implements OnInit {
     }
   }
 
-  usuarioSelecionado: string ='';
+  async salvar(): Promise<void> {
+    if (!this.dadosParaEditar?.uid) return;
+
+    const mensagem = `Deseja realmente alterar o acesso do usuário ${this.dadosParaEditar.nome}?`;
+    if (!confirmarAcao(mensagem)) return;
+
+    const dadosAtualizados = this.dadosForms.value;
+
+    try {
+      await this.auth.updateUsuario(this.dadosParaEditar.uid, dadosAtualizados);
+
+      this.snackBar.open('Atualizado com sucesso!', 'Fechar', {
+        duration: 3000,
+      });
+
+      this.liberacoes = false;
+    } catch (error) {
+      this.snackBar.open('Erro ao atualizar usuário', 'Fechar', {
+        duration: 3000,
+      });
+    }
+  }
+
+  usuarioSelecionado: string = '';
+  // editar(select: Usuarios): void {
+  //   this.title = 'Editar Instrumentos';
+  //   this.liberacoes = true;
+  //   this.usuarioSelecionado =
+  //     select.nome.toUpperCase() + ' - ' + select.perfil.toUpperCase();
+  //   this.dadosForms = this.fb.group({
+  //     perfil: [''],
+  //     acessos: this.fb.group({
+  //       candidatos: this.fb.group({
+  //         read: [false],
+  //         create: [false],
+  //         update: [false],
+  //         delete: [false],
+  //       }),
+  //       igrejas: this.fb.group({
+  //         read: [false],
+  //         create: [false],
+  //         update: [false],
+  //         delete: [false],
+  //       }),
+  //       instrumentos: this.fb.group({
+  //         read: [false],
+  //         create: [false],
+  //         update: [false],
+  //         delete: [false],
+  //       }),
+  //       setores: this.fb.group({
+  //         read: [false],
+  //         create: [false],
+  //         update: [false],
+  //         delete: [false],
+  //       }),
+  //       usuarios: this.fb.group({
+  //         read: [false],
+  //         create: [false],
+  //         update: [false],
+  //         delete: [false],
+  //       }),
+  //     }),
+  //   });
+  //   this.escutarMudancaPerfil();
+  //   this.dadosParaEditar = { ...select };
+
+  //   this.dadosForms.patchValue({
+  //     perfil: select.perfil,
+  //     acessos: select.acessos ?? TIPO_PERFIL[select.perfil as Perfil].acessos,
+  //   });
+
+  //   // console.log(this.dadosParaEditar);
+  // }
+
   editar(select: Usuarios): void {
+    this.ignorarMudancaPerfil = true;
     this.title = 'Editar Instrumentos';
     this.liberacoes = true;
-    this.usuarioSelecionado = select.nome.toUpperCase() + ' - '+ select.perfil.toUpperCase();
+    this.usuarioSelecionado =
+      select.nome.toUpperCase() + ' - ' + select.perfil.toUpperCase();
+    this.dadosParaEditar = { ...select };
     this.dadosForms = this.fb.group({
       perfil: [''],
       acessos: this.fb.group({
@@ -329,14 +431,20 @@ export class UsuariosComponent implements OnInit {
         }),
       }),
     });
-    this.dadosParaEditar = { ...select };
 
-    this.dadosForms.patchValue({
-      perfil: select.perfil,
-      acessos: select.acessos ?? TIPO_PERFIL[select.perfil as Perfil].acessos,
+    this.escutarMudancaPerfil();
+
+    this.dadosForms.patchValue(
+      {
+        perfil: select.perfil,
+        acessos: select.acessos ?? TIPO_PERFIL[select.perfil as Perfil].acessos,
+      },
+      { emitEvent: false }, // 💥 ISSO resolve tudo
+    );
+    // libera depois de carregar
+    setTimeout(() => {
+      this.ignorarMudancaPerfil = false;
     });
-
-    console.log(this.dadosParaEditar);
   }
 
   getControl(controlName: string): FormControl {
@@ -350,7 +458,8 @@ export class UsuariosComponent implements OnInit {
   fecharModal() {
     this.mostrarModal = false;
   }
-  get cancel(): boolean {
-    return this.liberacoes =  !this.liberacoes;
+
+  cancel() {
+    this.liberacoes = false;
   }
 }

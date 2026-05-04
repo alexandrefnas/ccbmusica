@@ -16,6 +16,7 @@ import {
   Firestore,
   getDoc,
   setDoc,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { getApps, initializeApp } from 'firebase/app';
@@ -121,7 +122,6 @@ export class AuthService {
 
   // ⚙️ Cadastro com perfil
   async cadastrar(email: string, senha: string, dadosExtras: any) {
-
     const secondaryApp =
       getApps().find((app) => app.name === 'secondary') ||
       initializeApp(firebaseConfig, 'secondary');
@@ -149,6 +149,15 @@ export class AuthService {
     return collectionData(dadosCollection, {
       idField: 'uid',
     }) as Observable<Usuarios[]>;
+  }
+
+  async updateUsuario(uid: string, dados: any) {
+    const ref = doc(this.firestore, 'usuarios', uid);
+
+    return await updateDoc(ref, {
+      perfil: dados.perfil,
+      acessos: dados.acessos,
+    });
   }
 
   async reautenticarEAlterarSenha(

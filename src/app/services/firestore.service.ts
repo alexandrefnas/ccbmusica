@@ -176,4 +176,26 @@ export class FirestoreService {
     return updateDoc(dadosDocRef, dados);
   }
   // Fim
+
+//// Acessos
+  // Pesquisar
+  getAcessos() {
+    const dadosCollection = collection(this.firestore, 'usuarios');
+    return collectionData(dadosCollection, {
+      idField: 'id',
+    }) as Observable<Candidatos[]>;
+  }
+
+  // Deletar
+  async deleteAcessos(id: string) {
+    const dadosDocRef = doc(this.firestore, 'usuarios', id);
+    return deleteDoc(dadosDocRef);
+  }
+
+  // Atualizar
+  async updateAcessos(id: string, dados: Partial<Candidatos>) {
+    const dadosDocRef = doc(this.firestore, 'usuarios', id);
+    return updateDoc(dadosDocRef, dados);
+  }
+  // Fim
 }
