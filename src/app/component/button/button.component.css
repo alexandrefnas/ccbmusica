@@ -28,7 +28,7 @@
   box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #999;
 
   line-height: 1; /* Evita espaçamentos extras */
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
 
   display: flex;
@@ -38,7 +38,7 @@
 }
 
 .container__button > button:hover {
-  font-weight: bold;
+  /* font-weight: bold; */
   transform: scale(1.05);
 }
 

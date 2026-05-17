@@ -1,8 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ModalComponent } from '../../../modal/modal/modal.component';
-import { ButtonComponent } from '../../../component/button/button.component';
-import { TextComponent } from '../../../component/inputs/text/text.component';
-import { SelectComponent } from '../../../component/inputs/select/select.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   FormBuilder,
   FormControl,
@@ -11,20 +8,26 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ModalComponent } from '../../../modal/modal/modal.component';
+import { ButtonComponent } from '../../../component/button/button.component';
+import { TextComponent } from '../../../component/inputs/text/text.component';
+import { SelectComponent } from '../../../component/inputs/select/select.component';
 import {
   FirestoreService,
   Igrejas,
   Setor,
 } from '../../../services/firestore.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { confirmarAcao } from '../../../../shared/shared.service';
-import { combineLatest, forkJoin, take } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { TableComponent } from '../../../component/table/table.component';
 import { upper } from '../../../services/select.service';
+import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'tcx-igrejas',
   imports: [
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     ModalComponent,
@@ -37,6 +40,26 @@ import { upper } from '../../../services/select.service';
   styleUrl: './igrejas.component.css',
 })
 export class IgrejasComponent implements OnInit {
+  constructor(
+    private fb: FormBuilder,
+    private firestoreService: FirestoreService,
+    private auth: AuthService,
+    private snackBar: MatSnackBar,
+  ) {
+    this.dadosForms = this.fb.group({
+      nomeCongregacao: ['', Validators.required],
+      idSetor: ['', Validators.required],
+      localizacao: [''],
+    });
+    this.carregarDados();
+    // this.liberaEditar = this.permissao('update');
+    // this.liberaCriar = this.permissao('create');
+    // this.liberaDeletar = this.permissao('delete');
+  }
+
+  liberaEditar: boolean = false;
+  liberaCriar: boolean = true;
+  liberaDeletar: boolean = false;
   title = 'TITULO';
   mostrarModal = false;
 
@@ -79,14 +102,14 @@ export class IgrejasComponent implements OnInit {
       label: '✏️',
       descricao: 'Editar',
       classe: 'acao-editar',
-      visivel: (item: any) => true,
+      visivel: (item: any) => this.liberaEditar,
       callback: (item: any) => this.editar(item),
     },
     {
       label: '🗑️',
       descricao: 'Excluir',
       classe: 'acao-excluir',
-      visivel: (item: any) => true,
+      visivel: (item: any) => this.liberaDeletar,
       callback: (item: any) => this.excluir(item),
     },
   ];
@@ -96,28 +119,39 @@ export class IgrejasComponent implements OnInit {
 
   dadosForms: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    private firestoreService: FirestoreService,
-    private snackBar: MatSnackBar,
-  ) {
-    this.dadosForms = this.fb.group({
-      nomeCongregacao: ['', Validators.required],
-      idSetor: ['', Validators.required],
-      localizacao: [''],
-    });
-    this.carregarDados();
+  permissao(tipo: keyof PermissoesCRUD): boolean {
+    return this.auth.temPermissao('igrejas', tipo);
   }
 
+  // ngOnInit(): void {
+  //   this.firestoreService.getSetor().subscribe((lista: Setor[]) => {
+  //     // this.listaLinks = lista;
+  //     this.listaSetor = lista.map((l) => ({
+  //       value: l.id!,
+  //       label: l.nomeSetor,
+  //     }));
+  //   });
+
+  //   this.carregarDados();
+  // }
+
   ngOnInit(): void {
+    this.auth.getUsuarioAtualObservable().subscribe((user) => {
+      if (!user) return;
+
+      this.liberaEditar = this.permissao('update');
+      this.liberaCriar = this.permissao('create');
+      this.liberaDeletar = this.permissao('delete');
+    });
+    // console.log('cheguei 1');
     this.firestoreService.getSetor().subscribe((lista: Setor[]) => {
-      // this.listaLinks = lista;
       this.listaSetor = lista.map((l) => ({
         value: l.id!,
         label: l.nomeSetor,
       }));
+      // console.log('SETOR:', this.listaSetor);
+      // console.log('cheguei 2');
     });
-
     this.carregarDados();
   }
 

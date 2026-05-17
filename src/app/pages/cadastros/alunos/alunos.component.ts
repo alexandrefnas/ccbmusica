@@ -7,29 +7,32 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ModalComponent } from '../../modal/modal/modal.component';
-import { ButtonComponent } from '../../component/button/button.component';
-import { TextComponent } from '../../component/inputs/text/text.component';
-import { SelectComponent } from '../../component/inputs/select/select.component';
-import { DataComponent } from '../../component/inputs/data/data.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
+import { ModalComponent } from '../../../modal/modal/modal.component';
+import { ButtonComponent } from '../../../component/button/button.component';
+import { TextComponent } from '../../../component/inputs/text/text.component';
+import { SelectComponent } from '../../../component/inputs/select/select.component';
+import { DataComponent } from '../../../component/inputs/data/data.component';
 import {
   confirmarAcao,
   formatarDataString,
-} from '../../../shared/shared.service';
-import { TableComponent } from '../../component/table/table.component';
+} from '../../../../shared/shared.service';
+import { TableComponent } from '../../../component/table/table.component';
 import {
   Candidatos,
   FirestoreService,
   Igrejas,
   Instrumentos,
-} from '../../services/firestore.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+} from '../../../services/firestore.service';
 import { combineLatest } from 'rxjs';
-import { upper } from '../../services/select.service';
+import { upper } from '../../../services/select.service';
+import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 
 @Component({
   selector: 'tcx-alunos',
   imports: [
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     ModalComponent,
@@ -43,6 +46,29 @@ import { upper } from '../../services/select.service';
   styleUrl: './alunos.component.css',
 })
 export class AlunosComponent implements OnInit {
+  constructor(
+    private fb: FormBuilder,
+    private firestoreService: FirestoreService,
+    private auth: AuthService,
+    private snackBar: MatSnackBar,
+  ) {
+    this.dadosForms = this.fb.group({
+      nomeAluno: ['', Validators.required],
+      dataNascimento: ['', Validators.required],
+      idComum: ['', Validators.required],
+      idInstrumento: [''],
+      afinacao: [''],
+    });
+    this.carregarDados();
+    this.liberaEditar = this.permissao('update');
+    this.liberaCriar = this.permissao('create');
+    this.liberaDeletar = this.permissao('delete');
+  }
+
+  liberaEditar: boolean = false;
+  liberaCriar: boolean = false;
+  liberaDeletar: boolean = false;
+
   title = 'TITULO';
   mostrarModal = false;
 
@@ -107,14 +133,14 @@ export class AlunosComponent implements OnInit {
       label: '✏️',
       descricao: 'Editar',
       classe: 'acao-editar',
-      visivel: (item: any) => true,
+      visivel: (item: any) => this.liberaEditar,
       callback: (item: any) => this.editar(item),
     },
     {
       label: '🗑️',
       descricao: 'Excluir',
       classe: 'acao-excluir',
-      visivel: (item: any) => true,
+      visivel: (item: any) => this.liberaDeletar,
       callback: (item: any) => this.excluir(item),
     },
   ];
@@ -124,19 +150,8 @@ export class AlunosComponent implements OnInit {
 
   dadosForms: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    private firestoreService: FirestoreService,
-    private snackBar: MatSnackBar,
-  ) {
-    this.dadosForms = this.fb.group({
-      nomeAluno: ['', Validators.required],
-      dataNascimento: ['', Validators.required],
-      idComum: ['', Validators.required],
-      idInstrumento: [''],
-      afinacao: [''],
-    });
-    this.carregarDados();
+  permissao(tipo: keyof PermissoesCRUD): boolean {
+    return this.auth.temPermissao('candidatos', tipo);
   }
 
   ngOnInit(): void {

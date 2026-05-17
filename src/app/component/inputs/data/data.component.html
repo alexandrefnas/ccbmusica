@@ -6,6 +6,7 @@
     class="form-input"
     matInput
     [matDatepicker]="picker"
+    [value]="value"
     (dateChange)="onDateChange($event)"
     (input)="aplicarMascaraData($event)"
     (focus)="isFocused = true"

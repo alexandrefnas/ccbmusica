@@ -47,6 +47,7 @@
       <tr
         *ngFor="let item of dados"
         (click)="getClassesDestaque(item)"
+        [ngClass]="getClassesDestaque(item)"
         [class.linha-selecionada]="destacarLinhas === item.id"
       >
         <td [ngStyle]="getEstiloColuna(coluna)" *ngFor="let coluna of colunas">
@@ -57,6 +58,7 @@
           *ngIf="mostrarAcoes"
           class="sticky-acoes"
           [ngClass]="getClassesDestaque(item)"
+          [class.linha-selecionada]="destacarLinhas === item.id"
         >
           <!-- [ngStyle]="{ 'text-align': 'center', 'white-space': 'nowrap' }" -->
           <!-- [ngStyle]="getEstiloColuna('mostrarAcoes')" -->
@@ -68,6 +70,7 @@
               >
                 <button
                   class="buttons-stile"
+                  [title]="acao.descricao || ''"
                   *ngIf="!acao.visivel || acao.visivel(item)"
                   [ngClass]="acao.classe || ''"
                   (click)="acao.callback(item)"

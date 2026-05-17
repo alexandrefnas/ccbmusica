@@ -18,7 +18,6 @@ import { AuthService } from '../../services/auth.service';
 export class TableComponent implements OnInit, OnChanges {
   @Input() dados: any[] | null = [];
   usuario: any;
-
   @Input() filtros!: Observable<any[]>;
   @Input() mensagemVazio: string = '';
   @Input() mostrarAcoes: boolean = false;

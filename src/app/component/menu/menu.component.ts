@@ -54,9 +54,10 @@ export class MenuComponent {
   ];
 
   avaliacoes = [
-    { label: 'Solicitação', rota: '/setores', tabela: '' },
-    { label: 'Testes', rota: '/usuarios', tabela: '' },
-    { label: 'Notas', rota: '/igrejas', tabela: '' },
+    { label: 'Solicitações', rota: '/solicitacao', tabela: 'exames' },
+    { label: 'Exames', rota: '/exames', tabela: 'exames' },
+    // { label: 'Testes', rota: '/usuarios', tabela: '' },
+    // { label: 'Notas', rota: '/igrejas', tabela: '' },
   ];
 
   constructor(
@@ -69,7 +70,7 @@ export class MenuComponent {
     this.mostrarGrupo = false;
     this.mostrarGrupo1 = false;
     this.mostrarGrupo2 = false;
-    this.abrirRota('/');
+    this.abrirRota('/home');
   }
 
   menuCadastro(): void {

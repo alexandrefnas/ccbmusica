@@ -16,10 +16,12 @@
 
 .tabela {
   width: 100%;
-  border-collapse: separate; /* importante */
+  border-collapse: collapse; /* importante */
   border-spacing: 0;
   border: 1px solid #e0e0e0; /* 👈 borda externa */
   border-top: none;
+font-size: 14px;
+  /* border-right: none; */
 }
 
 /* ===== CABEÇALHO ===== */
@@ -45,18 +47,27 @@
 }
 
 .tabela tbody td {
-  border: none;
-
-  box-shadow:
-    inset 0 -1px 0 #e0e0e0,
-    /* linha horizontal */ inset -1px 0 0 #e0e0e0; /* linha vertical */
+  /* border: none; */
+  border: 1px solid #e0e0e0;
 }
 
-/* .sticky-acoes:hover { */
-.tabela tbody tr:hover {
-  background: #f9fafc;
-  transition: background 0.2s ease-in-out;
+/* Classes para destaque de linha via destacarLinhas */
+.tabela tbody tr.linha-vermelha td {
+  background-color: #ffdddd !important;
+  color: #b33a3a;
+  /* font-weight: bold; */
 }
+
+.tabela tbody tr.linha-sucesso td {
+  background-color: #e6ffea !important;
+  color: #2e7d32;
+}
+
+.tabela tbody tr.linha-aviso td {
+  background-color: #fff9c4 !important;
+  color: #8a6d3b;
+}
+/* // */
 
 /* ===== ÚLTIMA LINHA SEM BORDA ===== */
 .tabela tbody tr:last-child td {
@@ -64,11 +75,19 @@
 }
 
 tr.linha-selecionada {
-  background-color: #dbeafe; /* azul claro */
+  background-color: #dbeafe !important; /* azul claro */
 }
 
 tr.linha-selecionada:hover {
-  background-color: #bfdbfe;
+  background-color: #bfdbfe !important;
+}
+
+tr.linha-selecionada td {
+  background-color: #dbeafe !important;
+}
+
+tr.linha-selecionada:hover td {
+  background-color: #bfdbfe !important;
 }
 
 /* Cabeçalho fixo */
@@ -79,15 +98,11 @@ tr.linha-selecionada:hover {
   z-index: 2;
 
   /* remove conflito */
-  border: none;
+  border: 1px solid #e0e0e0;
 
   /* cria borda visual fixa */
 
-  box-shadow:
-    inset 0 -1px 0 #e0e0e0,
-    /* baixo */ inset 0 1px 0 #e0e0e0,
-    /* cima */ inset -1px 0 0 #e0e0e0,
-    /* direita */ inset 1px 0 0 #e0e0e0; /* esquerda */
+  /* box-shadow: none; */
 }
 
 .sticky-acoes:last-child {
@@ -100,71 +115,54 @@ tr.linha-selecionada:hover {
 .tabela th,
 .tabela td {
   /* border: 1px solid #ddd; */
+  border: 1px solid #e0e0e0;
+  height: 100%;
+  vertical-align: middle;
   padding: 8px;
   text-align: left;
 }
 /* FIM Cabeçalho fixo */
 
 /* ===== AÇÕES ===== */
-/* .sticky-acoes {
-  width: 1%;
-  padding: 0 6px;
-  box-sizing: border-box;
-  position: sticky;
-  right: 0;
-  z-index: 3;
-  border-left: none;
-  border-right: none;
-} */
-
 .sticky-acoes {
-  display: flex;
-  justify-content: center;
   position: sticky;
   right: 0;
   z-index: 3;
   background: #fff;
 
-  border: none;
-
-  box-shadow:
-    inset 1px 0 0 #e0e0e0,
-    /* borda esquerda */ inset 0 -1px 0 #e0e0e0; /* linha horizontal */
-}
-
-/* remove borda da coluna anterior */
-/* .tabela td:not(.sticky-acoes) {
-  border-right: none;
-  border-left: none;
-} */
-
-/* sticky desenha a borda */
-/* .sticky-acoes {
+  /* separação interna */
   border-left: 1px solid #e0e0e0;
-} */
 
-/* cria separação limpa */
-/* .sticky-acoes::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1px;
-  height: 100%;
-  background: #e0e0e0;
-} */
+  /* borda externa direita */
+  border-right: 1px solid #e0e0e0; /* 👈 força a borda visível */
+
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
 
 /* Botões de ação */
 .container__mostrar-acoes {
-  display: inline-flex;
+  display: flex;
   justify-content: center;
-  text-align: center;
+  align-items: center; /* centraliza verticalmente */
   gap: 4px;
   white-space: nowrap;
+  height: 100%;
 }
 
 .mostrar-acoes__button {
   display: inline-block;
+}
+
+.tabela tbody tr:hover td {
+  background: #a8c1f3 !important;
+  transition: background 0.2s ease-in-out;
+}
+
+.tabela tbody tr:hover td.sticky-acoes {
+  background: #a8c1f3 !important;
 }
 
 /* / / */
@@ -179,7 +177,7 @@ tr.linha-selecionada:hover {
   justify-content: center;
   text-align: center;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .buttons-stile:active {
@@ -196,6 +194,10 @@ tr.linha-selecionada:hover {
   .tabela {
     font-size: 10px;
     /* font-weight: 600; */
+  }
+
+  .buttons-stile {
+    font-size: 13px;
   }
 }
 
