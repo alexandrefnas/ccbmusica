@@ -12,7 +12,7 @@ export const PerfilGuard: CanActivateFn = () => {
       if (user?.perfil === 'admin') {
         return true;
       } else {
-        return router.createUrlTree(['/']);
+        return router.createUrlTree(['/home']);
       }
     })
   );

@@ -1,6 +1,58 @@
 import { Injectable } from '@angular/core';
-import { addDoc, collection, collectionData, deleteDoc, doc, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
+import {
+  addDoc,
+  collection,
+  collectionData,
+  deleteDoc,
+  doc,
+  Firestore,
+  setDoc,
+  updateDoc,
+} from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+
+export type StatusExame =
+  | 'solicitado'
+  | 'agendado'
+  | 'emAndamento'
+  | 'aprovado'
+  | 'reprovado'
+  | 'cancelado';
+
+export type ResultadoEtapa =
+  | 'pendente'
+  | 'bloqueado'
+  | 'aprovado'
+  | 'reprovado';
+
+export interface EtapaExame {
+  nome: string;
+  ordem: number;
+  nota: number | null;
+  notaMinima: number;
+  resultado: ResultadoEtapa;
+  dataAgendada: string;
+  dataLancamento: string;
+  professorLancamento: string;
+}
+
+export interface Exames {
+  id?: string;
+  idAluno: string;
+  tipoExame: string;
+  status: StatusExame;
+  categoriaExame: string;
+  dataSolicitacao: string;
+  // dataAgendada: string;
+  // professorResponsavel: string;
+  observacao: string;
+  etapaAtual: number;
+  etapas: EtapaExame[];
+
+  motivoCancelamento?: string;
+  dataCancelamento?: string;
+  usuarioCancelamento?: string;
+}
 
 export interface Setor {
   id?: string;
@@ -33,15 +85,41 @@ export interface Candidatos {
   afinacao: string;
 }
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FirestoreService {
-
   constructor(private firestore: Firestore) {}
 
-//// Igreja
+  //// Exames
+  async addExame(dados: Exames) {
+    const dadosRef = collection(this.firestore, 'exames');
+    const docRef = await addDoc(dadosRef, dados);
+
+    await setDoc(docRef, { ...dados, id: docRef.id }, { merge: true });
+
+    return docRef;
+  }
+
+  getExames() {
+    const dadosCollection = collection(this.firestore, 'exames');
+    return collectionData(dadosCollection, {
+      idField: 'id',
+    }) as Observable<Exames[]>;
+  }
+
+  async deleteExame(id: string) {
+    const dadosDocRef = doc(this.firestore, 'exames', id);
+    return deleteDoc(dadosDocRef);
+  }
+
+  async updateExame(id: string, dados: Partial<Exames>) {
+    const dadosDocRef = doc(this.firestore, 'exames', id);
+    return updateDoc(dadosDocRef, dados);
+  }
+  // Fim
+
+  //// Igreja
   // Adicionar
   async addIgrejas(dados: Igrejas) {
     const dadosfasRef = collection(this.firestore, 'igrejas');
@@ -75,7 +153,7 @@ export class FirestoreService {
 
   // Fim
 
-//// Setor
+  //// Setor
   // Adicionar
   async addSetor(dados: Setor) {
     const dadosfasRef = collection(this.firestore, 'setores');
@@ -109,8 +187,7 @@ export class FirestoreService {
 
   // Fim
 
-
-//// Instrumentos
+  //// Instrumentos
   // Adicionar
   async addInstrumento(dados: Instrumentos) {
     const dadosfasRef = collection(this.firestore, 'instrumentos');
@@ -143,8 +220,7 @@ export class FirestoreService {
   }
   // Fim
 
-
-//// Candidato
+  //// Candidato
   // Adicionar
   async addCandidato(dados: Candidatos) {
     const dadosfasRef = collection(this.firestore, 'candidatos');
@@ -177,7 +253,7 @@ export class FirestoreService {
   }
   // Fim
 
-//// Acessos
+  //// Acessos
   // Pesquisar
   getAcessos() {
     const dadosCollection = collection(this.firestore, 'usuarios');

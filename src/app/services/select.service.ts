@@ -11,18 +11,17 @@ export class SelectService {
   }
 }
 
-  export function upper(value: string): string {
-    return value?.toLocaleUpperCase('pt-BR') || '';
-  }
+export function upper(value: string): string {
+  return value?.toLocaleUpperCase('pt-BR') || '';
+}
 
- export const LISTA_TIPO_USUARIO =  [
-    { value: 'admin', label: 'Admin' },
-    { value: 'secretario', label: 'Secretário(a)' },
-    { value: 'regional', label: 'Regional' },
-    { value: 'encarregado', label: 'Encarregado' },
-    { value: 'usuario', label: 'Instrutor' },
-  ];
-
+export const LISTA_TIPO_USUARIO = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'secretario', label: 'Secretário(a)' },
+  { value: 'regional', label: 'Regional' },
+  { value: 'encarregado', label: 'Encarregado' },
+  { value: 'instrutor', label: 'Instrutor' },
+];
 
 export type Permissao = {
   read: boolean;
@@ -36,11 +35,18 @@ export type Modulo =
   | 'igrejas'
   | 'instrumentos'
   | 'setores'
+  | 'solicitacoes'
+  | 'exames'
   | 'usuarios';
 
 export type Acessos = Record<Modulo, Permissao>;
 
-export type Perfil = 'admin' | 'regional' | 'secretario' | 'encarregado' | 'usuario';
+export type Perfil =
+  | 'admin'
+  | 'regional'
+  | 'secretario'
+  | 'encarregado'
+  | 'instrutor';
 
 export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
   admin: {
@@ -49,6 +55,8 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       igrejas: { read: true, create: true, update: true, delete: true },
       instrumentos: { read: true, create: true, update: true, delete: true },
       setores: { read: true, create: true, update: true, delete: true },
+      solicitacoes: { read: true, create: true, update: true, delete: true },
+      exames: { read: true, create: true, update: true, delete: true },
       usuarios: { read: true, create: true, update: true, delete: true },
     },
   },
@@ -59,6 +67,8 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       igrejas: { read: true, create: false, update: false, delete: false },
       instrumentos: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
+      solicitacoes: { read: true, create: true, update: true, delete: true },
+      exames: { read: true, create: true, update: true, delete: true },
       usuarios: { read: true, create: true, update: true, delete: true },
     },
   },
@@ -69,6 +79,8 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       igrejas: { read: true, create: false, update: false, delete: false },
       instrumentos: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
+      solicitacoes: { read: true, create: true, update: true, delete: true },
+      exames: { read: true, create: true, update: true, delete: true },
       usuarios: { read: true, create: true, update: true, delete: true },
     },
   },
@@ -77,17 +89,31 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
     acessos: {
       candidatos: { read: true, create: true, update: true, delete: true },
       igrejas: { read: false, create: false, update: false, delete: false },
-      instrumentos: { read: false, create: false, update: false, delete: false },
+      instrumentos: {
+        read: false,
+        create: false,
+        update: false,
+        delete: false,
+      },
+      solicitacoes: { read: true, create: true, update: true, delete: true },
+      exames: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: false, create: false, update: false, delete: false },
     },
   },
 
-  usuario: {
+  instrutor: {
     acessos: {
       candidatos: { read: true, create: true, update: true, delete: false },
       igrejas: { read: false, create: false, update: false, delete: false },
-      instrumentos: { read: false, create: false, update: false, delete: false },
+      instrumentos: {
+        read: false,
+        create: false,
+        update: false,
+        delete: false,
+      },
+      solicitacoes: { read: true, create: false, update: false, delete: false },
+      exames: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: false, create: false, update: false, delete: false },
     },

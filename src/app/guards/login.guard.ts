@@ -1,24 +1,45 @@
-import { inject } from '@angular/core';
-import {
-  CanActivateFn,
-  Router
-} from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { combineLatest, map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { map, filter, take } from 'rxjs/operators';
 
 export const loginGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
+  const platformId = inject(PLATFORM_ID);
 
-  return auth.carregando$.pipe(
-    filter((carregando) => !carregando), // espera carregamento terminar
+  if (!isPlatformBrowser(platformId)) {
+    return true;
+  }
+
+  // Espera o estado de inicialização + usuário
+  return combineLatest([auth.authInicializado$, auth.currentUser$]).pipe(
     take(1),
-    map(() => {
-      if (auth.estaLogado) {
-        router.navigate(['/']);
+    map(([inicializado, userAuth]) => {
+      if (!inicializado) {
+        // ainda não inicializou, bloqueia navegação até emitir
         return false;
       }
-      return true;
-    })
+      return userAuth ? router.parseUrl('/home') : true;
+    }),
   );
 };
+
+
+// export const loginGuard: CanActivateFn = () => {
+//   const auth = inject(AuthService);
+//   const router = inject(Router);
+
+//   return auth.carregando$.pipe(
+//     filter((carregando) => !carregando), // espera carregamento terminar
+//     take(1),
+//     map(() => {
+//       if (auth.estaLogado) {
+//         router.navigate(['/']);
+//         return false;
+//       }
+//       return true;
+//     })
+//   );
+// };

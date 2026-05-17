@@ -1,56 +1,252 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './pages/home/home.component';
-import { AlunosComponent } from './pages/alunos/alunos.component';
-import { SetorComponent } from './pages/configuracoes/setor/setor.component';
-import { IgrejasComponent } from './pages/configuracoes/igrejas/igrejas.component';
-import { UsuariosComponent } from './pages/configuracoes/usuarios/usuarios.component';
 import { AuthGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
-import { PerfilGuard } from './guards/perfil.guard';
-import { LoginComponent } from './pages/login/login.component';
 import { PermissaoGuard } from './guards/permissao.guard';
-import { InstrumentosComponent } from './pages/configuracoes/instrumentos/instrumentos.component';
+import { AuthResolver } from './guards/auth.resolver';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent, canActivate: [loginGuard] },
-  { path: '', component: HomeComponent, canActivate: [AuthGuard] },
   {
-    path: 'setor',
-    component: SetorComponent,
-    canActivate: [AuthGuard, PermissaoGuard],
-    data: { tabela: 'setores', tipo: 'read' },
+    path: '',
+    resolve: { authReady: AuthResolver }, // resolver na raiz
+    children: [
+      { path: '', redirectTo: 'login', pathMatch: 'full' },
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./pages/login/login.component').then((m) => m.LoginComponent),
+        canActivate: [loginGuard],
+      },
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('./pages/home/home.component').then((m) => m.HomeComponent),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'setor',
+        loadComponent: () =>
+          import('./pages/configuracoes/setor/setor.component').then(
+            (m) => m.SetorComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'setores', tipo: 'read' },
+      },
+      {
+        path: 'instrumento',
+        loadComponent: () =>
+          import('./pages/configuracoes/instrumentos/instrumentos.component').then(
+            (m) => m.InstrumentosComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'instrumentos', tipo: 'read' },
+      },
+      {
+        path: 'igrejas',
+        loadComponent: () =>
+          import('./pages/configuracoes/igrejas/igrejas.component').then(
+            (m) => m.IgrejasComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'igrejas', tipo: 'read' },
+      },
+      {
+        path: 'usuarios',
+        loadComponent: () =>
+          import('./pages/configuracoes/usuarios/usuarios.component').then(
+            (m) => m.UsuariosComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'usuarios', tipo: 'read' },
+      },
+      {
+        path: 'alunos',
+        loadComponent: () =>
+          import('./pages/cadastros/alunos/alunos.component').then(
+            (m) => m.AlunosComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'candidatos', tipo: 'read' },
+      },
+      {
+        path: 'exames',
+        loadComponent: () =>
+          import('./pages/exames/exames/exames.component').then(
+            (m) => m.ExamesComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'exames', tipo: 'read' },
+      },
+      {
+        path: 'solicitacao',
+        loadComponent: () =>
+          import('./pages/exames/solicitacao/solicitacao.component').then(
+            (m) => m.SolicitacaoComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'exames', tipo: 'create' },
+      },
+      {
+        path: 'as',
+        loadComponent: () =>
+          import('./pages/configuracoes/alterar-senha/alterar-senha.component').then(
+            (m) => m.AlterarSenhaComponent,
+          ),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'sem-permissao',
+        loadComponent: () =>
+          import('./pages/sem-permissao/sem-permissao.component').then(
+            (m) => m.SemPermissaoComponent,
+          ),
+      },
+      { path: '**', redirectTo: 'home' },
+    ],
   },
-  {
-    path: 'instrumento',
-    component: InstrumentosComponent,
-    canActivate: [AuthGuard, PermissaoGuard],
-    data: { tabela: 'setores', tipo: 'read' },
-  },
-  {
-    path: 'igrejas',
-    component: IgrejasComponent,
-    canActivate: [AuthGuard, PermissaoGuard],
-    data: { tabela: 'setores', tipo: 'read' },
-  },
-  {
-    path: 'usuarios',
-    component: UsuariosComponent,
-    canActivate: [AuthGuard, PermissaoGuard],
-    data: { tabela: 'setores', tipo: 'read' },
-  },
-  {
-    path: 'alunos',
-    component: AlunosComponent,
-    canActivate: [AuthGuard, PermissaoGuard],
-    data: { tabela: 'setores', tipo: 'read' },
-  },
-  {
-    path: 'as',
-    loadComponent: () =>
-      import('./pages/configuracoes/alterar-senha/alterar-senha.component').then(
-        (m) => m.AlterarSenhaComponent,
-      ),
-    canActivate: [AuthGuard], // Apenas usuários logados
-  },
-  { path: '**', redirectTo: '' },
 ];
+
+
+  // {
+  //   path: '',
+  //   redirectTo: 'home',
+  //   pathMatch: 'full',
+  // },
+  // {
+  //   path: 'login',
+  //   loadComponent: () =>
+  //     import('./pages/login/login.component').then((m) => m.LoginComponent),
+  //   canActivate: [loginGuard], // bloqueia login se já estiver autenticado
+  // },
+  // {
+  //   path: 'home',
+  //   loadComponent: () =>
+  //     import('./pages/home/home.component').then((m) => m.HomeComponent),
+  //   canActivate: [AuthGuard], // exige login
+  // },
+  // {
+  //   path: '**',
+  //   redirectTo: 'home', // rota inválida leva para home
+  // },
+
+
+// import { Routes } from '@angular/router';
+// import { AuthGuard } from './guards/auth.guard';
+// import { loginGuard } from './guards/login.guard';
+// import { PermissaoGuard } from './guards/permissao.guard';
+
+// export const routes: Routes = [
+//   // { path: '', redirectTo: 'login', pathMatch: 'full' },
+//   {
+//     path: '',
+//     redirectTo: 'home',
+//     pathMatch: 'full',
+//   },
+//   {
+//     path: 'login',
+//     loadComponent: () =>
+//       import('./pages/login/login.component').then((m) => m.LoginComponent),
+//     canActivate: [loginGuard],
+//   },
+
+//   {
+//     path: 'home',
+//     loadComponent: () =>
+//       import('./pages/home/home.component').then((m) => m.HomeComponent),
+//     canActivate: [AuthGuard],
+//   },
+
+//   {
+//     path: 'setor',
+//     loadComponent: () =>
+//       import('./pages/configuracoes/setor/setor.component').then(
+//         (m) => m.SetorComponent,
+//       ),
+//     canActivate: [PermissaoGuard],
+//     data: { tabela: 'setores', tipo: 'read' },
+//   },
+
+//   {
+//     path: 'instrumento',
+//     loadComponent: () =>
+//       import('./pages/configuracoes/instrumentos/instrumentos.component').then(
+//         (m) => m.InstrumentosComponent,
+//       ),
+//     canActivate: [PermissaoGuard],
+//     data: { tabela: 'instrumentos', tipo: 'read' },
+//   },
+
+//   {
+//     path: 'igrejas',
+//     loadComponent: () =>
+//       import('./pages/configuracoes/igrejas/igrejas.component').then(
+//         (m) => m.IgrejasComponent,
+//       ),
+//     canActivate: [PermissaoGuard],
+//     data: { tabela: 'igrejas', tipo: 'read' },
+//   },
+
+//   {
+//     path: 'usuarios',
+//     loadComponent: () =>
+//       import('./pages/configuracoes/usuarios/usuarios.component').then(
+//         (m) => m.UsuariosComponent,
+//       ),
+//     canActivate: [PermissaoGuard],
+//     data: { tabela: 'usuarios', tipo: 'read' },
+//   },
+
+//   {
+//     path: 'alunos',
+//     loadComponent: () =>
+//       import('./pages/cadastros/alunos/alunos.component').then(
+//         (m) => m.AlunosComponent,
+//       ),
+//     canActivate: [PermissaoGuard],
+//     data: { tabela: 'candidatos', tipo: 'read' },
+//   },
+
+//   {
+//     path: 'exames',
+//     loadComponent: () =>
+//       import('./pages/exames/exames/exames.component').then(
+//         (m) => m.ExamesComponent,
+//       ),
+//     canActivate: [PermissaoGuard],
+//     data: { tabela: 'exames', tipo: 'read' },
+//   },
+
+//   {
+//     path: 'solicitacao',
+//     loadComponent: () =>
+//       import('./pages/exames/solicitacao/solicitacao.component').then(
+//         (m) => m.SolicitacaoComponent,
+//       ),
+//     canActivate: [PermissaoGuard],
+//     data: { tabela: 'exames', tipo: 'create' },
+//   },
+
+//   {
+//     path: 'as',
+//     loadComponent: () =>
+//       import('./pages/configuracoes/alterar-senha/alterar-senha.component').then(
+//         (m) => m.AlterarSenhaComponent,
+//       ),
+//     canActivate: [AuthGuard],
+//   },
+
+//   {
+//     path: 'sem-permissao',
+//     loadComponent: () =>
+//       import('./pages/sem-permissao/sem-permissao.component').then(
+//         (m) => m.SemPermissaoComponent,
+//       ),
+//   },
+//   // { path: '**', redirectTo: 'login' },
+// {
+//   path: '**',
+//   canActivate: [AuthGuard],
+//   loadComponent: () =>
+//     import('./pages/home/home.component').then((m) => m.HomeComponent),
+// }
+
+// ];

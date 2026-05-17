@@ -29,9 +29,9 @@ export class LoginComponent {
     try {
       await this.authService.login(this.email, this.senha);
 
-      console.log('👤 Usuário logado:', this.authService.usuario);
+      // console.log('👤 Usuário logado:', this.authService.usuario);
 
-      this.router.navigate(['/']);
+      this.router.navigate(['/home']);
     } catch (err) {
       console.error('❌ Erro ao fazer login', err);
       this.erro = 'Email ou senha inválidos';

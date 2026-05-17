@@ -3,7 +3,7 @@
     <div id="barra-titulo__container">
       <h2 style="font-weight: normal; color: grey">USUÁRIOS</h2>
     </div>
-    <div>
+    <div *ngIf="liberaCriar">
       <button class="buttons" (click)="buttonClick()">
         <i class="bi bi-file-earmark-plus"></i> Novo Usuário
       </button>
@@ -17,7 +17,7 @@
       [tamanhosColunas]="tamanhoColunas"
       [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
       [alinhamentosColunas]="alinhamentoColuna"
-      [mostrarAcoes]="true"
+      [mostrarAcoes]="liberaEditar"
       [acoesTabela]="acoes"
     />
   </div>
@@ -26,7 +26,7 @@
       <p>Acessos do Usuário:</p>
       <p>{{ usuarioSelecionado }}</p>
     </div>
-    <form [formGroup]="dadosForms" class="acessos-container" (ngSubmit)="salvar()">
+    <form [formGroup]="dadosForms" class="acessos-container" (ngSubmit)="salvar()">-
       <div formGroupName="acessos">
         <div class="input-select">
           <tcx-select
@@ -88,8 +88,8 @@
           padding: 10px;
         "
       >
-        <button class="buttons"  type="submit">Salvar</button>
-        <button class="buttons" (click)="cancel()">Cancelar</button>
+      <button class="buttons" type="button" (click)="cancel()">Cancelar</button>
+      <button class="buttons"  type="submit">Salvar</button>
       </div>
     </form>
   </div>
@@ -144,7 +144,7 @@
         </div>
       </div>
       <div class="linhaButton">
-        <div class="form__button" *ngIf="permissao">
+        <div class="form__button" *ngIf="liberaCriar">
           <tcx-button label="Salvar" type="submit"></tcx-button>
         </div>
       </div>

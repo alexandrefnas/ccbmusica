@@ -10,7 +10,11 @@ import {
 } from '@angular/forms';
 import { ModalComponent } from '../../../modal/modal/modal.component';
 import { ButtonComponent } from '../../../component/button/button.component';
-import { AuthService, Usuarios } from '../../../services/auth.service';
+import {
+  AuthService,
+  PermissoesCRUD,
+  Usuarios,
+} from '../../../services/auth.service';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { TableComponent } from '../../../component/table/table.component';
@@ -40,6 +44,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrl: './usuarios.component.css',
 })
 export class UsuariosComponent implements OnInit {
+
+
+  liberaEditar: boolean = false;
+  liberaCriar: boolean = false;
+  liberaDeletar: boolean = false;
+
   title = 'TITULO';
   mostrarModal = false;
   liberacoes = false;
@@ -49,23 +59,25 @@ export class UsuariosComponent implements OnInit {
     'igrejas',
     'instrumentos',
     'setores',
+    'solicitacoes',
+    'exames',
     'usuarios',
   ];
 
   nome = '';
   email = '';
   senha = '';
-  perfil: Perfil = 'usuario';
+  perfil: Perfil = 'instrutor';
   carregando = false;
   ignorarMudancaPerfil = false;
 
   listaTipoUsuario = LISTA_TIPO_USUARIO;
 
-  camposColunas = ['nome', 'email', 'perfil'];
+  camposColunas = ['nome', 'email', 'perfil2'];
   tituloColunas = {
     nome: 'Nome',
     email: 'Email',
-    perfil: 'Perfil',
+    perfil2: 'Perfil',
   };
 
   listaUsuarios: any[] = [];
@@ -73,11 +85,11 @@ export class UsuariosComponent implements OnInit {
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     // mostrarAcoes: 'center',
     nome: 'center',
-    perfil: 'center',
+    perfil2: 'center',
   };
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
-    perfil: 'center',
+    perfil2: 'center',
     mostrarAcoes: 'center',
     // valor: 'right',
   };
@@ -85,7 +97,7 @@ export class UsuariosComponent implements OnInit {
   tamanhoColunas = {
     nome: { width: '40%' },
     email: { width: '35%' },
-    perfil: { width: '25%' },
+    perfil2: { width: '25%' },
     // mostrarAcoes: { width: '75px' },
   };
 
@@ -95,7 +107,7 @@ export class UsuariosComponent implements OnInit {
       label: '✏️',
       descricao: 'Editar',
       classe: 'acao-editar',
-      visivel: (item: any) => true,
+      visivel: (item: any) => this.liberaEditar,
       callback: (item: any) => this.editar(item),
     },
     // {
@@ -110,76 +122,6 @@ export class UsuariosComponent implements OnInit {
 
   dadosForms: FormGroup;
 
-  // tipoPerfil: any = {
-  //   admin: {
-  //     acessos: {
-  //       candidatos: { read: true, create: true, update: true, delete: true },
-  //       igrejas: { read: true, create: true, update: true, delete: true },
-  //       instrumentos: { read: true, create: true, update: true, delete: true },
-  //       setores: { read: true, create: true, update: true, delete: true },
-  //       usuarios: { read: true, create: true, update: true, delete: true },
-  //     },
-  //   },
-
-  //   regional: {
-  //     acessos: {
-  //       candidatos: { read: true, create: true, update: true, delete: true },
-  //       igrejas: { read: true, create: false, update: false, delete: false },
-  //       instrumentos: {
-  //         read: true,
-  //         create: false,
-  //         update: false,
-  //         delete: false,
-  //       },
-  //       setores: { read: false, create: false, update: false, delete: false },
-  //       usuarios: { read: true, create: true, update: true, delete: true },
-  //     },
-  //   },
-  //   secretario: {
-  //     acessos: {
-  //       candidatos: { read: true, create: true, update: true, delete: true },
-  //       igrejas: { read: true, create: false, update: false, delete: false },
-  //       instrumentos: {
-  //         read: true,
-  //         create: false,
-  //         update: false,
-  //         delete: false,
-  //       },
-  //       setores: { read: false, create: false, update: false, delete: false },
-  //       usuarios: { read: true, create: true, update: true, delete: true },
-  //     },
-  //   },
-
-  //   encarregado: {
-  //     acessos: {
-  //       candidatos: { read: true, create: true, update: true, delete: true },
-  //       igrejas: { read: false, create: false, update: false, delete: false },
-  //       instrumentos: {
-  //         read: false,
-  //         create: false,
-  //         update: false,
-  //         delete: false,
-  //       },
-  //       setores: { read: false, create: false, update: false, delete: false },
-  //       usuarios: { read: false, create: false, update: false, delete: false },
-  //     },
-  //   },
-
-  //   usuario: {
-  //     acessos: {
-  //       candidatos: { read: true, create: true, update: true, delete: false },
-  //       igrejas: { read: false, create: false, update: false, delete: false },
-  //       instrumentos: {
-  //         read: false,
-  //         create: false,
-  //         update: false,
-  //         delete: false,
-  //       },
-  //       setores: { read: false, create: false, update: false, delete: false },
-  //       usuarios: { read: false, create: false, update: false, delete: false },
-  //     },
-  //   },
-  // };
 
   constructor(
     private fb: FormBuilder,
@@ -193,16 +135,35 @@ export class UsuariosComponent implements OnInit {
       senha: ['', Validators.required],
       perfil: ['', Validators.required],
     });
+    // this.liberaEditar = this.permissao('update');
+    // this.liberaCriar = this.permissao('create');
+    // this.liberaDeletar = this.permissao('delete');
+  }
+  // get permissao() {
+  //   return this.auth.temPermissao('usuarios', 'create');
+  // }
+
+  permissao(tipo: keyof PermissoesCRUD): boolean {
+    return this.auth.temPermissao('usuarios', tipo);
   }
 
-  get permissao() {
-    return this.auth.temPermissao('usuarios', 'create');
-  }
+  // ngOnInit(): void {
+  //   this.escutarMudancaPerfil();
+  //   this.carregarDados();
+  // }
 
-  ngOnInit(): void {
-    this.escutarMudancaPerfil();
-    this.carregarDados();
-  }
+ngOnInit(): void {
+  this.escutarMudancaPerfil();
+  this.carregarDados();
+
+  this.auth.currentUserData$.subscribe(() => {
+    this.liberaEditar = this.permissao('update');
+    this.liberaCriar = this.permissao('create');
+    this.liberaDeletar = this.permissao('delete');
+
+    this.cd.markForCheck();
+  });
+}
 
   private escutarMudancaPerfil() {
     this.getControl('perfil')?.valueChanges.subscribe((perfil: Perfil) => {
@@ -247,13 +208,28 @@ export class UsuariosComponent implements OnInit {
   //   });
   // }
 
+  // carregarDados(): void {
+  //   this.auth.getUsuario().subscribe((usuarios) => {
+  //     this.listaUsuarios = [...usuarios].sort((a, b) =>
+  //       (a.nome?.toLowerCase() || '').localeCompare(
+  //         b.nome?.toLowerCase() || '',
+  //       ),
+  //     );
+  //     this.cd.markForCheck(); // força atualização
+  //   });
+  // }
+
   carregarDados(): void {
     this.auth.getUsuario().subscribe((usuarios) => {
-      this.listaUsuarios = [...usuarios].sort((a, b) =>
-        (a.nome?.toLowerCase() || '').localeCompare(
-          b.nome?.toLowerCase() || '',
-        ),
-      );
+      this.listaUsuarios = usuarios
+        .map((u) => ({
+          ...u,
+          nome: (u.nome || '').toUpperCase(),
+          // perfil: (u.perfil || ''),
+          perfil2:(u.perfil || '').toUpperCase()
+        }))
+        .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+
       this.cd.markForCheck(); // força atualização
     });
   }
@@ -304,7 +280,7 @@ export class UsuariosComponent implements OnInit {
       this.nome = '';
       this.email = '';
       this.senha = '';
-      this.perfil = 'usuario';
+      this.perfil = 'instrutor';
       this.fecharModal();
     } catch (erro) {
       console.error(erro);
@@ -418,6 +394,18 @@ export class UsuariosComponent implements OnInit {
           delete: [false],
         }),
         setores: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        solicitacoes: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        exames: this.fb.group({
           read: [false],
           create: [false],
           update: [false],
