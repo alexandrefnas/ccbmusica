@@ -26,13 +26,34 @@
       <p>Acessos do Usuário:</p>
       <p>{{ usuarioSelecionado }}</p>
     </div>
-    <form [formGroup]="dadosForms" class="acessos-container" (ngSubmit)="salvar()">-
+    <form
+      [formGroup]="dadosForms"
+      class="acessos-container"
+      (ngSubmit)="salvar()"
+    >
       <div formGroupName="acessos">
+        <div class="input-select">
+          <tcx-select
+            id="setor"
+            [label]="'Setor'"
+            [placeholder]="''"
+            [niveisLimitados]="listaSetoresSelect"
+            [formControl]="getControl('idSetor')"
+          />
+          <tcx-select
+            [label]="'Comum'"
+            [placeholder]="''"
+            [niveisLimitados]="listaComunsSelect"
+            [formControl]="getControl('idComum')"
+          />
+        </div>
+
+        <div class="input-select"></div>
         <div class="input-select">
           <tcx-select
             [label]="'Perfil'"
             [placeholder]="''"
-            [niveisLimitados]="listaTipoUsuario"
+            [niveisLimitados]="listaTipoUsuarioPermitida"
             [formControl]="getControl('perfil')"
             [required]="true"
             errorMessage="Campo obrigatório"
@@ -88,8 +109,10 @@
           padding: 10px;
         "
       >
-      <button class="buttons" type="button" (click)="cancel()">Cancelar</button>
-      <button class="buttons"  type="submit">Salvar</button>
+        <button class="buttons" type="button" (click)="cancel()">
+          Cancelar
+        </button>
+        <button class="buttons" type="submit">Salvar</button>
       </div>
     </form>
   </div>
@@ -98,7 +121,7 @@
 <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
   <div class="templates__form">
     <form [formGroup]="dadosForms" (ngSubmit)="prepararDados()">
-      <div class="linha1">
+      <div class="linha">
         <div class="input-text" id="input-nome">
           <tcx-text
             label="Nome Completo"
@@ -131,12 +154,35 @@
           />
         </div>
       </div>
+      <div class="linha">
+        <div class="input-select">
+          <tcx-select
+            [label]="'Setor'"
+            [placeholder]="''"
+            [niveisLimitados]="listaSetoresSelect"
+            [formControl]="getControl('idSetor')"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
+
+      <div class="linha">
+        <div class="input-select">
+          <tcx-select
+            [label]="'Comum'"
+            [placeholder]="''"
+            [niveisLimitados]="listaComunsSelect"
+            [formControl]="getControl('idComum')"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
       <div class="linha4">
         <div class="input-select">
           <tcx-select
             [label]="'Perfil'"
             [placeholder]="''"
-            [niveisLimitados]="listaTipoUsuario"
+            [niveisLimitados]="listaTipoUsuarioPermitida"
             [formControl]="getControl('perfil')"
             [required]="true"
             errorMessage="Campo obrigatório"

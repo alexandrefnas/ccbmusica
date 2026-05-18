@@ -59,6 +59,8 @@ export interface Usuarios {
   nome: string;
   email: string;
   perfil: string;
+  idSetor?: string;
+  idComum?: string;
   acessos?: Acessos;
 }
 
@@ -235,6 +237,8 @@ export class AuthService {
 
     return await updateDoc(ref, {
       perfil: dados.perfil,
+      idSetor: dados.idSetor || '',
+      idComum: dados.idComum || '',
       acessos: dados.acessos,
     });
   }
@@ -282,6 +286,33 @@ export class AuthService {
     // limpa sessão secundária
     await signOut(secondaryAuth);
     return cred;
+  }
+
+  temAcessoAoRegistro(registro: any): boolean {
+    const usuario = this.authUserSnapshot;
+
+    if (!usuario) return false;
+
+    // Admin vê tudo
+    if (usuario.perfil === 'admin') return true;
+
+    // Regional e Secretário veem o setor inteiro
+    if (usuario.perfil === 'regional' || usuario.perfil === 'secretario') {
+      return registro.idSetor === usuario.idSetor;
+    }
+
+    // Encarregado e Instrutor veem somente a comum
+    if (usuario.perfil === 'encarregado' || usuario.perfil === 'instrutor') {
+      return registro.idComum === usuario.idComum;
+    }
+
+    return false;
+  }
+
+  podeVerRegistro(registro: any, tabela: keyof Acessos): boolean {
+    return (
+      this.temPermissao(tabela, 'read') && this.temAcessoAoRegistro(registro)
+    );
   }
 }
 

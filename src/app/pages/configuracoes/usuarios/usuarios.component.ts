@@ -27,6 +27,11 @@ import {
 } from '../../../services/select.service';
 import { confirmarAcao } from '../../../../shared/shared.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {
+  FirestoreService,
+  Igrejas,
+  Setor,
+} from '../../../services/firestore.service';
 
 @Component({
   selector: 'tcx-usuarios',
@@ -44,8 +49,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrl: './usuarios.component.css',
 })
 export class UsuariosComponent implements OnInit {
-
-
   liberaEditar: boolean = false;
   liberaCriar: boolean = false;
   liberaDeletar: boolean = false;
@@ -54,6 +57,13 @@ export class UsuariosComponent implements OnInit {
   mostrarModal = false;
   liberacoes = false;
   dadosParaEditar: any | null = null;
+
+  listaSetores: Setor[] = [];
+  listaComuns: Igrejas[] = [];
+
+  listaSetoresSelect: { value: string; label: string }[] = [];
+  listaComunsSelect: { value: string; label: string }[] = [];
+  listaTipoUsuarioPermitida: any[] = [];
   modulos: Modulo[] = [
     'candidatos',
     'igrejas',
@@ -107,7 +117,7 @@ export class UsuariosComponent implements OnInit {
       label: '✏️',
       descricao: 'Editar',
       classe: 'acao-editar',
-      visivel: (item: any) => this.liberaEditar,
+      visivel: (item: any) => this.podeEditarUsuario(item),
       callback: (item: any) => this.editar(item),
     },
     // {
@@ -122,18 +132,20 @@ export class UsuariosComponent implements OnInit {
 
   dadosForms: FormGroup;
 
-
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
     private cd: ChangeDetectorRef,
     private snackBar: MatSnackBar,
+    private firestoreService: FirestoreService,
   ) {
     this.dadosForms = this.fb.group({
       nome: ['', Validators.required],
       email: ['', Validators.required],
       senha: ['', Validators.required],
       perfil: ['', Validators.required],
+      idSetor: [''],
+      idComum: [''],
     });
     // this.liberaEditar = this.permissao('update');
     // this.liberaCriar = this.permissao('create');
@@ -152,18 +164,20 @@ export class UsuariosComponent implements OnInit {
   //   this.carregarDados();
   // }
 
-ngOnInit(): void {
-  this.escutarMudancaPerfil();
-  this.carregarDados();
+  ngOnInit(): void {
+    this.escutarMudancaPerfil();
+    this.carregarDados();
+    this.escutarMudancaSetor();
+    this.carregarSetoresEComuns();
 
-  this.auth.currentUserData$.subscribe(() => {
-    this.liberaEditar = this.permissao('update');
-    this.liberaCriar = this.permissao('create');
-    this.liberaDeletar = this.permissao('delete');
-
-    this.cd.markForCheck();
-  });
-}
+    this.auth.currentUserData$.subscribe(() => {
+      this.liberaEditar = this.permissao('update');
+      this.liberaCriar = this.permissao('create');
+      this.liberaDeletar = this.permissao('delete');
+      this.carregarPerfisPermitidos();
+      this.cd.markForCheck();
+    });
+  }
 
   private escutarMudancaPerfil() {
     this.getControl('perfil')?.valueChanges.subscribe((perfil: Perfil) => {
@@ -181,6 +195,20 @@ ngOnInit(): void {
       this.dadosForms.patchValue({
         acessos: JSON.parse(JSON.stringify(config.acessos)),
       });
+    });
+  }
+
+  escutarMudancaSetor(): void {
+    this.getControl('idSetor').valueChanges.subscribe((idSetor) => {
+      this.listaComunsSelect = this.listaComuns
+        .filter((c) => c.idSetor === idSetor)
+        .map((c) => ({
+          value: c.id!,
+          label: c.nomeCongregacao,
+        }));
+
+      this.dadosForms.patchValue({ idComum: '' }, { emitEvent: false });
+      this.cd.markForCheck();
     });
   }
 
@@ -222,16 +250,53 @@ ngOnInit(): void {
   carregarDados(): void {
     this.auth.getUsuario().subscribe((usuarios) => {
       this.listaUsuarios = usuarios
+        .filter((usuario) => this.auth.podeVerRegistro(usuario, 'usuarios'))
         .map((u) => ({
           ...u,
           nome: (u.nome || '').toUpperCase(),
           // perfil: (u.perfil || ''),
-          perfil2:(u.perfil || '').toUpperCase()
+          perfil2: (u.perfil || '').toUpperCase(),
         }))
         .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
       this.cd.markForCheck(); // força atualização
     });
+  }
+
+  carregarSetoresEComuns(): void {
+    this.firestoreService.getSetor().subscribe((setores) => {
+      this.listaSetores = setores;
+
+      this.listaSetoresSelect = setores.map((s) => ({
+        value: s.id!,
+        label: s.nomeSetor,
+      }));
+    });
+
+    this.firestoreService.getIgrejas().subscribe((igrejas) => {
+      this.listaComuns = igrejas;
+    });
+  }
+
+  carregarPerfisPermitidos(): void {
+    const logado = this.auth.usuario;
+
+    if (!logado) {
+      this.listaTipoUsuarioPermitida = [];
+      return;
+    }
+
+    if (logado.perfil === 'admin') {
+      this.listaTipoUsuarioPermitida = this.listaTipoUsuario;
+      return;
+    }
+
+    this.listaTipoUsuarioPermitida = this.listaTipoUsuario.filter(
+      (perfil) =>
+        perfil.value !== 'admin' &&
+        perfil.value !== 'regional' &&
+        perfil.value !== 'secretario',
+    );
   }
 
   prepararDados() {
@@ -244,8 +309,46 @@ ngOnInit(): void {
     this.email = this.dadosForms.value.email;
     this.senha = this.dadosForms.value.senha;
     this.perfil = this.dadosForms.value.perfil;
-
+    const idSetor = this.dadosForms.value.idSetor;
+    const idComum = this.dadosForms.value.idComum;
     this.onSalvar();
+  }
+
+  podeVerUsuario(usuario: any): boolean {
+    const logado = this.auth.usuario;
+
+    if (!logado) return false;
+
+    // Só admin vê usuários admin
+    if (usuario.perfil === 'admin') {
+      return logado.perfil === 'admin';
+    }
+
+    // Admin vê todos
+    if (logado.perfil === 'admin') return true;
+
+    // Demais seguem a regra de setor/comum
+    return this.auth.podeVerRegistro(usuario, 'usuarios');
+  }
+
+  podeEditarUsuario(usuario: any): boolean {
+    const logado = this.auth.usuario;
+
+    if (!logado) return false;
+
+    if (!this.liberaEditar) return false;
+
+    // Só admin edita admin, regional e secretário
+    if (
+      usuario.perfil === 'admin' ||
+      usuario.perfil === 'regional' ||
+      usuario.perfil === 'secretario'
+    ) {
+      return logado.perfil === 'admin';
+    }
+
+    // Demais usuários seguem acesso por setor/comum
+    return this.auth.temAcessoAoRegistro(usuario);
   }
 
   async onSalvar() {
@@ -272,6 +375,8 @@ ngOnInit(): void {
       await this.auth.cadastrar(this.email, this.senha, {
         nome: upper(this.nome),
         perfil: this.perfil,
+        idSetor: this.dadosForms.value.idSetor || '',
+        idComum: this.dadosForms.value.idComum || '',
         acessos: perfilConfig.acessos,
       });
 
@@ -374,6 +479,8 @@ ngOnInit(): void {
     this.dadosParaEditar = { ...select };
     this.dadosForms = this.fb.group({
       perfil: [''],
+      idSetor: [''],
+      idComum: [''],
       acessos: this.fb.group({
         candidatos: this.fb.group({
           read: [false],
@@ -421,14 +528,25 @@ ngOnInit(): void {
     });
 
     this.escutarMudancaPerfil();
+    this.escutarMudancaSetor();
 
     this.dadosForms.patchValue(
       {
         perfil: select.perfil,
+        idSetor: select.idSetor || '',
+        idComum: select.idComum || '',
         acessos: select.acessos ?? TIPO_PERFIL[select.perfil as Perfil].acessos,
       },
       { emitEvent: false }, // 💥 ISSO resolve tudo
     );
+
+    this.listaComunsSelect = this.listaComuns
+      .filter((c) => c.idSetor === select.idSetor)
+      .map((c) => ({
+        value: c.id!,
+        label: c.nomeCongregacao,
+      }));
+
     // libera depois de carregar
     setTimeout(() => {
       this.ignorarMudancaPerfil = false;

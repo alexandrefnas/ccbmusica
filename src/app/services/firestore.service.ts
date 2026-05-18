@@ -80,6 +80,7 @@ export interface Candidatos {
   id?: string;
   nomeAluno: string;
   dataNascimento: string;
+  idSetor: string;
   idComum: string;
   idInstrumento: string;
   afinacao: string;

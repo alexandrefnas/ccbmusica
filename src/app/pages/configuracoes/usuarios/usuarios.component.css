@@ -66,7 +66,7 @@
   box-sizing: border-box;
 }
 
-.linha1,
+.linha,
 .linha2,
 .linha3,
 .linha4 {
@@ -97,9 +97,15 @@
 }
 
 .input-select {
+  display: flex;
+  flex-direction: row;
   width: 100%;
+  gap: 10px;
 }
 
+#setor {
+  width: 65%;
+}
 /* .buttons {
   display: flex;
   justify-content: center;
@@ -284,6 +290,14 @@ color: white; */
   .label {
     font-size: 12px;
     font-weight: normal;
+  }
+
+  .input-select {
+    flex-direction: column;
+  }
+
+  #setor {
+    width: 100%;
   }
 }
 
