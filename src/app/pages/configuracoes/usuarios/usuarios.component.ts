@@ -212,9 +212,41 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
+  usuarioEhAdmin(): boolean {
+    return this.auth.usuario?.perfil === 'admin';
+  }
+
   buttonClick(): void {
-    this.title = 'TESTE';
+    this.title = 'Cadastrar Usuário';
     this.mostrarModal = true;
+
+    const usuario = this.auth.usuario;
+
+    if (!usuario) return;
+
+    if (usuario.perfil !== 'admin') {
+      this.dadosForms.patchValue({
+        idSetor: usuario.idSetor || '',
+      });
+
+      this.listaComunsSelect = this.listaComuns
+        .filter((c) =>
+          this.auth.temAcessoAoRegistro({
+            idSetor: c.idSetor,
+            idComum: c.id,
+          }),
+        )
+        .map((c) => ({
+          value: c.id!,
+          label: c.nomeCongregacao,
+        }));
+
+      if (usuario.perfil === 'encarregado' || usuario.perfil === 'instrutor') {
+        this.dadosForms.patchValue({
+          idComum: usuario.idComum || '',
+        });
+      }
+    }
   }
 
   // carregarDados(): void {
@@ -359,6 +391,19 @@ export class UsuariosComponent implements OnInit {
 
     const usuarioLogado = this.auth.usuario;
 
+    let idSetorFinal = this.dadosForms.value.idSetor || '';
+    let idComumFinal = this.dadosForms.value.idComum || '';
+
+    if (usuarioLogado?.perfil !== 'admin') {
+      idSetorFinal = usuarioLogado?.idSetor || '';
+
+      if (
+        usuarioLogado?.perfil === 'encarregado' ||
+        usuarioLogado?.perfil === 'instrutor'
+      ) {
+        idComumFinal = usuarioLogado?.idComum || '';
+      }
+    }
     // só admin pode criar admin
     if (this.perfil === 'admin' && usuarioLogado?.perfil !== 'admin') {
       alert('Você não tem permissão para criar administradores.');
@@ -375,8 +420,8 @@ export class UsuariosComponent implements OnInit {
       await this.auth.cadastrar(this.email, this.senha, {
         nome: upper(this.nome),
         perfil: this.perfil,
-        idSetor: this.dadosForms.value.idSetor || '',
-        idComum: this.dadosForms.value.idComum || '',
+        idSetor: idSetorFinal,
+        idComum: idComumFinal,
         acessos: perfilConfig.acessos,
       });
 
@@ -563,6 +608,7 @@ export class UsuariosComponent implements OnInit {
 
   fecharModal() {
     this.mostrarModal = false;
+    this.dadosForms.reset();
   }
 
   cancel() {
