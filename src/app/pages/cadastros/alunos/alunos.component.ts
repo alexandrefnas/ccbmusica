@@ -16,6 +16,7 @@ import { SelectComponent } from '../../../component/inputs/select/select.compone
 import { DataComponent } from '../../../component/inputs/data/data.component';
 import {
   confirmarAcao,
+  converterISOParaBR,
   formatarDataString,
 } from '../../../../shared/shared.service';
 import { TableComponent } from '../../../component/table/table.component';
@@ -72,7 +73,7 @@ export class AlunosComponent implements OnInit {
   title = 'TITULO';
   mostrarModal = false;
 
-  listaIgreja: { value: string; label: string }[] = [];
+  listaIgreja: { value: string; label: string; idSetor: string }[] = [];
   listaInstrumento: { value: string; label: string }[] = [];
   listaAfinacao = [
     { value: 'DÓ', label: 'DÓ' },
@@ -156,10 +157,17 @@ export class AlunosComponent implements OnInit {
 
   ngOnInit(): void {
     this.firestoreService.getIgrejas().subscribe((lista: Igrejas[]) => {
-      // this.listaLinks = lista;
-      this.listaIgreja = lista.map((l) => ({
+      const igrejasFiltradas = lista.filter((igreja) =>
+        this.auth.temAcessoAoRegistro({
+          idSetor: igreja.idSetor,
+          idComum: igreja.id,
+        }),
+      );
+
+      this.listaIgreja = igrejasFiltradas.map((l) => ({
         value: l.id!,
         label: l.nomeCongregacao?.toUpperCase() || '',
+        idSetor: l.idSetor,
       }));
     });
     this.firestoreService
@@ -202,22 +210,26 @@ export class AlunosComponent implements OnInit {
       this.firestoreService.getIgrejas(),
       this.firestoreService.getInstrumento(),
     ]).subscribe(([candidato, igrejas, instrumento]) => {
-      const dadosCandidatos = candidato.map((c) => {
-        const igrejaFiltro = igrejas.find((s) => s.id === c.idComum);
-        const InstrumentoFiltro = instrumento.find(
-          (i) => i.id === c.idInstrumento,
-        );
-        return {
-          ...c,
-          nomeAluno: c.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
-          nomeComum:
-            igrejaFiltro?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
-            'NÃO CADASTRADO',
-          nomeInstrumento:
-            InstrumentoFiltro?.nomeInstrumento?.toLocaleUpperCase('pt-BR') ||
-            'SEM INSTRUMENTO',
-        };
-      });
+      const dadosCandidatos = candidato
+        .filter((c) => this.auth.podeVerRegistro(c, 'candidatos'))
+        .map((c) => {
+          const igrejaFiltro = igrejas.find((s) => s.id === c.idComum);
+          const InstrumentoFiltro = instrumento.find(
+            (i) => i.id === c.idInstrumento,
+          );
+
+          return {
+            ...c,
+            nomeAluno: c.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
+            dataNascimento: `${converterISOParaBR(c.dataNascimento || '')} (${this.calcularIdade(c.dataNascimento)} anos)`,
+            nomeComum:
+              igrejaFiltro?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
+              'NÃO CADASTRADO',
+            nomeInstrumento:
+              InstrumentoFiltro?.nomeInstrumento?.toLocaleUpperCase('pt-BR') ||
+              'SEM INSTRUMENTO',
+          };
+        });
 
       // Ordenar se necessário
       this.dados = [...dadosCandidatos].sort((a, b) =>
@@ -230,6 +242,15 @@ export class AlunosComponent implements OnInit {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
       alert('Formulário inválido. Preencha os campos obrigatórios.');
+      return;
+    }
+
+    const igrejaSelecionada = this.listaIgreja.find(
+      (i) => i.value === this.dadosForms.value.idComum,
+    );
+
+    if (!igrejaSelecionada) {
+      alert('Comum inválida.');
       return;
     }
 
@@ -249,6 +270,7 @@ export class AlunosComponent implements OnInit {
     const baseData = {
       ...this.dadosForms.value,
       nomeAluno: upper(this.dadosForms.value.nomeAluno),
+      idSetor: igrejaSelecionada.idSetor,
       afinacao: upper(this.dadosForms.value.afinacao),
       vozAlternativa: upper(this.dadosForms.value.vozAlternativa),
       dataNascimento: date,
@@ -299,6 +321,23 @@ export class AlunosComponent implements OnInit {
         this.fecharModal();
       });
     }
+  }
+
+  calcularIdade(data: string): number {
+    if (!data) return 0;
+
+    const hoje = new Date();
+    const nascimento = new Date(data);
+
+    let idade = hoje.getFullYear() - nascimento.getFullYear();
+
+    const mes = hoje.getMonth() - nascimento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+      idade--;
+    }
+
+    return idade;
   }
 
   buttonClick(): void {
