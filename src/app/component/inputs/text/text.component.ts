@@ -17,6 +17,7 @@ import { NgControl } from '@angular/forms';
   styleUrl: './text.component.css',
 })
 export class TextComponent {
+  @Input() type: string = 'text';
   @Input() label: string = '';
   @Input() required: boolean = false;
   @Input() placeholder: string = '';
@@ -65,7 +66,7 @@ export class TextComponent {
       },
       (err) => {
         console.error('Erro ao copiar:', err);
-      }
+      },
     );
   }
 
@@ -113,8 +114,8 @@ export class TextComponent {
 
       const formElements = Array.from(
         document.querySelectorAll<HTMLElement>(
-          'input, select, textarea, button, [tabindex]:not([tabindex="-1"])'
-        )
+          'input, select, textarea, button, [tabindex]:not([tabindex="-1"])',
+        ),
       ).filter((el) => !el.hasAttribute('disabled'));
 
       const index = formElements.indexOf(event.target as HTMLElement);

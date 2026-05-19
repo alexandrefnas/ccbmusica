@@ -266,9 +266,20 @@ export class IgrejasComponent implements OnInit {
       });
 
       // Ordenar se necessário
-      this.dados = [...dadosIgrejas].sort((a, b) =>
-        (a.nomeCongregacao || '').localeCompare(b.nomeCongregacao || ''),
-      );
+      this.dados = [...dadosIgrejas].sort((a, b) => {
+        const setorA = (a.nomeSetor || '').toLowerCase();
+        const setorB = (b.nomeSetor || '').toLowerCase();
+
+        // primeiro ordena por setor
+        const compararSetor = setorA.localeCompare(setorB);
+
+        if (compararSetor !== 0) {
+          return compararSetor;
+        }
+
+        // depois por igreja
+        return (a.nomeCongregacao || '').localeCompare(b.nomeCongregacao || '');
+      });
     });
   }
 

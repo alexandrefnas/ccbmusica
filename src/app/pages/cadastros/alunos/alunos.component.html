@@ -38,6 +38,16 @@
           />
         </div>
       </div>
+      <div class="linha" *ngIf="usuarioEhAdmin()">
+        <div class="input-select">
+          <tcx-select
+            [label]="'Setor'"
+            [placeholder]="''"
+            [niveisLimitados]="listaSetor"
+            [formControl]="getControl('idSetor')"
+          />
+        </div>
+      </div>
       <div class="linha">
         <div class="input-select" id="input-congregacao">
           <tcx-select
@@ -68,7 +78,7 @@
             [required]="false"
           />
         </div>
-        <div class="input-select" id="input-afinacao">
+        <div id="input-afinacao">
           <tcx-select
             [label]="'Afinação'"
             [placeholder]="''"

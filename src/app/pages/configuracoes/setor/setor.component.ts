@@ -140,9 +140,31 @@ export class SetorComponent implements OnInit {
   carregarDados(): void {
     this.firestoreService.getSetor().subscribe((setores) => {
       const setoresOrdenados = setores.sort((a, b) => {
-        const nomeA = a.nomeSetor?.toLowerCase() || '';
-        const nomeB = b.nomeSetor?.toLowerCase() || '';
-        return nomeA.localeCompare(nomeB);
+        // UF
+        const estadoA = (a.estado || '').toLowerCase();
+        const estadoB = (b.estado || '').toLowerCase();
+
+        const compararEstado = estadoA.localeCompare(estadoB);
+
+        if (compararEstado !== 0) {
+          return compararEstado;
+        }
+
+        // Cidade
+        const cidadeA = (a.nomeCidade || '').toLowerCase();
+        const cidadeB = (b.nomeCidade || '').toLowerCase();
+
+        const compararCidade = cidadeA.localeCompare(cidadeB);
+
+        if (compararCidade !== 0) {
+          return compararCidade;
+        }
+
+        // Setor
+        const setorA = (a.nomeSetor || '').toLowerCase();
+        const setorB = (b.nomeSetor || '').toLowerCase();
+
+        return setorA.localeCompare(setorB);
       });
 
       this.dados = [...setoresOrdenados]; // 🔁 Cria nova referência
@@ -272,6 +294,4 @@ export class SetorComponent implements OnInit {
     this.mostrarModal = false;
     this.dadosForms.reset();
   }
-
-
 }

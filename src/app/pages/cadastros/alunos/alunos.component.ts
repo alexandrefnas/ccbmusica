@@ -56,6 +56,7 @@ export class AlunosComponent implements OnInit {
     this.dadosForms = this.fb.group({
       nomeAluno: ['', Validators.required],
       dataNascimento: ['', Validators.required],
+      idSetor: [''],
       idComum: ['', Validators.required],
       idInstrumento: [''],
       afinacao: [''],
@@ -69,8 +70,9 @@ export class AlunosComponent implements OnInit {
   liberaEditar: boolean = false;
   liberaCriar: boolean = false;
   liberaDeletar: boolean = false;
-
-  title = 'TITULO';
+  listaSetor: { value: string; label: string }[] = [];
+  listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
+  title = '';
   mostrarModal = false;
 
   listaIgreja: { value: string; label: string; idSetor: string }[] = [];
@@ -155,8 +157,96 @@ export class AlunosComponent implements OnInit {
     return this.auth.temPermissao('candidatos', tipo);
   }
 
+  usuarioEhAdmin(): boolean {
+    return this.auth.usuario?.perfil === 'admin';
+  }
+
+  // ngOnInit(): void {
+  //   this.firestoreService.getSetor().subscribe((setores) => {
+  //     this.listaSetor = setores
+  //       .map((s) => ({
+  //         value: s.id!,
+  //         label: s.nomeSetor,
+  //       }))
+  //       .sort((a, b) => a.label.localeCompare(b.label));
+  //   });
+  //   this.escutarMudancaSetor();
+  //   this.firestoreService.getIgrejas().subscribe((lista: Igrejas[]) => {
+  //     const usuario = this.auth.usuario;
+
+  //     // ADMIN
+  //     if (usuario?.perfil === 'admin') {
+  //       this.listaIgrejaTodas = lista.map((l) => ({
+  //         value: l.id!,
+  //         label: l.nomeCongregacao?.toUpperCase() || '',
+  //         idSetor: l.idSetor,
+  //       }));
+
+  //       // começa vazio até selecionar setor
+  //       this.listaIgreja = [];
+
+  //       return;
+  //     }
+
+  //     // DEMAIS PERFIS
+  //     const igrejasFiltradas = lista.filter((igreja) =>
+  //       this.auth.temAcessoAoRegistro({
+  //         idSetor: igreja.idSetor,
+  //         idComum: igreja.id,
+  //       }),
+  //     );
+
+  //     this.listaIgreja = igrejasFiltradas.map((l) => ({
+  //       value: l.id!,
+  //       label: l.nomeCongregacao?.toUpperCase() || '',
+  //       idSetor: l.idSetor,
+  //     }));
+  //   });
+  //   this.firestoreService
+  //     .getInstrumento()
+  //     .subscribe((lista: Instrumentos[]) => {
+  //       // this.listaLinks = lista;
+  //       this.listaInstrumento = lista.map((l) => ({
+  //         value: l.id!,
+  //         label: l.nomeInstrumento?.toUpperCase() || '',
+  //       }));
+  //     });
+
+  //   this.carregarDados();
+  // }
+
   ngOnInit(): void {
+    const usuario = this.auth.usuario;
+
+    // SOMENTE ADMIN
+    if (usuario?.perfil === 'admin') {
+      this.firestoreService.getSetor().subscribe((setores) => {
+        this.listaSetor = setores
+          .map((s) => ({
+            value: s.id!,
+            label: s.nomeSetor,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label));
+      });
+
+      this.escutarMudancaSetor();
+    }
+
     this.firestoreService.getIgrejas().subscribe((lista: Igrejas[]) => {
+      // ADMIN
+      if (usuario?.perfil === 'admin') {
+        this.listaIgrejaTodas = lista.map((l) => ({
+          value: l.id!,
+          label: l.nomeCongregacao?.toUpperCase() || '',
+          idSetor: l.idSetor,
+        }));
+
+        this.listaIgreja = [];
+
+        return;
+      }
+
+      // DEMAIS PERFIS
       const igrejasFiltradas = lista.filter((igreja) =>
         this.auth.temAcessoAoRegistro({
           idSetor: igreja.idSetor,
@@ -170,10 +260,10 @@ export class AlunosComponent implements OnInit {
         idSetor: l.idSetor,
       }));
     });
+
     this.firestoreService
       .getInstrumento()
       .subscribe((lista: Instrumentos[]) => {
-        // this.listaLinks = lista;
         this.listaInstrumento = lista.map((l) => ({
           value: l.id!,
           label: l.nomeInstrumento?.toUpperCase() || '',
@@ -191,6 +281,22 @@ export class AlunosComponent implements OnInit {
     return control as FormControl;
   }
 
+  escutarMudancaSetor(): void {
+    this.getControl('idSetor').valueChanges.subscribe((idSetor) => {
+      if (this.auth.usuario?.perfil !== 'admin') return;
+
+      this.listaIgreja = this.listaIgrejaTodas
+        .filter((i) => i.idSetor === idSetor)
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+      this.dadosForms.patchValue(
+        {
+          idComum: '',
+        },
+        { emitEvent: false },
+      );
+    });
+  }
   // carregarDadosOFF(): void {
   //   this.firestoreService.getCandidato().subscribe((date) => {
   //     const dateOrdenados = date.sort((a, b) => {
@@ -353,11 +459,17 @@ export class AlunosComponent implements OnInit {
     this.dadosForms.patchValue({
       nomeAluno: select.nomeAluno || '',
       dataNascimento: select.dataNascimento || '',
+      idSetor: select.idSetor || '',
       idComum: select.idComum || '',
       idInstrumento: select.idInstrumento || '',
       afinacao: select.afinacao || '',
     });
-    console.log(this.dadosParaEditar);
+    if (this.auth.usuario?.perfil === 'admin') {
+      this.listaIgreja = this.listaIgrejaTodas.filter(
+        (i) => i.idSetor === select.idSetor,
+      );
+    }
+    // console.log(this.dadosParaEditar);
   }
 
   async excluir(dados: Candidatos): Promise<void> {
