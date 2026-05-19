@@ -15,6 +15,15 @@ export function upper(value: string): string {
   return value?.toLocaleUpperCase('pt-BR') || '';
 }
 
+export type Modulo =
+  | 'candidatos'
+  | 'igrejas'
+  | 'instrumentos'
+  | 'setores'
+  | 'solicitacoes'
+  | 'exames'
+  | 'usuarios';
+
 export const LISTA_TIPO_USUARIO = [
   { value: 'admin', label: 'Admin' },
   { value: 'secretario', label: 'Secretário(a)' },
@@ -29,15 +38,6 @@ export type Permissao = {
   update: boolean;
   delete: boolean;
 };
-
-export type Modulo =
-  | 'candidatos'
-  | 'igrejas'
-  | 'instrumentos'
-  | 'setores'
-  | 'solicitacoes'
-  | 'exames'
-  | 'usuarios';
 
 export type Acessos = Record<Modulo, Permissao>;
 

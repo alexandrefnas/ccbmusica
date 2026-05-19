@@ -37,6 +37,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { firebaseConfig } from '../../firebase.config';
+// import { Functions, httpsCallable } from '@angular/fire/functions';
 
 export interface PermissoesCRUD {
   read: boolean;
@@ -76,7 +77,7 @@ export class AuthService {
 
   public authInicializado$ = new BehaviorSubject<boolean>(false);
   public usuarioLogado$ = new BehaviorSubject<Usuarios | null>(null);
-
+  // private functions = inject(Functions);
   // currentUser$ = user(this.auth);
   // currentUser$ = authState(this.auth).pipe(
   //   shareReplay({ bufferSize: 1, refCount: true }),
@@ -265,26 +266,52 @@ export class AuthService {
   }
 
   // ⚙️ Cadastro com perfil
+  // async cadastrar(email: string, senha: string, dadosExtras: any) {
+  //   const secondaryApp =
+  //     getApps().find((app) => app.name === 'secondary') ||
+  //     initializeApp(firebaseConfig, 'secondary');
+
+  //   const secondaryAuth = getAuth(secondaryApp);
+  //   const cred = await createUserWithEmailAndPassword(
+  //     secondaryAuth,
+  //     email,
+  //     senha,
+  //   );
+  //   const ref = doc(this.firestore, 'usuarios', cred.user.uid);
+  //   await setDoc(ref, {
+  //     uid: cred.user.uid,
+  //     email,
+  //     ...dadosExtras,
+  //   });
+
+  //   // limpa sessão secundária
+  //   await signOut(secondaryAuth);
+  //   return cred;
+  // }
+
   async cadastrar(email: string, senha: string, dadosExtras: any) {
     const secondaryApp =
       getApps().find((app) => app.name === 'secondary') ||
       initializeApp(firebaseConfig, 'secondary');
 
     const secondaryAuth = getAuth(secondaryApp);
+
     const cred = await createUserWithEmailAndPassword(
       secondaryAuth,
       email,
       senha,
     );
+
     const ref = doc(this.firestore, 'usuarios', cred.user.uid);
+
     await setDoc(ref, {
       uid: cred.user.uid,
-      email,
+      email: email.toLowerCase().trim(),
       ...dadosExtras,
     });
 
-    // limpa sessão secundária
     await signOut(secondaryAuth);
+
     return cred;
   }
 

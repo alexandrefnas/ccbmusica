@@ -282,16 +282,15 @@ export class UsuariosComponent implements OnInit {
   carregarDados(): void {
     this.auth.getUsuario().subscribe((usuarios) => {
       this.listaUsuarios = usuarios
-        .filter((usuario) => this.auth.podeVerRegistro(usuario, 'usuarios'))
+        .filter((usuario) => this.podeVerUsuario(usuario))
         .map((u) => ({
           ...u,
           nome: (u.nome || '').toUpperCase(),
-          // perfil: (u.perfil || ''),
           perfil2: (u.perfil || '').toUpperCase(),
         }))
         .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
-      this.cd.markForCheck(); // força atualização
+      this.cd.markForCheck();
     });
   }
 
@@ -338,7 +337,8 @@ export class UsuariosComponent implements OnInit {
       return;
     }
     this.nome = this.dadosForms.value.nome;
-    this.email = this.dadosForms.value.email;
+    // this.email = this.dadosForms.value.email;
+    this.email = (this.dadosForms.value.email || '').toLowerCase().trim();
     this.senha = this.dadosForms.value.senha;
     this.perfil = this.dadosForms.value.perfil;
     const idSetor = this.dadosForms.value.idSetor;
@@ -351,16 +351,14 @@ export class UsuariosComponent implements OnInit {
 
     if (!logado) return false;
 
-    // Só admin vê usuários admin
-    if (usuario.perfil === 'admin') {
-      return logado.perfil === 'admin';
-    }
-
     // Admin vê todos
     if (logado.perfil === 'admin') return true;
 
-    // Demais seguem a regra de setor/comum
-    return this.auth.podeVerRegistro(usuario, 'usuarios');
+    // Só admin vê usuários admin
+    if (usuario.perfil === 'admin') return false;
+
+    // Demais veem usuários do próprio setor
+    return usuario.idSetor === logado.idSetor;
   }
 
   podeEditarUsuario(usuario: any): boolean {

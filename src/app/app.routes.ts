@@ -100,7 +100,7 @@ export const routes: Routes = [
             (m) => m.SemPermissaoComponent,
           ),
       },
-      { path: '**', redirectTo: 'home' },
+      { path: '**', redirectTo: 'login' },
     ],
   },
 ];

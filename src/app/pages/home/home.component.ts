@@ -29,7 +29,6 @@ import { TableComponent } from '../../component/tableOFF/table.component';
     DecimalComponent,
     SelectComponent,
     TextSelectComponent,
-    TableComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
