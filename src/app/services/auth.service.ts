@@ -30,11 +30,14 @@ import {
 } from 'firebase/auth';
 import {
   BehaviorSubject,
+  filter,
+  firstValueFrom,
   map,
   Observable,
   of,
   shareReplay,
   switchMap,
+  take,
 } from 'rxjs';
 import { firebaseConfig } from '../../firebase.config';
 // import { Functions, httpsCallable } from '@angular/fire/functions';
@@ -53,6 +56,7 @@ export interface Acessos {
   setores?: PermissoesCRUD;
   usuarios?: PermissoesCRUD;
   exames?: PermissoesCRUD;
+  solicitacoes?: PermissoesCRUD;
 }
 
 export interface Usuarios {
@@ -77,42 +81,9 @@ export class AuthService {
 
   public authInicializado$ = new BehaviorSubject<boolean>(false);
   public usuarioLogado$ = new BehaviorSubject<Usuarios | null>(null);
-  // private functions = inject(Functions);
-  // currentUser$ = user(this.auth);
-  // currentUser$ = authState(this.auth).pipe(
-  //   shareReplay({ bufferSize: 1, refCount: true }),
-  // );
 
-  // currentUserData$: Observable<Usuarios | null> = this.currentUser$.pipe(
-  //   switchMap((userAuth) => {
-  //     if (!userAuth) return of(null);
-
-  //     const ref = doc(this.firestore, 'usuarios', userAuth.uid);
-  //     return docData(ref, { idField: 'uid' }) as Observable<Usuarios>;
-  //   }),
-  //   shareReplay({ bufferSize: 1, refCount: true }),
-  // );
   currentUser$: Observable<any>;
   currentUserData$: Observable<any | null>;
-  // constructor() {
-  //   this.currentUser$ = user(this.auth);
-  //   // this.currentUserData$.subscribe((usuario) => {
-  //   //   this.authUserSnapshot = usuario;
-  //   // });
-
-  //   this.currentUserData$ = this.currentUser$.pipe(
-  //     switchMap((userAuth) => {
-  //       if (!userAuth) return of(null);
-  //       const ref = doc(this.firestore, 'usuarios', userAuth.uid);
-  //       return docData(ref, { idField: 'uid' });
-  //     }),
-  //     shareReplay({ bufferSize: 1, refCount: true }),
-  //   );
-
-  //   this.currentUserData$.subscribe((u) => {
-  //     this.authUserSnapshot = u;
-  //   });
-  // }
 
   constructor() {
     this.currentUser$ = authState(this.auth).pipe(
@@ -127,7 +98,7 @@ export class AuthService {
           return of(null);
         }
 
-        console.log('APP iniciou em:', window.location.pathname);
+        // console.log('APP iniciou em:', window.location.pathname);
         const ref = doc(this.firestore, 'usuarios', userAuth.uid);
 
         return docData(ref, { idField: 'uid' }).pipe(
@@ -194,14 +165,36 @@ export class AuthService {
     }
   }
 
+  // async logout() {
+  //   if (typeof window !== 'undefined') {
+  //     localStorage.removeItem('authCache');
+  //   }
+  //   await signOut(this.auth);
+
+  //   this.authUserSnapshot = null;
+  //   this.router.navigate(['/login']);
+  // }
+
   async logout() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('authCache');
     }
-    await signOut(this.auth);
 
     this.authUserSnapshot = null;
-    this.router.navigate(['/login']);
+    this.authInicializado$.next(false);
+
+    await signOut(this.auth);
+
+    await firstValueFrom(
+      this.currentUser$.pipe(
+        filter((user) => user === null),
+        take(1),
+      ),
+    );
+
+    this.authInicializado$.next(true);
+
+    await this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
   get estaLogado(): boolean {

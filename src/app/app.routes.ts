@@ -83,7 +83,7 @@ export const routes: Routes = [
             (m) => m.SolicitacaoComponent,
           ),
         canActivate: [PermissaoGuard],
-        data: { tabela: 'exames', tipo: 'create' },
+        data: { tabela: 'solicitacoes', tipo: 'read' },
       },
       {
         path: 'as',

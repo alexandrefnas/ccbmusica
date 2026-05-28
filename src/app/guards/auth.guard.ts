@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { combineLatest, map, take } from 'rxjs';
+import { combineLatest, filter, map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const AuthGuard: CanActivateFn = () => {
@@ -8,15 +8,33 @@ export const AuthGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   return combineLatest([auth.authInicializado$, auth.currentUser$]).pipe(
+    filter(([inicializado]) => inicializado === true),
     take(1),
-    map(([inicializado, userAuth]) => {
-      if (!inicializado) {
-        return false; // segura até inicializar
-      }
+    map(([_, userAuth]) => {
       return userAuth ? true : router.parseUrl('/login');
     }),
   );
 };
+
+// import { inject } from '@angular/core';
+// import { CanActivateFn, Router } from '@angular/router';
+// import { combineLatest, map, take } from 'rxjs';
+// import { AuthService } from '../services/auth.service';
+
+// export const AuthGuard: CanActivateFn = () => {
+//   const auth = inject(AuthService);
+//   const router = inject(Router);
+
+//   return combineLatest([auth.authInicializado$, auth.currentUser$]).pipe(
+//     take(1),
+//     map(([inicializado, userAuth]) => {
+//       if (!inicializado) {
+//         return false; // segura até inicializar
+//       }
+//       return userAuth ? true : router.parseUrl('/login');
+//     }),
+//   );
+// };
 
 
 

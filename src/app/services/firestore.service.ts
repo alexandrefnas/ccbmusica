@@ -93,11 +93,23 @@ export class FirestoreService {
   constructor(private firestore: Firestore) {}
 
   //// Exames
+  // async addExame(dados: Exames) {
+  //   const dadosRef = collection(this.firestore, 'exames');
+  //   const docRef = await addDoc(dadosRef, dados);
+
+  //   await setDoc(docRef, { ...dados, id: docRef.id }, { merge: true });
+
+  //   return docRef;
+  // }
   async addExame(dados: Exames) {
     const dadosRef = collection(this.firestore, 'exames');
-    const docRef = await addDoc(dadosRef, dados);
 
-    await setDoc(docRef, { ...dados, id: docRef.id }, { merge: true });
+    const docRef = doc(dadosRef);
+
+    await setDoc(docRef, {
+      ...dados,
+      id: docRef.id,
+    });
 
     return docRef;
   }

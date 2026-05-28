@@ -21,7 +21,7 @@
 }
 
 .demonstrativo__tabela td {
-  padding: 8px;
+  padding: 15px;
   /* border-bottom: 1px solid #ddd; */
   cursor: pointer;
 }
@@ -58,6 +58,15 @@
 .grupo__submenu span {
   display: flex;
   justify-content: center;
+}
+
+.submenu {
+  background-color: #f2f0f0;
+}
+.submenu td {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
 tr {
