@@ -3,7 +3,7 @@
     <div id="barra-titulo__container">
       <h2 style="font-weight: normal; color: grey">INSTRUMENTOS</h2>
     </div>
-    <div class="button-container">
+    <div class="button-container" *ngIf="liberaCriar">
       <!-- <tcx-button label="Novo" (click)="buttonClick()"></tcx-button> -->
       <button class="buttons" (click)="buttonClick()">
         <i class="bi bi-file-earmark-plus"></i> Novo
@@ -15,7 +15,7 @@
       [colunas]="camposColunas"
       [colunasLabels]="tituloColunas"
       [dados]="dados"
-      [mostrarAcoes]="true"
+      [mostrarAcoes]="liberaAcoes"
       [acoesTabela]="acoes"
       [tamanhosColunas]="tamanhoColunas"
       [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"

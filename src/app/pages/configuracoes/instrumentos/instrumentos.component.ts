@@ -19,6 +19,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { confirmarAcao } from '../../../../shared/shared.service';
 import { TableComponent } from '../../../component/table/table.component';
 import { upper } from '../../../services/select.service';
+import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 
 @Component({
   selector: 'tcx-instrumentos',
@@ -37,6 +38,10 @@ import { upper } from '../../../services/select.service';
 export class InstrumentosComponent {
   title = 'TITULO';
   mostrarModal = false;
+
+  liberaCriar = false;
+  liberaEditar = false;
+  liberaDeletar = false;
 
   listaFamilia = [
     { value: 'CORDAS', label: 'CORDAS' },
@@ -99,14 +104,14 @@ export class InstrumentosComponent {
       label: '✏️',
       descricao: 'Editar',
       classe: 'acao-editar',
-      visivel: (item: any) => true,
+      visivel: () => this.liberaEditar,
       callback: (item: any) => this.editar(item),
     },
     {
       label: '🗑️',
       descricao: 'Excluir',
       classe: 'acao-excluir',
-      visivel: (item: any) => true,
+      visivel: () => this.liberaDeletar,
       callback: (item: any) => this.excluir(item),
     },
   ];
@@ -118,6 +123,7 @@ export class InstrumentosComponent {
 
   constructor(
     private fb: FormBuilder,
+    private auth: AuthService,
     private firestoreService: FirestoreService,
     private snackBar: MatSnackBar,
   ) {
@@ -130,7 +136,14 @@ export class InstrumentosComponent {
     this.carregarDados();
   }
 
+  permissao(tipo: keyof PermissoesCRUD): boolean {
+    return this.auth.temPermissao('instrumentos', tipo);
+  }
+
   ngOnInit(): void {
+    this.liberaEditar = this.permissao('update');
+    this.liberaCriar = this.permissao('create');
+    this.liberaDeletar = this.permissao('delete');
     this.carregarDados();
   }
 
@@ -199,6 +212,10 @@ export class InstrumentosComponent {
       throw new Error(`FormControl '${controlName}' não existe no FormGroup`);
     }
     return control as FormControl;
+  }
+
+  get liberaAcoes(): boolean {
+    return this.liberaCriar || this.liberaEditar || this.liberaDeletar;
   }
 
   buttonClick(): void {

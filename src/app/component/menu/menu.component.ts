@@ -36,34 +36,67 @@ export class MenuComponent {
   mostrarGrupo1 = false;
   mostrarGrupo2 = true;
 
-  cadastros = [{ label: 'Alunos', rota: '/alunos', tabela: 'candidatos' }];
-
-  // avaliacoes = [
-  //   { label: 'Solicitação', rota: '/setores' },
-  //   { label: 'Testes', rota: '/usuarios' },
-  //   { label: 'Notas', rota: '/igrejas' },
-  // ];
+  cadastros = [
+    {
+      label: 'Alunos',
+      rota: '/alunos',
+      tabela: 'candidatos',
+      icon: 'bi bi-person-vcard',
+    },
+  ];
 
   manutencao = [
-    { label: 'Alterar Senha', rota: '/as', tabela: 'usuarios' },
-    // { label: 'Alunos', rota: '/alunos', tabela: 'candidatos' },
-    { label: 'Instrumentos', rota: '/instrumento', tabela: 'instrumentos' },
-    { label: 'Igrejas', rota: '/igrejas', tabela: 'igrejas' },
-    { label: 'Setores', rota: '/setor', tabela: 'setores' },
-    { label: 'Usuários', rota: '/usuarios', tabela: 'usuarios' },
+    {
+      label: 'Alterar Senha',
+      rota: '/as',
+      tabela: 'usuarios',
+      icon: 'bi bi-key',
+    },
+    {
+      label: 'Instrumentos',
+      rota: '/instrumento',
+      tabela: 'instrumentos',
+      icon: 'bi bi-music-note-beamed',
+    },
+    {
+      label: 'Igrejas',
+      rota: '/igrejas',
+      tabela: 'igrejas',
+      icon: 'bi bi-building',
+    },
+    {
+      label: 'Setores',
+      rota: '/setor',
+      tabela: 'setores',
+      icon: 'bi bi-diagram-3',
+    },
+    {
+      label: 'Usuários',
+      rota: '/usuarios',
+      tabela: 'usuarios',
+      icon: 'bi bi-people',
+    },
   ];
 
   avaliacoes = [
-    { label: 'Solicitações', rota: '/solicitacao', tabela: 'exames' },
-    { label: 'Exames', rota: '/exames', tabela: 'exames' },
-    // { label: 'Testes', rota: '/usuarios', tabela: '' },
-    // { label: 'Notas', rota: '/igrejas', tabela: '' },
+    {
+      label: 'Solicitações',
+      rota: '/solicitacao',
+      tabela: 'solicitacoes',
+      icon: 'bi bi-clipboard-check',
+    },
+    {
+      label: 'Exames',
+      rota: '/exames',
+      tabela: 'exames',
+      icon: 'bi bi-journal-text',
+    },
   ];
 
   constructor(
     private router: Router,
     private auth: AuthService,
-    private appcomp: AppComponent
+    private appcomp: AppComponent,
   ) {}
 
   menuHome(): void {

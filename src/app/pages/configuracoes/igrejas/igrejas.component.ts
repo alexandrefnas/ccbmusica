@@ -57,9 +57,14 @@ export class IgrejasComponent implements OnInit {
     // this.liberaDeletar = this.permissao('delete');
   }
 
-  liberaEditar: boolean = false;
-  liberaCriar: boolean = true;
-  liberaDeletar: boolean = false;
+liberaEditar = false;
+liberaCriar = false;
+liberaDeletar = false;
+
+get liberaAcoes(): boolean {
+  return this.liberaEditar || this.liberaDeletar;
+}
+
   title = 'TITULO';
   mostrarModal = false;
 
