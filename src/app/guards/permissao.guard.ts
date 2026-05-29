@@ -26,11 +26,11 @@ export class PermissaoGuard implements CanActivate {
         return this.auth.currentUserData$.pipe(
           take(1),
           map((usuario) => {
-            console.log('ROTA:', route.routeConfig?.path);
-            console.log('TABELA:', tabela);
-            console.log('TIPO:', tipo);
-            console.log('USUARIO:', usuario);
-            console.log('ACESSO:', usuario.acessos?.[tabela]);
+            // console.log('ROTA:', route.routeConfig?.path);
+            // console.log('TABELA:', tabela);
+            // console.log('TIPO:', tipo);
+            // console.log('USUARIO:', usuario);
+            // console.log('ACESSO:', usuario.acessos?.[tabela]);
             if (!usuario) {
               return this.router.parseUrl('/login');
             }

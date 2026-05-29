@@ -240,7 +240,6 @@ export class AlunosComponent implements OnInit {
           label: l.nomeCongregacao?.toUpperCase() || '',
           idSetor: l.idSetor,
         }));
-        console.log('LilistaIgrejaTodass', this.listaIgrejaTodas);
         this.listaIgreja = [];
 
         return;
@@ -253,13 +252,11 @@ export class AlunosComponent implements OnInit {
           idComum: igreja.id,
         }),
       );
-  console.log('igrejasFiltradas', igrejasFiltradas);
   this.listaIgreja = igrejasFiltradas.map((l) => ({
     value: l.id!,
     label: l.nomeCongregacao?.toUpperCase() || '',
     idSetor: l.idSetor,
   }));
-  console.log('listaIgreja', this.listaIgreja);
 
     });
 
@@ -342,7 +339,6 @@ export class AlunosComponent implements OnInit {
         .filter((c) => this.auth.podeVerRegistro(c, 'candidatos'))
         .map((c) => {
           const igrejaFiltro = igrejas.find((s) => s.id === c.idComum);
-            console.log('listaIgreja2', igrejaFiltro);
 
           const InstrumentoFiltro = instrumento.find(
             (i) => i.id === c.idInstrumento,
