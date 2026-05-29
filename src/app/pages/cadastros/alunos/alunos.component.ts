@@ -17,6 +17,7 @@ import { DataComponent } from '../../../component/inputs/data/data.component';
 import {
   confirmarAcao,
   converterISOParaBR,
+  dataBRparaISO,
   formatarDataString,
 } from '../../../../shared/shared.service';
 import { TableComponent } from '../../../component/table/table.component';
@@ -89,7 +90,7 @@ export class AlunosComponent implements OnInit {
   // DADOS TABELA
   camposColunas = [
     'nomeAluno',
-    'dataNascimento',
+    'dataNascimentoExibicao',
     'nomeComum',
     'nomeInstrumento',
     'afinacao',
@@ -97,7 +98,7 @@ export class AlunosComponent implements OnInit {
 
   tituloColunas = {
     nomeAluno: 'Aluno',
-    dataNascimento: 'Data Nascimento',
+    dataNascimentoExibicao: 'Data Nascimento',
     nomeComum: 'Comum',
     nomeInstrumento: 'Instrumento',
     afinacao: 'Afinação',
@@ -108,7 +109,7 @@ export class AlunosComponent implements OnInit {
 
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'center',
-    dataNascimento: 'center',
+    dataNascimentoExibicao: 'center',
     nomeComum: 'center',
     nomeInstrumento: 'center',
     afinacao: 'center',
@@ -116,7 +117,7 @@ export class AlunosComponent implements OnInit {
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'left',
-    dataNascimento: 'center',
+    dataNascimentoExibicao: 'center',
     nomeComum: 'left',
     nomeInstrumento: 'left',
     afinacao: 'center',
@@ -124,7 +125,7 @@ export class AlunosComponent implements OnInit {
 
   tamanhoColunas = {
     nomeAluno: { width: '45%' },
-    dataNascimento: { width: '15%' },
+    dataNascimentoExibicao: { width: '15%' },
     nomeComum: { width: '20%' },
     nomeInstrumento: { width: '20%' },
     afinacao: { width: '20%' },
@@ -252,21 +253,28 @@ export class AlunosComponent implements OnInit {
           idComum: igreja.id,
         }),
       );
-  this.listaIgreja = igrejasFiltradas.map((l) => ({
-    value: l.id!,
-    label: l.nomeCongregacao?.toUpperCase() || '',
-    idSetor: l.idSetor,
-  }));
-
+      this.listaIgreja = igrejasFiltradas.map((l) => ({
+        value: l.id!,
+        label: l.nomeCongregacao?.toUpperCase() || '',
+        idSetor: l.idSetor,
+      }));
     });
 
     this.firestoreService
       .getInstrumento()
       .subscribe((lista: Instrumentos[]) => {
-        this.listaInstrumento = lista.map((l) => ({
-          value: l.id!,
-          label: l.nomeInstrumento?.toUpperCase() || '',
-        }));
+        this.listaInstrumento = lista
+          .sort((a, b) =>
+            (a.nomeInstrumento || '').localeCompare(
+              b.nomeInstrumento || '',
+              'pt-BR',
+              { sensitivity: 'base' },
+            ),
+          )
+          .map((l) => ({
+            value: l.id!,
+            label: l.nomeInstrumento?.toUpperCase() || '',
+          }));
       });
 
     this.carregarDados();
@@ -306,11 +314,13 @@ export class AlunosComponent implements OnInit {
     this.getControl('idComum').valueChanges.subscribe((idIgreja) => {
       if (this.auth.usuario?.perfil === 'admin') return;
 
-      const igrejaSelecionada = this.listaIgreja.find(i => i.value === idIgreja);
+      const igrejaSelecionada = this.listaIgreja.find(
+        (i) => i.value === idIgreja,
+      );
       if (igrejaSelecionada) {
         // Vincula o idSetor da igreja diretamente no formulário do aluno
         this.dadosForms.patchValue({
-          idSetor: igrejaSelecionada.idSetor
+          idSetor: igrejaSelecionada.idSetor,
         });
       }
     });
@@ -347,7 +357,8 @@ export class AlunosComponent implements OnInit {
           return {
             ...c,
             nomeAluno: c.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
-            dataNascimento: `${converterISOParaBR(c.dataNascimento || '')} (${this.calcularIdade(c.dataNascimento)} anos)`,
+            dataNascimento: c.dataNascimento || '',
+            dataNascimentoExibicao: `${converterISOParaBR(c.dataNascimento || '')} (${this.calcularIdade(c.dataNascimento)} anos)`,
             nomeComum:
               igrejaFiltro?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
               'NÃO CADASTRADO',
@@ -475,7 +486,7 @@ export class AlunosComponent implements OnInit {
     this.title = 'Editar Instrumentos';
     this.mostrarModal = true;
     this.dadosParaEditar = { ...select };
-
+    console.log(select.dataNascimento);
     this.dadosForms.patchValue({
       nomeAluno: select.nomeAluno || '',
       dataNascimento: select.dataNascimento || '',

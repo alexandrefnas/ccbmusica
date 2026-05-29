@@ -28,6 +28,10 @@ export function formatarDataString(data: Date): string {
   return `${ano}-${mes}-${dia}`;
 }
 
+export function dataBRparaISO(data: string): string {
+  const [dia, mes, ano] = data.split('/');
+  return `${ano}-${mes}-${dia}`;
+}
 export function confirmarAcao(mensagem: string): boolean {
   return window.confirm(mensagem);
 }
