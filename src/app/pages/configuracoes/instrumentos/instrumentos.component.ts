@@ -20,10 +20,12 @@ import { confirmarAcao } from '../../../../shared/shared.service';
 import { TableComponent } from '../../../component/table/table.component';
 import { upper } from '../../../services/select.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'tcx-instrumentos',
   imports: [
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     ModalComponent,

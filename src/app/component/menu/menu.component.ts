@@ -34,7 +34,7 @@ import { AppComponent } from '../../app.component';
 export class MenuComponent {
   mostrarGrupo = false;
   mostrarGrupo1 = false;
-  mostrarGrupo2 = true;
+  mostrarGrupo2 = false;
 
   cadastros = [
     {

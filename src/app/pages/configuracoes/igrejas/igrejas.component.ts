@@ -51,19 +51,19 @@ export class IgrejasComponent implements OnInit {
       idSetor: ['', Validators.required],
       localizacao: [''],
     });
-    this.carregarDados();
+    // this.carregarDados();
     // this.liberaEditar = this.permissao('update');
     // this.liberaCriar = this.permissao('create');
     // this.liberaDeletar = this.permissao('delete');
   }
 
-liberaEditar = false;
-liberaCriar = false;
-liberaDeletar = false;
+  liberaEditar = false;
+  liberaCriar = false;
+  liberaDeletar = false;
 
-get liberaAcoes(): boolean {
-  return this.liberaEditar || this.liberaDeletar;
-}
+  get liberaAcoes(): boolean {
+    return this.liberaEditar || this.liberaDeletar;
+  }
 
   title = 'TITULO';
   mostrarModal = false;
@@ -140,6 +140,26 @@ get liberaAcoes(): boolean {
   //   this.carregarDados();
   // }
 
+  // ngOnInit(): void {
+  //   this.auth.getUsuarioAtualObservable().subscribe((user) => {
+  //     if (!user) return;
+
+  //     this.liberaEditar = this.permissao('update');
+  //     this.liberaCriar = this.permissao('create');
+  //     this.liberaDeletar = this.permissao('delete');
+  //   });
+  //   // console.log('cheguei 1');
+  //   this.firestoreService.getSetor().subscribe((lista: Setor[]) => {
+  //     this.listaSetor = lista.map((l) => ({
+  //       value: l.id!,
+  //       label: l.nomeSetor,
+  //     }));
+  //     // console.log('SETOR:', this.listaSetor);
+  //     // console.log('cheguei 2');
+  //   });
+  //   this.carregarDados();
+  // }
+
   ngOnInit(): void {
     this.auth.getUsuarioAtualObservable().subscribe((user) => {
       if (!user) return;
@@ -147,17 +167,30 @@ get liberaAcoes(): boolean {
       this.liberaEditar = this.permissao('update');
       this.liberaCriar = this.permissao('create');
       this.liberaDeletar = this.permissao('delete');
+
+      this.carregarSetores();
+      this.carregarDados();
     });
-    // console.log('cheguei 1');
+  }
+
+  carregarSetores(): void {
     this.firestoreService.getSetor().subscribe((lista: Setor[]) => {
-      this.listaSetor = lista.map((l) => ({
-        value: l.id!,
-        label: l.nomeSetor,
-      }));
-      // console.log('SETOR:', this.listaSetor);
-      // console.log('cheguei 2');
+      const setoresFiltrados =
+        this.auth.usuario?.perfil === 'admin'
+          ? lista
+          : lista.filter((setor) =>
+              this.auth.temAcessoAoRegistro({
+                idSetor: setor.id,
+              }),
+            );
+
+      this.listaSetor = setoresFiltrados
+        .map((l) => ({
+          value: l.id!,
+          label: l.nomeSetor,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
     });
-    this.carregarDados();
   }
 
   getControl(controlName: string): FormControl {
@@ -257,32 +290,71 @@ get liberaAcoes(): boolean {
   //   });
   // }
 
+  // carregarDados(): void {
+  //   combineLatest([
+  //     this.firestoreService.getIgrejas(),
+  //     this.firestoreService.getSetor(),
+  //   ]).subscribe(([igrejas, setores]) => {
+  //     const dadosIgrejas = igrejas.map((igreja) => {
+  //       const setorFiltro = setores.find((c) => c.id === igreja.idSetor);
+  //       return {
+  //         ...igreja,
+  //         nomeSetor: setorFiltro?.nomeSetor ?? 'Setor não encontrado',
+  //       };
+  //     });
+
+  //     // Ordenar se necessário
+  //     this.dados = [...dadosIgrejas].sort((a, b) => {
+  //       const setorA = (a.nomeSetor || '').toLowerCase();
+  //       const setorB = (b.nomeSetor || '').toLowerCase();
+
+  //       // primeiro ordena por setor
+  //       const compararSetor = setorA.localeCompare(setorB);
+
+  //       if (compararSetor !== 0) {
+  //         return compararSetor;
+  //       }
+
+  //       // depois por igreja
+  //       return (a.nomeCongregacao || '').localeCompare(b.nomeCongregacao || '');
+  //     });
+  //   });
+  // }
+
   carregarDados(): void {
     combineLatest([
       this.firestoreService.getIgrejas(),
       this.firestoreService.getSetor(),
     ]).subscribe(([igrejas, setores]) => {
-      const dadosIgrejas = igrejas.map((igreja) => {
+      const igrejasFiltradas =
+        this.auth.usuario?.perfil === 'admin'
+          ? igrejas
+          : igrejas.filter((igreja) =>
+              this.auth.temAcessoAoRegistro({
+                idSetor: igreja.idSetor,
+                idComum: igreja.id,
+              }),
+            );
+
+      const dadosIgrejas = igrejasFiltradas.map((igreja) => {
         const setorFiltro = setores.find((c) => c.id === igreja.idSetor);
+
         return {
           ...igreja,
           nomeSetor: setorFiltro?.nomeSetor ?? 'Setor não encontrado',
         };
       });
 
-      // Ordenar se necessário
       this.dados = [...dadosIgrejas].sort((a, b) => {
         const setorA = (a.nomeSetor || '').toLowerCase();
         const setorB = (b.nomeSetor || '').toLowerCase();
 
-        // primeiro ordena por setor
         const compararSetor = setorA.localeCompare(setorB);
 
         if (compararSetor !== 0) {
           return compararSetor;
         }
 
-        // depois por igreja
         return (a.nomeCongregacao || '').localeCompare(b.nomeCongregacao || '');
       });
     });

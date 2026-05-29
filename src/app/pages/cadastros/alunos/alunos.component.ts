@@ -61,10 +61,10 @@ export class AlunosComponent implements OnInit {
       idInstrumento: [''],
       afinacao: [''],
     });
-    this.carregarDados();
-    this.liberaEditar = this.permissao('update');
-    this.liberaCriar = this.permissao('create');
-    this.liberaDeletar = this.permissao('delete');
+    // this.carregarDados();
+    // this.liberaEditar = this.permissao('update');
+    // this.liberaCriar = this.permissao('create');
+    // this.liberaDeletar = this.permissao('delete');
   }
 
   liberaEditar: boolean = false;
@@ -240,7 +240,7 @@ export class AlunosComponent implements OnInit {
           label: l.nomeCongregacao?.toUpperCase() || '',
           idSetor: l.idSetor,
         }));
-
+        console.log('LilistaIgrejaTodass', this.listaIgrejaTodas);
         this.listaIgreja = [];
 
         return;
@@ -253,12 +253,14 @@ export class AlunosComponent implements OnInit {
           idComum: igreja.id,
         }),
       );
+  console.log('igrejasFiltradas', igrejasFiltradas);
+  this.listaIgreja = igrejasFiltradas.map((l) => ({
+    value: l.id!,
+    label: l.nomeCongregacao?.toUpperCase() || '',
+    idSetor: l.idSetor,
+  }));
+  console.log('listaIgreja', this.listaIgreja);
 
-      this.listaIgreja = igrejasFiltradas.map((l) => ({
-        value: l.id!,
-        label: l.nomeCongregacao?.toUpperCase() || '',
-        idSetor: l.idSetor,
-      }));
     });
 
     this.firestoreService
@@ -271,6 +273,11 @@ export class AlunosComponent implements OnInit {
       });
 
     this.carregarDados();
+    this.liberaEditar = this.permissao('update');
+    this.liberaCriar = this.permissao('create');
+    this.liberaDeletar = this.permissao('delete');
+
+    this.escutarMudancaIgreja();
   }
 
   getControl(controlName: string): FormControl {
@@ -297,6 +304,21 @@ export class AlunosComponent implements OnInit {
       );
     });
   }
+
+  escutarMudancaIgreja(): void {
+    this.getControl('idComum').valueChanges.subscribe((idIgreja) => {
+      if (this.auth.usuario?.perfil === 'admin') return;
+
+      const igrejaSelecionada = this.listaIgreja.find(i => i.value === idIgreja);
+      if (igrejaSelecionada) {
+        // Vincula o idSetor da igreja diretamente no formulário do aluno
+        this.dadosForms.patchValue({
+          idSetor: igrejaSelecionada.idSetor
+        });
+      }
+    });
+  }
+
   // carregarDadosOFF(): void {
   //   this.firestoreService.getCandidato().subscribe((date) => {
   //     const dateOrdenados = date.sort((a, b) => {
@@ -320,6 +342,8 @@ export class AlunosComponent implements OnInit {
         .filter((c) => this.auth.podeVerRegistro(c, 'candidatos'))
         .map((c) => {
           const igrejaFiltro = igrejas.find((s) => s.id === c.idComum);
+            console.log('listaIgreja2', igrejaFiltro);
+
           const InstrumentoFiltro = instrumento.find(
             (i) => i.id === c.idInstrumento,
           );

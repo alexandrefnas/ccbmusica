@@ -329,10 +329,19 @@ export class AuthService {
     return false;
   }
 
+  // podeVerRegistro(registro: any, tabela: keyof Acessos): boolean {
+  //   return (
+  //     this.temPermissao(tabela, 'read') && this.temAcessoAoRegistro(registro)
+  //   );
+  // }
+
   podeVerRegistro(registro: any, tabela: keyof Acessos): boolean {
-    return (
-      this.temPermissao(tabela, 'read') && this.temAcessoAoRegistro(registro)
-    );
+    // precisa ter permissão de leitura na tabela
+    const temPermissao = this.temPermissao(tabela, 'read');
+    // precisa respeitar o vínculo do usuário (comum/setor/admin)
+    const temAcesso = this.temAcessoAoRegistro(registro);
+
+    return temPermissao && temAcesso;
   }
 }
 

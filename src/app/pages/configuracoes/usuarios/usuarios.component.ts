@@ -64,7 +64,17 @@ export class UsuariosComponent implements OnInit {
   listaSetoresSelect: { value: string; label: string }[] = [];
   listaComunsSelect: { value: string; label: string }[] = [];
   listaTipoUsuarioPermitida: any[] = [];
-  modulos: Modulo[] = [
+  // modulos: Modulo[] = [
+  //   'candidatos',
+  //   'igrejas',
+  //   'instrumentos',
+  //   'setores',
+  //   'solicitacoes',
+  //   'exames',
+  //   'usuarios',
+  // ];
+
+  todosModulos: Modulo[] = [
     'candidatos',
     'igrejas',
     'instrumentos',
@@ -73,6 +83,8 @@ export class UsuariosComponent implements OnInit {
     'exames',
     'usuarios',
   ];
+
+  modulos: Modulo[] = [];
 
   nome = '';
   email = '';
@@ -330,6 +342,28 @@ export class UsuariosComponent implements OnInit {
     );
   }
 
+  carregarModulosPermitidosParaEdicao(perfilEditado: Perfil): void {
+    const logado = this.auth.usuario;
+
+    if (!logado) {
+      this.modulos = [];
+      return;
+    }
+
+    // Admin pode ver/alterar todos os módulos
+    if (logado.perfil === 'admin') {
+      this.modulos = [...this.todosModulos];
+      return;
+    }
+
+    const acessosPadrao = TIPO_PERFIL[perfilEditado]?.acessos;
+
+    // Regional/secretário só veem módulos onde o perfil editado tem read: true
+    this.modulos = this.todosModulos.filter((modulo) => {
+      return acessosPadrao?.[modulo]?.read === true;
+    });
+  }
+
   prepararDados() {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
@@ -572,7 +606,7 @@ export class UsuariosComponent implements OnInit {
 
     this.escutarMudancaPerfil();
     this.escutarMudancaSetor();
-
+    this.carregarModulosPermitidosParaEdicao(select.perfil as Perfil);
     this.dadosForms.patchValue(
       {
         perfil: select.perfil,

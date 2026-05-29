@@ -336,38 +336,117 @@ export class ExamesComponent implements OnInit {
     });
   }
 
+  // carregarDados(): void {
+  //   combineLatest([
+  //     this.firestoreService.getExames(),
+  //     this.firestoreService.getCandidato(),
+  //   ]).subscribe(([exames, alunos]) => {
+  //     const dadosExames = exames.map((exame) => {
+  //       const alunoFiltro = alunos.find((a) => a.id === exame.idAluno);
+
+  //       const etapaAtual = exame.etapas?.find(
+  //         (e) => e.ordem === exame.etapaAtual,
+  //       );
+
+  //       return {
+  //         ...exame,
+  //         dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
+  //         nomeAluno:
+  //           alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+  //           'ALUNO NÃO CADASTRADO',
+  //         tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
+  //         statusLabel: this.formatarStatus(exame.status),
+  //         etapaAtualLabel:
+  //           exame.status === 'aprovado'
+  //             ? 'CONCLUÍDO'
+  //             : exame.status === 'reprovado'
+  //               ? 'REPROVADO'
+  //               : etapaAtual?.nome || 'AGUARDANDO',
+  //       };
+  //     });
+
+  //     // this.dados = [...dadosExames].sort((a, b) =>
+  //     //   (a.nomeAluno || '').localeCompare(b.nomeAluno || ''),
+  //     // );
+  //     const ordemStatus: Record<string, number> = {
+  //       solicitado: 1,
+  //       agendado: 2,
+  //       emAndamento: 3,
+  //       aprovado: 4,
+  //       reprovado: 5,
+  //       cancelado: 6,
+  //     };
+
+  //     this.dados = [...dadosExames].sort((a, b) => {
+  //       // STATUS
+  //       const statusA = ordemStatus[a.status] || 999;
+  //       const statusB = ordemStatus[b.status] || 999;
+
+  //       if (statusA !== statusB) {
+  //         return statusA - statusB;
+  //       }
+
+  //       // EXAME
+  //       const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
+
+  //       if (tipo !== 0) {
+  //         return tipo;
+  //       }
+
+  //       // CATEGORIA
+  //       const categoria = (a.categoriaExame || '').localeCompare(
+  //         b.categoriaExame || '',
+  //       );
+
+  //       if (categoria !== 0) {
+  //         return categoria;
+  //       }
+
+  //       // ALUNO
+  //       return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
+  //     });
+  //     // console.log(this.dados);
+  //   });
+  // }
   carregarDados(): void {
     combineLatest([
       this.firestoreService.getExames(),
       this.firestoreService.getCandidato(),
     ]).subscribe(([exames, alunos]) => {
-      const dadosExames = exames.map((exame) => {
-        const alunoFiltro = alunos.find((a) => a.id === exame.idAluno);
+      const alunosPermitidos = alunos.filter((a) =>
+        this.auth.podeVerRegistro(a, 'candidatos'),
+      );
 
-        const etapaAtual = exame.etapas?.find(
-          (e) => e.ordem === exame.etapaAtual,
-        );
+      const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
 
-        return {
-          ...exame,
-          dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
-          nomeAluno:
-            alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
-            'ALUNO NÃO CADASTRADO',
-          tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
-          statusLabel: this.formatarStatus(exame.status),
-          etapaAtualLabel:
-            exame.status === 'aprovado'
-              ? 'CONCLUÍDO'
-              : exame.status === 'reprovado'
-                ? 'REPROVADO'
-                : etapaAtual?.nome || 'AGUARDANDO',
-        };
-      });
+      const dadosExames = exames
+        .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
+        .map((exame) => {
+          const alunoFiltro = alunosPermitidos.find(
+            (a) => a.id === exame.idAluno,
+          );
 
-      // this.dados = [...dadosExames].sort((a, b) =>
-      //   (a.nomeAluno || '').localeCompare(b.nomeAluno || ''),
-      // );
+          const etapaAtual = exame.etapas?.find(
+            (e) => e.ordem === exame.etapaAtual,
+          );
+
+          return {
+            ...exame,
+            dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
+            nomeAluno:
+              alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+              'ALUNO NÃO CADASTRADO',
+            tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
+            statusLabel: this.formatarStatus(exame.status),
+            etapaAtualLabel:
+              exame.status === 'aprovado'
+                ? 'CONCLUÍDO'
+                : exame.status === 'reprovado'
+                  ? 'REPROVADO'
+                  : etapaAtual?.nome || 'AGUARDANDO',
+          };
+        });
+
       const ordemStatus: Record<string, number> = {
         solicitado: 1,
         agendado: 2,
@@ -378,34 +457,21 @@ export class ExamesComponent implements OnInit {
       };
 
       this.dados = [...dadosExames].sort((a, b) => {
-        // STATUS
         const statusA = ordemStatus[a.status] || 999;
         const statusB = ordemStatus[b.status] || 999;
 
-        if (statusA !== statusB) {
-          return statusA - statusB;
-        }
+        if (statusA !== statusB) return statusA - statusB;
 
-        // EXAME
         const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
+        if (tipo !== 0) return tipo;
 
-        if (tipo !== 0) {
-          return tipo;
-        }
-
-        // CATEGORIA
         const categoria = (a.categoriaExame || '').localeCompare(
           b.categoriaExame || '',
         );
+        if (categoria !== 0) return categoria;
 
-        if (categoria !== 0) {
-          return categoria;
-        }
-
-        // ALUNO
         return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
       });
-      // console.log(this.dados);
     });
   }
 
