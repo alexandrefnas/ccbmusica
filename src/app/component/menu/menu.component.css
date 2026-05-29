@@ -87,3 +87,13 @@ tr:active {
     inset -1px -1px 0 white,
     inset 1px 1px 0 black;
 }
+
+.menu-ativo {
+  background-color: #82bbe2 !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+.menu-ativo i {
+  color: white;
+}

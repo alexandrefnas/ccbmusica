@@ -7,14 +7,14 @@ import {
   animate,
   transition,
 } from '@angular/animations';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AppComponent } from '../../app.component';
 
 @Component({
   selector: 'tcx-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css',
   animations: [

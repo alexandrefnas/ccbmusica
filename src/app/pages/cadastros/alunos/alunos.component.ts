@@ -486,7 +486,6 @@ export class AlunosComponent implements OnInit {
     this.title = 'Editar Instrumentos';
     this.mostrarModal = true;
     this.dadosParaEditar = { ...select };
-    console.log(select.dataNascimento);
     this.dadosForms.patchValue({
       nomeAluno: select.nomeAluno || '',
       dataNascimento: select.dataNascimento || '',
