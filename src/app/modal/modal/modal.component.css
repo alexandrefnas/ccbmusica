@@ -126,13 +126,13 @@
 /* Table */
 @media (min-width: 768px) and (max-width: 992px) {
   .container__form {
+    top: 10px;
     width: 95vw;
-    max-height: 90vh;
-    top: 50%;
+    max-height: calc(100vh - 20px);
   }
 
   .container__form-windows {
-    max-height: 90vh;
+    max-height: calc(100vh - 20px);
   }
 }
 
