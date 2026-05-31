@@ -113,13 +113,14 @@
 /* Mobile */
 @media (max-width: 576px) {
   .container__form {
-    width: 95%;
-    top: 40%;
+    top: 10px;
+    width: 95vw;
+    max-height: calc(100vh - 20px);
   }
 
-  /* .container__form-windows {
-    min-width: 98%;
-  } */
+  .container__form-windows {
+    max-height: calc(100vh - 20px);
+  }
 }
 
 /* Table */
