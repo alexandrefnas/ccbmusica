@@ -14,9 +14,11 @@
   flex-direction: column;
   align-items: center;
   position: fixed;
-  top: 45%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  /* width: min(95vw, 800px); */
+  max-height: 90vh;
   z-index: 999;
 }
 
@@ -30,6 +32,7 @@
   min-width: 300px;
   max-width: 800px;
   min-height: 100px;
+  max-height: 90vh;
   gap: 5px;
   box-sizing: border-box;
   /* overflow-y: auto; */
@@ -41,6 +44,7 @@
     inset 1px 1px 0 #999;
   background-color: #e0e0e0;
   border-radius: 10px;
+  overflow: hidden;
 }
 
 .title_container {
@@ -93,14 +97,13 @@
 
 .field__container {
   width: 100%;
-  height: 100%;
-  flex-grow: 1;
-  padding: 10px;
-  /* box-sizing: border-box; */
+  flex: 1;
+  min-height: 0;
 
-  /* display: flex; */
-  /* flex-direction: column; */
-  /* gap: 10px; */
+  padding: 10px;
+  box-sizing: border-box;
+
+  overflow-y: auto;
 }
 
 /* RESPONSIVIDADE */
@@ -118,6 +121,15 @@
 
 /* Table */
 @media (min-width: 768px) and (max-width: 992px) {
+  .container__form {
+    width: 95vw;
+    max-height: 90vh;
+    top: 50%;
+  }
+
+  .container__form-windows {
+    max-height: 90vh;
+  }
 }
 
 /* Desktop */

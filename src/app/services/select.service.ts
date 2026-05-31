@@ -149,8 +149,171 @@ export const listaPeriodo = [
   { value: '104', label: '4º PERÍODO' },
 ];
 
-export const listaPratico = [
+export const listaPeriodoPratico = [
   { value: '1001', label: 'REUNIÃO DE JOVENS E MENORES' },
   { value: '1002', label: 'CULTO OFICIAL' },
   { value: '1003', label: 'OFICIALIZAÇÃO' },
+];
+
+const grupoExames1 = [
+  {
+    grupoExame: '2026/2',
+    descricao: 'Testes teórico e pratica de solfejo',
+    idSetor: '',
+    idComum: '',
+    criadoEm: '',
+    usuarioCriador: '',
+    concluido: false,
+    periodos: [
+      {
+        categoriaExame: '001',
+        tipoExame: 'TEÓRICO E PRÁTICO',
+        etapas: [
+          {
+            tipo: '101',
+            avaliacao: [
+              {
+                nome: 'PARTE TEÓRICA',
+                dataAvaliacao: '',
+                ordem: 1,
+                notaMinima: 18,
+                notaMaxima: 20,
+                bloqueadaInicialmente: false,
+              },
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: '',
+                ordem: 2,
+                notaMinima: 7,
+                notaMaxima: 10,
+                bloqueadaInicialmente: true,
+              },
+            ],
+          },
+          {
+            tipo: '102',
+            avaliacao: [
+              {
+                nome: 'PARTE TEÓRICA',
+                dataAvaliacao: '',
+                ordem: 1,
+                notaMinima: 22,
+                notaMaxima: 35,
+                bloqueadaInicialmente: false,
+              },
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: '',
+                ordem: 2,
+                notaMinima: 7,
+                notaMaxima: 10,
+                bloqueadaInicialmente: true,
+              },
+            ],
+          },
+          {
+            tipo: '103',
+            avaliacao: [
+              {
+                nome: 'PARTE TEÓRICA',
+                dataAvaliacao: '',
+                ordem: 1,
+                notaMinima: 22,
+                notaMaxima: 35,
+                bloqueadaInicialmente: false,
+              },
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: '',
+                ordem: 2,
+                notaMinima: 7,
+                notaMaxima: 10,
+                bloqueadaInicialmente: true,
+              },
+            ],
+          },
+          {
+            tipo: '104',
+            avaliacao: [
+              {
+                nome: 'PARTE TEÓRICA',
+                dataAvaliacao: '',
+                ordem: 1,
+                notaMinima: 22,
+                notaMaxima: 35,
+                bloqueadaInicialmente: false,
+              },
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: '',
+                ordem: 2,
+                notaMinima: 7,
+                notaMaxima: 10,
+                bloqueadaInicialmente: true,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+const grupoExames2 = [
+  {
+    grupoExame: '2026/2',
+    descricao: 'Teste Instrumentos',
+    idSetor: '',
+    idComum: '',
+    criadoEm: '',
+    usuarioCriador: '',
+    concluido: false,
+    periodos: [
+      {
+        categoriaExame: '002',
+        tipoExame: 'PRÁTICO',
+        etapas: [
+          {
+            tipo: '1001',
+            avaliacao: [
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: '',
+                ordem: 1,
+                notaMinima: 7,
+                notaMaxima: 10,
+                bloqueadaInicialmente: false,
+              },
+            ],
+          },
+          {
+            tipo: '1002',
+            avaliacao: [
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: '',
+                ordem: 1,
+                notaMinima: 7,
+                notaMaxima: 10,
+                bloqueadaInicialmente: false,
+              },
+            ],
+          },
+          {
+            tipo: '1003',
+            avaliacao: [
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: '',
+                ordem: 1,
+                notaMinima: 7,
+                notaMaxima: 10,
+                bloqueadaInicialmente: false,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 ];

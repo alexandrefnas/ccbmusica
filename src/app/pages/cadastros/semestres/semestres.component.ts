@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
@@ -20,7 +21,7 @@ import {
 } from '../../../../shared/shared.service';
 import {
   listaPeriodo,
-  listaPratico,
+  listaPeriodoPratico,
   listaTipoExame,
   upper,
 } from '../../../services/select.service';
@@ -57,7 +58,7 @@ export class SemestresComponent {
       idSetor: [''],
       idComum: ['', Validators.required],
       tipoExame: ['', Validators.required],
-      categoriaExame: ['', Validators.required],
+      avaliacoes: this.fb.array([]),
       concluido: [false],
     });
   }
@@ -70,7 +71,7 @@ export class SemestresComponent {
 
   listaTipoExame = listaTipoExame;
   listaPeriodo = listaPeriodo;
-  listaPratico = listaPratico;
+  listaPratico = listaPeriodoPratico;
 
   listaIgreja: { value: string; label: string; idSetor: string }[] = [];
   listaSetor: { value: string; label: string }[] = [];
@@ -208,10 +209,101 @@ export class SemestresComponent {
     return [];
   }
 
+  get avaliacoesArray(): FormArray {
+    return this.dadosForms.get('avaliacoes') as FormArray;
+  }
+
+criarPeriodos(): any[] {
+  const tipoExame = this.dadosForms.value.tipoExame;
+  const avaliacoes = this.avaliacoesArray.value;
+
+  if (tipoExame === '001') {
+    return [
+      {
+        categoriaExame: '001',
+        tipoExame: 'MSA',
+        etapas: avaliacoes.map((item: any) => ({
+          tipo: item.tipo,
+          avaliacao: [
+            {
+              nome: 'PARTE TEÓRICA',
+              ordem: 1,
+              notaMinima: Number(item.teoricaNotaMinima),
+              notaMaxima: Number(item.teoricaNotaMaxima),
+              bloqueadaInicialmente: false,
+            },
+            {
+              nome: 'PARTE PRÁTICA',
+              ordem: 2,
+              notaMinima: Number(item.praticaNotaMinima),
+              notaMaxima: Number(item.praticaNotaMaxima),
+              bloqueadaInicialmente: true,
+            },
+          ],
+        })),
+      },
+    ];
+  }
+
+  if (tipoExame === '002') {
+    return [
+      {
+        categoriaExame: '002',
+        tipoExame: 'PRÁTICO',
+        etapas: avaliacoes.map((item: any) => ({
+          tipo: item.tipo,
+          avaliacao: [
+            {
+              nome: 'PARTE PRÁTICA',
+              ordem: 1,
+              notaMinima: Number(item.praticaNotaMinima),
+              notaMaxima: Number(item.praticaNotaMaxima),
+              bloqueadaInicialmente: false,
+            },
+          ],
+        })),
+      },
+    ];
+  }
+
+  return [];
+}
+
   onTipoExameChange(): void {
-    this.dadosForms.patchValue({
-      categoriaExame: '',
-    });
+    this.avaliacoesArray.clear();
+
+    const tipoExame = this.dadosForms.get('tipoExame')?.value;
+
+    if (tipoExame === '001') {
+      this.listaPeriodo.forEach((periodo) => {
+        this.avaliacoesArray.push(
+          this.fb.group({
+            tipo: [periodo.value],
+            label: [periodo.label],
+
+            teoricaNotaMinima: [null, Validators.required],
+            teoricaNotaMaxima: [null, Validators.required],
+
+            praticaNotaMinima: [null, Validators.required],
+            praticaNotaMaxima: [null, Validators.required],
+          }),
+        );
+      });
+    }
+
+    if (tipoExame === '002') {
+      this.listaPratico.forEach((periodo) => {
+        this.avaliacoesArray.push(
+          this.fb.group({
+            tipo: [periodo.value],
+            label: [periodo.label],
+
+            praticaNotaMinima: [null, Validators.required],
+            praticaNotaMaxima: [null, Validators.required],
+          }),
+        );
+      });
+    }
   }
 
   buttonClick(): void {
@@ -234,18 +326,22 @@ export class SemestresComponent {
         : (usuarioLogado?.nome ?? 'Não identificado');
 
     const data = {
-      ...this.dadosForms.value,
+      grupoExame: upper(this.dadosForms.value.grupoExame),
       descricao: upper(this.dadosForms.value.descricao),
-      idComum: '',
-      idSetor: '',
-      criadoEm: formatarDataString(new Date()),
-      periodos: this.dadosParaEditar?.periodos || [],
+      idSetor: this.dadosForms.value.idSetor || '',
+      idComum: this.dadosForms.value.idComum || '',
+      tipoExame: this.dadosForms.value.tipoExame,
+      categoriaExame: this.dadosForms.value.categoriaExame,
+      concluido: this.dadosForms.value.concluido || false,
+      criadoEm:
+        this.dadosParaEditar?.criadoEm || formatarDataString(new Date()),
       usuarioCriador: nomeUsuario,
+      periodos: this.criarPeriodos(),
     };
 
     const mensagem = this.dadosParaEditar
       ? `Deseja realmente alterar ${this.dadosParaEditar.grupoExame}?`
-      : `Deseja realmente salvar ${data.semestre}?`;
+      : `Deseja realmente salvar ${data.grupoExame}?`;
 
     if (this.dadosParaEditar?.id) {
       // const alterado = Object.keys(data).some(

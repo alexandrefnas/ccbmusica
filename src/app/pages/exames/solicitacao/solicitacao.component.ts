@@ -27,7 +27,7 @@ import {
 } from '../../../../shared/shared.service';
 import {
   listaPeriodo,
-  listaPratico,
+  listaPeriodoPratico,
   listaTipoExame,
   upper,
 } from '../../../services/select.service';
@@ -98,7 +98,7 @@ export class SolicitacaoComponent {
 
   listaTipoExame = listaTipoExame;
   listaPeriodo = listaPeriodo;
-  listaPratico = listaPratico;
+  listaPratico = listaPeriodoPratico;
 
   camposColunas = [
     'nomeAluno',

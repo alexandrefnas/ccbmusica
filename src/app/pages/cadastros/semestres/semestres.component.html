@@ -14,88 +14,189 @@
       </button>
     </div>
   </div>
+
+  <!-- SOLICITAR/EDITAR EXAME -->
+  <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
+    <div class="templates__form">
+      <form
+        [formGroup]="dadosForms"
+        (ngSubmit)="onSalvar()"
+        style="width: 100%"
+      >
+        <div class="linha">
+          <div class="input-text" id="input-nomeAluno">
+            <tcx-text
+              label="Nome do Exame"
+              type="name"
+              formControlName="grupoExame"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
+        </div>
+        <div class="linha">
+          <div class="input-text">
+            <tcx-text
+              label="Descrição do Exame."
+              type="text"
+              formControlName="descricao"
+              [required]="false"
+            />
+          </div>
+        </div>
+
+        <div class="linha" *ngIf="usuarioEhAdmin()">
+          <div class="input-select">
+            <tcx-select
+              [label]="'Setor'"
+              [placeholder]="''"
+              [niveisLimitados]="listaSetor"
+              [formControl]="getControl('idSetor')"
+            />
+          </div>
+        </div>
+        <div class="linha">
+          <div class="input-select" id="input-congregacao">
+            <tcx-select
+              [label]="'Comum Congregação'"
+              [placeholder]="''"
+              [niveisLimitados]="listaIgreja"
+              [formControl]="getControl('idComum')"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
+        </div>
+
+        <div class="linha">
+          <div class="input-select">
+            <tcx-select
+              [label]="'Tipo de Exame'"
+              [placeholder]="''"
+              [niveisLimitados]="listaTipoExame"
+              [formControl]="getControl('tipoExame')"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+              (valorMudou)="onTipoExameChange()"
+            />
+          </div>
+        </div>
+        <!--
+        <div class="linha" *ngIf="getListaCategoriaExame().length > 0">
+  <div class="input-select">
+            <tcx-select
+              [label]="'Categoria'"
+              [placeholder]="''"
+              [niveisLimitados]="getListaCategoriaExame()"
+              [formControl]="getControl('categoriaExame')"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
+        </div>
+        -->
+
+        <!-- // INICIO // -->
+        <div
+          class="avaliacoes-container"
+          formArrayName="avaliacoes"
+          *ngIf="avaliacoesArray.length > 0"
+        >
+          <div
+            class="avaliacao-card"
+            *ngFor="let avaliacao of avaliacoesArray.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <ng-container *ngIf="getControl('tipoExame').value === '001'">
+              <h4>{{ avaliacao.get("label")?.value }}</h4>
+              <div class="linhaOff container__avaliacao">
+                <div>
+                  <p>Parte Teórica</p>
+                  <div style="display: flex; flex-direction: row; gap: 5px">
+                    <div class="input-text input-mine">
+                      <tcx-text
+                        label="Nota mín"
+                        type="number"
+                        formControlName="teoricaNotaMinima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+                    </div>
+
+                    <div class="input-text input-mine">
+                      <tcx-text
+                        label="Nota máx"
+                        type="number"
+                        formControlName="teoricaNotaMaxima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p>Parte Prática</p>
+                  <div style="display: flex; flex-direction: row; gap: 5px">
+                    <div class="input-text input-mine">
+                      <tcx-text
+                        label="Nota mín"
+                        type="number"
+                        formControlName="praticaNotaMinima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+                    </div>
+
+                    <div class="input-text input-mine">
+                      <tcx-text
+                        label="Nota máx"
+                        type="number"
+                        formControlName="praticaNotaMaxima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="getControl('tipoExame').value === '002'">
+              <h4>{{ avaliacao.get("label")?.value }}</h4>
+              <!-- <p>Parte Prática</p> -->
+
+              <div class="linhaOff container__avaliacao">
+                <div class="input-text">
+                  <tcx-text
+                    label="Nota mínima"
+                    type="number"
+                    formControlName="praticaNotaMinima"
+                    [required]="true"
+                    errorMessage="Campo obrigatório"
+                  />
+                </div>
+
+                <div class="input-text">
+                  <tcx-text
+                    label="Nota máxima"
+                    type="number"
+                    formControlName="praticaNotaMaxima"
+                    [required]="true"
+                    errorMessage="Campo obrigatório"
+                  />
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+        <!-- // FIM // -->
+
+        <div class="linhaButton">
+          <div class="form__button">
+            <tcx-button label="Salvar" type="submit"></tcx-button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </tcx-modal>
 </div>
-
-<!-- SOLICITAR/EDITAR EXAME -->
-<tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
-  <div class="templates__form">
-    <form [formGroup]="dadosForms" (ngSubmit)="onSalvar()" style="width: 100%">
-      <div class="linha">
-        <div class="input-text" id="input-nomeAluno">
-          <tcx-text
-            label="Nome do Exame"
-            type="name"
-            formControlName="grupoExame"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-          />
-        </div>
-      </div>
-      <div class="linha">
-        <div class="input-text">
-          <tcx-text
-            label="Descrição do Exame."
-            type="text"
-            formControlName="descricao"
-            [required]="false"
-          />
-        </div>
-      </div>
-
-      <div class="linha" *ngIf="usuarioEhAdmin()">
-        <div class="input-select">
-          <tcx-select
-            [label]="'Setor'"
-            [placeholder]="''"
-            [niveisLimitados]="listaSetor"
-            [formControl]="getControl('idSetor')"
-          />
-        </div>
-      </div>
-      <div class="linha">
-        <div class="input-select" id="input-congregacao">
-          <tcx-select
-            [label]="'Comum Congregação'"
-            [placeholder]="''"
-            [niveisLimitados]="listaIgreja"
-            [formControl]="getControl('idComum')"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-          />
-        </div>
-      </div>
-
-      <div class="linha">
-        <div class="input-select">
-          <tcx-select
-            [label]="'Tipo de Exame'"
-            [placeholder]="''"
-            [niveisLimitados]="listaTipoExame"
-            [formControl]="getControl('tipoExame')"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-            (valorMudou)="onTipoExameChange()"
-          />
-        </div>
-      </div>
-      <div class="linha" *ngIf="getListaCategoriaExame().length > 0">
-        <div class="input-select">
-          <tcx-select
-            [label]="'Categoria'"
-            [placeholder]="''"
-            [niveisLimitados]="getListaCategoriaExame()"
-            [formControl]="getControl('categoriaExame')"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-          />
-        </div>
-      </div>
-
-      <div class="linhaButton">
-        <div class="form__button">
-          <tcx-button label="Salvar" type="submit"></tcx-button>
-        </div>
-      </div>
-    </form>
-  </div>
-</tcx-modal>
