@@ -76,11 +76,12 @@ export class UsuariosComponent implements OnInit {
 
   todosModulos: Modulo[] = [
     'candidatos',
+    'grupoExames',
+    'solicitacoes',
+    'exames',
     'igrejas',
     'instrumentos',
     'setores',
-    'solicitacoes',
-    'exames',
     'usuarios',
   ];
 
@@ -560,6 +561,12 @@ export class UsuariosComponent implements OnInit {
       idComum: [''],
       acessos: this.fb.group({
         candidatos: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        grupoExames: this.fb.group({
           read: [false],
           create: [false],
           update: [false],

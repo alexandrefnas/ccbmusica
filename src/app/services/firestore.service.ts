@@ -6,10 +6,25 @@ import {
   deleteDoc,
   doc,
   Firestore,
+  orderBy,
+  query,
   setDoc,
   updateDoc,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+
+
+export interface GrupoExames {
+  id?: string;
+  grupoExame: string;
+  descricao: string;
+  idSetor: string;
+  idComum: string;
+  concluido: boolean;
+  criadoEm?: string;
+  periodos: any[];
+  usuarioCriador: string;
+}
 
 export type StatusExame =
   | 'solicitado'
@@ -91,6 +106,32 @@ export interface Candidatos {
 })
 export class FirestoreService {
   constructor(private firestore: Firestore) {}
+
+
+////ModeloExame
+// private modelosExameCollection = collection(this.firestore, 'grupoExames');
+
+addSemestres(data: GrupoExames) {
+  return addDoc(collection(this.firestore, 'grupoExames'), data);
+}
+
+getSemestres(): Observable<GrupoExames[]> {
+  const q = query(collection(this.firestore, 'grupoExames'), orderBy('grupoExame', 'desc'));
+
+  return collectionData(q, { idField: 'id' }) as Observable<GrupoExames[]>;
+}
+
+updateSemestres(id: string, data: Partial<GrupoExames>) {
+  const ref = doc(this.firestore, `grupoExames/${id}`);
+  return updateDoc(ref, data);
+}
+
+deleteSemestres(id: string) {
+  const ref = doc(this.firestore, `grupoExames/${id}`);
+  return deleteDoc(ref);
+}
+
+// FIM
 
   //// Exames
   // async addExame(dados: Exames) {

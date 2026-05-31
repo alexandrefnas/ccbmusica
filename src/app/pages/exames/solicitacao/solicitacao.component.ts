@@ -25,7 +25,12 @@ import {
   converterISOParaBR,
   formatarDataString,
 } from '../../../../shared/shared.service';
-import { upper } from '../../../services/select.service';
+import {
+  listaPeriodo,
+  listaPratico,
+  listaTipoExame,
+  upper,
+} from '../../../services/select.service';
 import { combineLatest } from 'rxjs';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 
@@ -91,27 +96,9 @@ export class SolicitacaoComponent {
 
   listaAlunos: { value: string; label: string }[] = [];
 
-  listaTipoExame = [
-    { value: 'TEÓRICO E PRÁTICO', label: 'TEÓRICO E PRÁTICO' },
-    { value: 'TEÓRICO', label: 'TEÓRICO' },
-    { value: 'PRÁTICO', label: 'PRÁTICO' },
-  ];
-
-  listaPeriodo = [
-    { value: '1º PERÍODO', label: '1º PERÍODO' },
-    { value: '2º PERÍODO', label: '2º PERÍODO' },
-    { value: '3º PERÍODO', label: '3º PERÍODO' },
-    { value: '4º PERÍODO', label: '4º PERÍODO' },
-  ];
-
-  listaPratico = [
-    {
-      value: 'REUNIÃO DE JOVENS E MENORES',
-      label: 'REUNIÃO DE JOVENS E MENORES',
-    },
-    { value: 'CULTO OFICIAL', label: 'CULTO OFICIAL' },
-    { value: 'OFICIALIZAÇÃO', label: 'OFICIALIZAÇÃO' },
-  ];
+  listaTipoExame = listaTipoExame;
+  listaPeriodo = listaPeriodo;
+  listaPratico = listaPratico;
 
   camposColunas = [
     'nomeAluno',
@@ -310,72 +297,91 @@ export class SolicitacaoComponent {
   //   });
   // }
 
-carregarDados(): void {
-  combineLatest([
-    this.firestoreService.getExames(),
-    this.firestoreService.getCandidato(),
-  ]).subscribe(([exames, alunos]) => {
-    const alunosPermitidos = alunos.filter((a) =>
-      this.auth.podeVerRegistro(a, 'candidatos'),
-    );
-
-    const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
-
-    const dadosExames = exames
-      .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
-      .map((exame) => {
-        const alunoFiltro = alunosPermitidos.find(
-          (a) => a.id === exame.idAluno,
-        );
-
-        const etapaAtual = exame.etapas?.find(
-          (e) => e.ordem === exame.etapaAtual,
-        );
-
-        return {
-          ...exame,
-          dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
-          nomeAluno:
-            alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
-            'ALUNO NÃO CADASTRADO',
-          tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
-          statusLabel: this.formatarStatus(exame.status),
-          etapaAtualLabel:
-            exame.status === 'aprovado'
-              ? 'CONCLUÍDO'
-              : exame.status === 'reprovado'
-                ? 'REPROVADO'
-                : etapaAtual?.nome || 'AGUARDANDO',
-        };
-      });
-
-    const ordemStatus: Record<string, number> = {
-      solicitado: 1,
-      agendado: 2,
-      emAndamento: 3,
-      aprovado: 4,
-      reprovado: 5,
-      cancelado: 6,
-    };
-
-    this.dados = [...dadosExames].sort((a, b) => {
-      const statusA = ordemStatus[a.status] || 999;
-      const statusB = ordemStatus[b.status] || 999;
-
-      if (statusA !== statusB) return statusA - statusB;
-
-      const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
-      if (tipo !== 0) return tipo;
-
-      const categoria = (a.categoriaExame || '').localeCompare(
-        b.categoriaExame || '',
+  carregarDados(): void {
+    combineLatest([
+      this.firestoreService.getExames(),
+      this.firestoreService.getCandidato(),
+    ]).subscribe(([exames, alunos]) => {
+      const alunosPermitidos = alunos.filter((a) =>
+        this.auth.podeVerRegistro(a, 'candidatos'),
       );
-      if (categoria !== 0) return categoria;
 
-      return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
+      const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
+
+      const dadosExames = exames
+        .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
+        .map((exame) => {
+          const alunoFiltro = alunosPermitidos.find(
+            (a) => a.id === exame.idAluno,
+          );
+
+          const etapaAtual = exame.etapas?.find(
+            (e) => e.ordem === exame.etapaAtual,
+          );
+
+          return {
+            ...exame,
+            dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
+            nomeAluno:
+              alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+              'ALUNO NÃO CADASTRADO',
+            // tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
+            tipoExame: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
+            categoriaExame: this.buscarCategoriaExame(
+              exame.categoriaExame || '',
+            ),
+            statusLabel: this.formatarStatus(exame.status),
+            etapaAtualLabel:
+              exame.status === 'aprovado'
+                ? 'CONCLUÍDO'
+                : exame.status === 'reprovado'
+                  ? 'REPROVADO'
+                  : etapaAtual?.nome || 'AGUARDANDO',
+          };
+        });
+
+      const ordemStatus: Record<string, number> = {
+        solicitado: 1,
+        agendado: 2,
+        emAndamento: 3,
+        aprovado: 4,
+        reprovado: 5,
+        cancelado: 6,
+      };
+
+      this.dados = [...dadosExames].sort((a, b) => {
+        const statusA = ordemStatus[a.status] || 999;
+        const statusB = ordemStatus[b.status] || 999;
+
+        if (statusA !== statusB) return statusA - statusB;
+
+        const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
+        if (tipo !== 0) return tipo;
+
+        const categoria = (a.categoriaExame || '').localeCompare(
+          b.categoriaExame || '',
+        );
+        if (categoria !== 0) return categoria;
+
+        return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
+      });
     });
-  });
-}
+  }
+
+  buscarLabel(
+    lista: { value: string; label: string }[],
+    value: string,
+  ): string {
+    return lista.find((item) => item.value === value)?.label || value;
+  }
+
+  buscarCategoriaExame(value: string): string {
+    return (
+      this.listaPeriodo.find((x) => x.value === value)?.label ||
+      this.listaPratico.find((x) => x.value === value)?.label ||
+      value
+    );
+  }
 
   onSalvar(): void {
     if (!this.dadosForms.valid) {
@@ -506,14 +512,28 @@ carregarDados(): void {
     return control as FormControl;
   }
 
+  // getListaCategoriaExame() {
+  //   const tipo = this.dadosForms.get('tipoExame')?.value;
+
+  //   if (tipo === '001') {
+  //     return this.listaPeriodo;
+  //   }
+
+  //   if (tipo === '002') {
+  //     return this.listaPratico;
+  //   }
+
+  //   return [];
+  // }
+
   getListaCategoriaExame() {
     const tipo = this.dadosForms.get('tipoExame')?.value;
 
-    if (tipo === 'TEÓRICO E PRÁTICO') {
+    if (tipo === this.listaTipoExame[0].value) {
       return this.listaPeriodo;
     }
 
-    if (tipo === 'PRÁTICO') {
+    if (tipo === this.listaTipoExame[1].value) {
       return this.listaPratico;
     }
 
@@ -532,25 +552,25 @@ carregarDados(): void {
   // Fim geters
 
   criarEtapas(tipoExame: string) {
-    if (tipoExame === 'TEÓRICO') {
-      return [
-        {
-          nome: 'PARTE TEÓRICA',
-          ordem: 1,
-          nota: null,
-          notaMinima: 7,
-          resultado: 'pendente' as const,
-          dataAgendada: '',
-          professorLancamento: '',
-          dataLancamento: '',
-        },
-      ];
-    }
+    // if (tipoExame === 'TEÓRICO') {
+    //   return [
+    //     {
+    //       nome: 'PARTE TEÓRICA',
+    //       ordem: 1,
+    //       nota: null,
+    //       notaMinima: 7,
+    //       resultado: 'pendente' as const,
+    //       dataAgendada: '',
+    //       professorLancamento: '',
+    //       dataLancamento: '',
+    //     },
+    //   ];
+    // }
 
-    if (tipoExame === 'PRÁTICO') {
+    if (tipoExame === this.listaTipoExame[1].value) {
       return [
         {
-          nome: 'PARTE PRÁTICA',
+          nome: this.listaTipoExame[1].label,
           ordem: 1,
           nota: null,
           notaMinima: 7,
@@ -586,3 +606,67 @@ carregarDados(): void {
     ];
   }
 }
+/*
+  listaTipoExame = [
+    { value: '001', label: 'TEÓRICO E PRÁTICO' },
+    { value: '002', label: 'TEÓRICO' },
+    { value: '003', label: 'PRÁTICO' },
+  ];
+
+  listaPeriodo = [
+    { value: '101', label: '1º PERÍODO' },
+    { value: '102', label: '2º PERÍODO' },
+    { value: '103', label: '3º PERÍODO' },
+    { value: '104', label: '4º PERÍODO' },
+  ];
+
+  listaPratico = [
+    {
+      value: '1001',
+      label: 'REUNIÃO DE JOVENS E MENORES',
+    },
+    { value: '1002', label: 'CULTO OFICIAL' },
+    { value: '1003', label: 'OFICIALIZAÇÃO' },
+  ];
+*/
+
+// listaTipoExame = [
+//   { value: 'TEÓRICO E PRÁTICO', label: 'TEÓRICO E PRÁTICO' },
+//   { value: 'TEÓRICO', label: 'TEÓRICO' },
+//   { value: 'PRÁTICO', label: 'PRÁTICO' },
+// ];
+
+// listaPeriodo = [
+//   { value: '1º PERÍODO', label: '1º PERÍODO' },
+//   { value: '2º PERÍODO', label: '2º PERÍODO' },
+//   { value: '3º PERÍODO', label: '3º PERÍODO' },
+//   { value: '4º PERÍODO', label: '4º PERÍODO' },
+// ];
+
+// listaPratico = [
+//   {
+//     value: 'REUNIÃO DE JOVENS E MENORES',
+//     label: 'REUNIÃO DE JOVENS E MENORES',
+//   },
+//   { value: 'CULTO OFICIAL', label: 'CULTO OFICIAL' },
+//   { value: 'OFICIALIZAÇÃO', label: 'OFICIALIZAÇÃO' },
+// ];
+
+// listaTipoExame = [
+//   { value: '001', label: 'TEÓRICO E PRÁTICO' },
+//   { value: '002', label: 'PRÁTICO' },
+//   // { value: '002', label: 'TEÓRICO' },
+// ];
+
+// listaPeriodo = [
+//   { value: '101', label: '1º PERÍODO' },
+//   { value: '102', label: '2º PERÍODO' },
+//   { value: '103', label: '3º PERÍODO' },
+//   { value: '104', label: '4º PERÍODO' },
+// ];
+
+// listaPratico = [
+//   { value: '1001', label: 'REUNIÃO DE JOVENS E MENORES' },
+//   { value: '1002', label: 'CULTO OFICIAL' },
+//   { value: '1003', label: 'OFICIALIZAÇÃO' },
+// ];

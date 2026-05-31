@@ -43,6 +43,12 @@ export class MenuComponent {
       tabela: 'candidatos',
       icon: 'bi bi-person-vcard',
     },
+    {
+      label: 'Grupo Avaliações',
+      rota: '/semestres',
+      tabela: 'modelosExame',
+      icon: 'bi bi-calendar3',
+    },
   ];
 
   manutencao = [

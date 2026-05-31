@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
+import { combineLatest } from 'rxjs';
 import { ModalComponent } from '../../../modal/modal/modal.component';
 import { ButtonComponent } from '../../../component/button/button.component';
 import { TextComponent } from '../../../component/inputs/text/text.component';
@@ -17,7 +18,6 @@ import { DataComponent } from '../../../component/inputs/data/data.component';
 import {
   confirmarAcao,
   converterISOParaBR,
-  dataBRparaISO,
   formatarDataString,
 } from '../../../../shared/shared.service';
 import { TableComponent } from '../../../component/table/table.component';
@@ -27,7 +27,6 @@ import {
   Igrejas,
   Instrumentos,
 } from '../../../services/firestore.service';
-import { combineLatest } from 'rxjs';
 import { upper } from '../../../services/select.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 
@@ -71,12 +70,12 @@ export class AlunosComponent implements OnInit {
   liberaEditar: boolean = false;
   liberaCriar: boolean = false;
   liberaDeletar: boolean = false;
-  listaSetor: { value: string; label: string }[] = [];
-  listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
   title = '';
   mostrarModal = false;
 
   listaIgreja: { value: string; label: string; idSetor: string }[] = [];
+  listaSetor: { value: string; label: string }[] = [];
+  listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
   listaInstrumento: { value: string; label: string }[] = [];
   listaAfinacao = [
     { value: 'DÓ', label: 'DÓ' },
@@ -416,7 +415,7 @@ export class AlunosComponent implements OnInit {
     const mensagem = this.dadosParaEditar
       ? `Deseja realmente alterar ${this.dadosParaEditar.nomeAluno}?`
       : `Deseja realmente salvar ${baseData.nomeAluno}?`;
-    console.log(baseData);
+    // console.log(baseData);
     if (this.dadosParaEditar) {
       const alterado = Object.keys(baseData).some(
         (key) => baseData[key] !== this.dadosParaEditar[key],

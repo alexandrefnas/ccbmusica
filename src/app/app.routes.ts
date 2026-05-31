@@ -68,6 +68,15 @@ export const routes: Routes = [
         data: { tabela: 'candidatos', tipo: 'read' },
       },
       {
+        path: 'semestres',
+        loadComponent: () =>
+          import('./pages/cadastros/semestres/semestres.component').then(
+            (m) => m.SemestresComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'modelosExame', tipo: 'read' },
+      },
+      {
         path: 'exames',
         loadComponent: () =>
           import('./pages/exames/exames/exames.component').then(
@@ -105,29 +114,27 @@ export const routes: Routes = [
   },
 ];
 
-
-  // {
-  //   path: '',
-  //   redirectTo: 'home',
-  //   pathMatch: 'full',
-  // },
-  // {
-  //   path: 'login',
-  //   loadComponent: () =>
-  //     import('./pages/login/login.component').then((m) => m.LoginComponent),
-  //   canActivate: [loginGuard], // bloqueia login se já estiver autenticado
-  // },
-  // {
-  //   path: 'home',
-  //   loadComponent: () =>
-  //     import('./pages/home/home.component').then((m) => m.HomeComponent),
-  //   canActivate: [AuthGuard], // exige login
-  // },
-  // {
-  //   path: '**',
-  //   redirectTo: 'home', // rota inválida leva para home
-  // },
-
+// {
+//   path: '',
+//   redirectTo: 'home',
+//   pathMatch: 'full',
+// },
+// {
+//   path: 'login',
+//   loadComponent: () =>
+//     import('./pages/login/login.component').then((m) => m.LoginComponent),
+//   canActivate: [loginGuard], // bloqueia login se já estiver autenticado
+// },
+// {
+//   path: 'home',
+//   loadComponent: () =>
+//     import('./pages/home/home.component').then((m) => m.HomeComponent),
+//   canActivate: [AuthGuard], // exige login
+// },
+// {
+//   path: '**',
+//   redirectTo: 'home', // rota inválida leva para home
+// },
 
 // import { Routes } from '@angular/router';
 // import { AuthGuard } from './guards/auth.guard';
