@@ -74,7 +74,7 @@ export const routes: Routes = [
             (m) => m.SemestresComponent,
           ),
         canActivate: [PermissaoGuard],
-        data: { tabela: 'modelosExame', tipo: 'read' },
+        data: { tabela: 'grupoExames', tipo: 'read' },
       },
       {
         path: 'exames',

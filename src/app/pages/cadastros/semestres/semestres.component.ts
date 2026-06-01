@@ -30,6 +30,7 @@ import { SelectComponent } from '../../../component/inputs/select/select.compone
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { ButtonComponent } from '../../../component/button/button.component';
 import { CommonModule } from '@angular/common';
+import { DataComponent } from '../../../component/inputs/data/data.component';
 
 @Component({
   selector: 'tcx-semestres',
@@ -41,6 +42,7 @@ import { CommonModule } from '@angular/common';
     SelectComponent,
     TextComponent,
     ButtonComponent,
+    DataComponent,
   ],
   templateUrl: './semestres.component.html',
   styleUrl: './semestres.component.css',
@@ -57,6 +59,8 @@ export class SemestresComponent {
       descricao: ['', Validators.required],
       idSetor: [''],
       idComum: ['', Validators.required],
+      dataTeorica: [''],
+      dataPratica: [''],
       tipoExame: ['', Validators.required],
       avaliacoes: this.fb.array([]),
       concluido: [false],
@@ -195,6 +199,15 @@ export class SemestresComponent {
     return control as FormControl;
   }
 
+  getLiberaData(): boolean {
+    const result =
+      this.getControl('tipoExame').value === '001' ||
+      this.getControl('tipoExame').value === '002';
+
+    // console.log('result',result);
+    return result;
+  }
+
   getListaCategoriaExame() {
     const tipo = this.dadosForms.get('tipoExame')?.value;
 
@@ -213,61 +226,90 @@ export class SemestresComponent {
     return this.dadosForms.get('avaliacoes') as FormArray;
   }
 
-criarPeriodos(): any[] {
-  const tipoExame = this.dadosForms.value.tipoExame;
-  const avaliacoes = this.avaliacoesArray.value;
+formatarDataFormulario(data: any): string {
+  if (!data) return '';
 
-  if (tipoExame === '001') {
-    return [
-      {
-        categoriaExame: '001',
-        tipoExame: 'MSA',
-        etapas: avaliacoes.map((item: any) => ({
-          tipo: item.tipo,
-          avaliacao: [
-            {
-              nome: 'PARTE TEÓRICA',
-              ordem: 1,
-              notaMinima: Number(item.teoricaNotaMinima),
-              notaMaxima: Number(item.teoricaNotaMaxima),
-              bloqueadaInicialmente: false,
-            },
-            {
-              nome: 'PARTE PRÁTICA',
-              ordem: 2,
-              notaMinima: Number(item.praticaNotaMinima),
-              notaMaxima: Number(item.praticaNotaMaxima),
-              bloqueadaInicialmente: true,
-            },
-          ],
-        })),
-      },
-    ];
+  if (data instanceof Date) {
+    return formatarDataString(data);
   }
 
-  if (tipoExame === '002') {
-    return [
-      {
-        categoriaExame: '002',
-        tipoExame: 'PRÁTICO',
-        etapas: avaliacoes.map((item: any) => ({
-          tipo: item.tipo,
-          avaliacao: [
-            {
-              nome: 'PARTE PRÁTICA',
-              ordem: 1,
-              notaMinima: Number(item.praticaNotaMinima),
-              notaMaxima: Number(item.praticaNotaMaxima),
-              bloqueadaInicialmente: false,
-            },
-          ],
-        })),
-      },
-    ];
+  if (data?._isAMomentObject) {
+    return data.format('YYYY-MM-DD');
   }
 
-  return [];
+  if (typeof data === 'string') {
+    return data;
+  }
+
+  return '';
 }
+
+  criarPeriodos(): any[] {
+    const tipoExame = this.dadosForms.value.tipoExame;
+    const avaliacoes = this.avaliacoesArray.value;
+
+    const dataTeorica = this.formatarDataFormulario(
+      this.dadosForms.value.dataTeorica,
+    );
+
+    const dataPratica = this.formatarDataFormulario(
+      this.dadosForms.value.dataPratica,
+    );
+
+    if (tipoExame === '001') {
+      return [
+        {
+          categoriaExame: '001',
+          tipoExame: 'MSA',
+          etapas: avaliacoes.map((item: any) => ({
+            tipo: item.tipo,
+            avaliacao: [
+              {
+                nome: 'PARTE TEÓRICA',
+                dataAvaliacao: dataTeorica,
+                ordem: 1,
+                notaMinima: Number(item.teoricaNotaMinima),
+                notaMaxima: Number(item.teoricaNotaMaxima),
+                bloqueadaInicialmente: false,
+              },
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: dataPratica,
+                ordem: 2,
+                notaMinima: Number(item.praticaNotaMinima),
+                notaMaxima: Number(item.praticaNotaMaxima),
+                bloqueadaInicialmente: true,
+              },
+            ],
+          })),
+        },
+      ];
+    }
+
+    if (tipoExame === '002') {
+      return [
+        {
+          categoriaExame: '002',
+          tipoExame: 'PRÁTICO',
+          etapas: avaliacoes.map((item: any) => ({
+            tipo: item.tipo,
+            avaliacao: [
+              {
+                nome: 'PARTE PRÁTICA',
+                dataAvaliacao: dataPratica,
+                ordem: 1,
+                notaMinima: Number(item.praticaNotaMinima),
+                notaMaxima: Number(item.praticaNotaMaxima),
+                bloqueadaInicialmente: false,
+              },
+            ],
+          })),
+        },
+      ];
+    }
+
+    return [];
+  }
 
   onTipoExameChange(): void {
     this.avaliacoesArray.clear();
@@ -280,10 +322,12 @@ criarPeriodos(): any[] {
           this.fb.group({
             tipo: [periodo.value],
             label: [periodo.label],
+            dataTeorica: [''],
 
             teoricaNotaMinima: [null, Validators.required],
             teoricaNotaMaxima: [null, Validators.required],
 
+            dataPratica: [''],
             praticaNotaMinima: [null, Validators.required],
             praticaNotaMaxima: [null, Validators.required],
           }),
@@ -297,7 +341,7 @@ criarPeriodos(): any[] {
           this.fb.group({
             tipo: [periodo.value],
             label: [periodo.label],
-
+            dataPratica: [''],
             praticaNotaMinima: [null, Validators.required],
             praticaNotaMaxima: [null, Validators.required],
           }),
@@ -331,7 +375,7 @@ criarPeriodos(): any[] {
       idSetor: this.dadosForms.value.idSetor || '',
       idComum: this.dadosForms.value.idComum || '',
       tipoExame: this.dadosForms.value.tipoExame,
-      categoriaExame: this.dadosForms.value.categoriaExame,
+      // categoriaExame: this.dadosForms.value.categoriaExame,
       concluido: this.dadosForms.value.concluido || false,
       criadoEm:
         this.dadosParaEditar?.criadoEm || formatarDataString(new Date()),
