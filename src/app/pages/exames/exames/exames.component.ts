@@ -76,10 +76,6 @@ export class ExamesComponent implements OnInit {
     this.agendamentoEtapaForm = this.fb.group({
       dataAgendada: ['', Validators.required],
     });
-
-    this.liberaEditar = this.permissao('update');
-    this.liberaCriar = this.permissao('create');
-    this.liberaDeletar = this.permissao('delete');
   }
   isMobile = window.innerWidth <= 576;
   converterISOParaBR = converterISOParaBR;
@@ -90,8 +86,8 @@ export class ExamesComponent implements OnInit {
   dadosForms: FormGroup;
   dadosParaEditar: Exames | null = null;
 
-  liberaEditar = false;
   liberaCriar = false;
+  liberaEditar = false;
   liberaDeletar = false;
 
   mostrarModalNota = false;
@@ -288,6 +284,10 @@ export class ExamesComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.liberaEditar = this.permissao('update');
+    this.liberaCriar = this.permissao('create');
+    this.liberaDeletar = this.permissao('delete');
+
     this.carregarAlunos();
     this.carregarDados();
   }

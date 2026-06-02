@@ -14,6 +14,18 @@
       </button>
     </div>
   </div>
+  <div id="tela__container-tabela">
+    <tcx-table
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [dados]="dados"
+      [mostrarAcoes]="true"
+      [acoesTabela]="acoes"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+    />
+  </div>
 
   <!-- SOLICITAR/EDITAR EXAME -->
   <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
@@ -191,7 +203,10 @@
         </div>
         <!-- // FIM // -->
         <h4 *ngIf="getLiberaData()">DATA AVALIAÇÃO</h4>
-        <div class="linha container__avaliacao" *ngIf="getControl('tipoExame').value === '001'">
+        <div
+          class="linha container__avaliacao"
+          *ngIf="getControl('tipoExame').value === '001'"
+        >
           <div class="input-data">
             <p>Parte Teórica</p>
             <tcx-data

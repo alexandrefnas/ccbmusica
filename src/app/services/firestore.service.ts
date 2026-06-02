@@ -20,6 +20,7 @@ export interface GrupoExames {
   descricao: string;
   idSetor: string;
   idComum: string;
+  tipoExame: string;
   concluido: boolean;
   criadoEm?: string;
   periodos: any[];

@@ -17,6 +17,7 @@ import {
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 import {
   confirmarAcao,
+  converterISOParaBR,
   formatarDataString,
 } from '../../../../shared/shared.service';
 import {
@@ -31,6 +32,7 @@ import { TextComponent } from '../../../component/inputs/text/text.component';
 import { ButtonComponent } from '../../../component/button/button.component';
 import { CommonModule } from '@angular/common';
 import { DataComponent } from '../../../component/inputs/data/data.component';
+import { TableComponent } from '../../../component/table/table.component';
 
 @Component({
   selector: 'tcx-semestres',
@@ -43,6 +45,7 @@ import { DataComponent } from '../../../component/inputs/data/data.component';
     TextComponent,
     ButtonComponent,
     DataComponent,
+    TableComponent,
   ],
   templateUrl: './semestres.component.html',
   styleUrl: './semestres.component.css',
@@ -72,6 +75,8 @@ export class SemestresComponent {
   mostrarModal: boolean = false;
   title: string = '';
   liberaCriar: boolean = false;
+  liberaEditar: boolean = false;
+  liberaDeletar: boolean = false;
 
   listaTipoExame = listaTipoExame;
   listaPeriodo = listaPeriodo;
@@ -81,6 +86,76 @@ export class SemestresComponent {
   listaSetor: { value: string; label: string }[] = [];
   listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
 
+  // TABELA
+  dados: any[] = [];
+
+  camposColunas = [
+    'grupoExame',
+    'descricao',
+    'tipoExameLabel',
+    'datasLabel',
+    'comumLabel',
+    // 'qtdPeriodos',
+    'concluidoLabel',
+  ];
+
+  tituloColunas = {
+    grupoExame: 'Grupo',
+    descricao: 'Descrição',
+    tipoExameLabel: 'Tipo',
+    datasLabel: 'Datas',
+    comumLabel: 'Comum',
+    // qtdPeriodos: 'Períodos',
+    concluidoLabel: 'Status',
+  };
+
+  alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
+    grupoExame: 'center',
+    descricao: 'center',
+    tipoExameLabel: 'center',
+    datasLabel: 'center',
+    comumLabel: 'center',
+    // qtdPeriodos: 'center',
+    concluidoLabel: 'center',
+  };
+
+  alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
+    grupoExame: 'center',
+    descricao: 'left',
+    tipoExameLabel: 'center',
+    datasLabel: 'center',
+    comumLabel: 'left',
+    // qtdPeriodos: 'center',
+    concluidoLabel: 'center',
+  };
+
+tamanhoColunas = {
+  grupoExame: { width: '15%' },
+  descricao: { width: '25%' },
+  tipoExameLabel: { width: '10%' },
+  datasLabel: { width: '25%' },
+  comumLabel: { width: '20%' },
+  // qtdPeriodos: { width: '5%' },
+  concluidoLabel: { width: '5%' },
+};
+
+  acoes = [
+    {
+      label: '✏️',
+      descricao: 'Editar',
+      classe: 'acao-editar',
+      visivel: (item: GrupoExames) => this.liberaEditar && !item.concluido,
+      callback: (item: GrupoExames) => this.editar(item),
+    },
+    {
+      label: '🗑️',
+      descricao: 'Excluir',
+      classe: 'acao-excluir',
+      visivel: (item: GrupoExames) => this.liberaDeletar && !item.concluido,
+      callback: (item: GrupoExames) => this.excluir(item),
+    },
+  ];
+  // FIM TABELA
   usuarioEhAdmin(): boolean {
     return this.auth.usuario?.perfil === 'admin';
   }
@@ -133,29 +208,60 @@ export class SemestresComponent {
       }));
     });
 
-    // this.firestoreService
-    //   .getInstrumento()
-    //   .subscribe((lista: Instrumentos[]) => {
-    //     this.listaInstrumento = lista
-    //       .sort((a, b) =>
-    //         (a.nomeInstrumento || '').localeCompare(
-    //           b.nomeInstrumento || '',
-    //           'pt-BR',
-    //           { sensitivity: 'base' },
-    //         ),
-    //       )
-    //       .map((l) => ({
-    //         value: l.id!,
-    //         label: l.nomeInstrumento?.toUpperCase() || '',
-    //       }));
-    //   });
-
-    // this.carregarDados();
-    // this.liberaEditar = this.permissao('update');
+    this.carregarDados();
     this.liberaCriar = this.permissao('create');
-    // this.liberaDeletar = this.permissao('delete');
+    this.liberaEditar = this.permissao('update');
+    this.liberaDeletar = this.permissao('delete');
 
     this.escutarMudancaIgreja();
+  }
+
+  carregarDados(): void {
+    this.firestoreService.getSemestres().subscribe((lista: GrupoExames[]) => {
+      this.dados = lista.map((item) => {
+        const comum =
+          this.listaIgrejaTodas.find((i) => i.value === item.idComum) ||
+          this.listaIgreja.find((i) => i.value === item.idComum);
+
+        const tipoExame = this.listaTipoExame.find(
+          (t) => t.value === (item as any).tipoExame,
+        );
+
+        const qtdPeriodos =
+          item.periodos?.reduce((total: number, periodo: any) => {
+            return total + (periodo.etapas?.length || 0);
+          }, 0) || 0;
+
+        const primeiraEtapa = item.periodos?.[0]?.etapas?.[0];
+
+        const dataTeorica =
+          primeiraEtapa?.avaliacao?.find((a: any) => a.nome === 'PARTE TEÓRICA')
+            ?.dataAvaliacao || '';
+
+        const dataPratica =
+          primeiraEtapa?.avaliacao?.find((a: any) => a.nome === 'PARTE PRÁTICA')
+            ?.dataAvaliacao || '';
+
+        const datas: string[] = [];
+
+        if (dataTeorica) {
+          datas.push(`${converterISOParaBR(dataTeorica)}`);
+        }
+
+        if (dataPratica) {
+          datas.push(`${converterISOParaBR(dataPratica)}`);
+        }
+
+        return {
+          ...item,
+          tipoExameLabel: tipoExame?.label || item.tipoExame || '',
+          comumLabel: comum?.label || '',
+          qtdPeriodos,
+          datasLabel: datas.join(' | '),
+          concluidoLabel: item.concluido ? 'CONCLUÍDO' : 'ABERTO',
+        };
+      });
+    });
   }
 
   escutarMudancaSetor(): void {
@@ -226,23 +332,23 @@ export class SemestresComponent {
     return this.dadosForms.get('avaliacoes') as FormArray;
   }
 
-formatarDataFormulario(data: any): string {
-  if (!data) return '';
+  formatarDataFormulario(data: any): string {
+    if (!data) return '';
 
-  if (data instanceof Date) {
-    return formatarDataString(data);
+    if (data instanceof Date) {
+      return formatarDataString(data);
+    }
+
+    if (data?._isAMomentObject) {
+      return data.format('YYYY-MM-DD');
+    }
+
+    if (typeof data === 'string') {
+      return data;
+    }
+
+    return '';
   }
-
-  if (data?._isAMomentObject) {
-    return data.format('YYYY-MM-DD');
-  }
-
-  if (typeof data === 'string') {
-    return data;
-  }
-
-  return '';
-}
 
   criarPeriodos(): any[] {
     const tipoExame = this.dadosForms.value.tipoExame;
@@ -405,14 +511,14 @@ formatarDataFormulario(data: any): string {
       this.firestoreService
         .updateSemestres(this.dadosParaEditar.id!, data)
         .then(() => {
-          this.snackBar.open('Semestre alterado com sucesso!', 'Fechar', {
+          this.snackBar.open('Exame alterado com sucesso!', 'Fechar', {
             duration: 4000,
           });
           this.fecharModal();
         });
     } else {
       this.firestoreService.addSemestres(data).then(() => {
-        this.snackBar.open('Semestre cadastrado com sucesso!', 'Fechar', {
+        this.snackBar.open('Exame cadastrado com sucesso!', 'Fechar', {
           duration: 4000,
         });
         this.fecharModal();
@@ -425,6 +531,127 @@ formatarDataFormulario(data: any): string {
   //   this.mostrarModal = true;
   //   this.dadosParaEditar = { ...select };
   // }
+
+  editar(item: GrupoExames): void {
+    this.title = 'Editar Grupo de Avaliações';
+    this.mostrarModal = true;
+    this.dadosParaEditar = { ...item };
+
+    this.dadosForms.patchValue({
+      grupoExame: item.grupoExame || '',
+      descricao: item.descricao || '',
+      idSetor: item.idSetor || '',
+      idComum: item.idComum || '',
+      tipoExame: item.tipoExame || '',
+      concluido: item.concluido || false,
+    });
+
+    this.montarAvaliacoesEdicao(item);
+  }
+
+  montarAvaliacoesEdicao(item: GrupoExames): void {
+    this.avaliacoesArray.clear();
+
+    const tipoExame = item.tipoExame;
+
+    const grupo = item.periodos?.[0];
+
+    if (!grupo) return;
+
+    const etapas = grupo.etapas || [];
+
+    if (tipoExame === '001') {
+      etapas.forEach((periodo: any) => {
+        const teorica = periodo.avaliacao?.find(
+          (a: any) => a.nome === 'PARTE TEÓRICA',
+        );
+
+        const pratica = periodo.avaliacao?.find(
+          (a: any) => a.nome === 'PARTE PRÁTICA',
+        );
+
+        const periodoLista = this.listaPeriodo.find(
+          (p) => p.value === periodo.tipo,
+        );
+
+        this.avaliacoesArray.push(
+          this.fb.group({
+            tipo: [periodo.tipo],
+            label: [periodoLista?.label || periodo.tipo],
+
+            teoricaNotaMinima: [
+              teorica?.notaMinima ?? null,
+              Validators.required,
+            ],
+            teoricaNotaMaxima: [
+              teorica?.notaMaxima ?? null,
+              Validators.required,
+            ],
+
+            praticaNotaMinima: [
+              pratica?.notaMinima ?? null,
+              Validators.required,
+            ],
+            praticaNotaMaxima: [
+              pratica?.notaMaxima ?? null,
+              Validators.required,
+            ],
+          }),
+        );
+
+        this.dadosForms.patchValue({
+          dataTeorica: teorica?.dataAvaliacao || '',
+          dataPratica: pratica?.dataAvaliacao || '',
+        });
+      });
+    }
+
+    if (tipoExame === '002') {
+      etapas.forEach((periodo: any) => {
+        const pratica = periodo.avaliacao?.find(
+          (a: any) => a.nome === 'PARTE PRÁTICA',
+        );
+
+        const periodoLista = this.listaPratico.find(
+          (p) => p.value === periodo.tipo,
+        );
+
+        this.avaliacoesArray.push(
+          this.fb.group({
+            tipo: [periodo.tipo],
+            label: [periodoLista?.label || periodo.tipo],
+
+            praticaNotaMinima: [
+              pratica?.notaMinima ?? null,
+              Validators.required,
+            ],
+            praticaNotaMaxima: [
+              pratica?.notaMaxima ?? null,
+              Validators.required,
+            ],
+          }),
+        );
+
+        this.dadosForms.patchValue({
+          dataPratica: pratica?.dataAvaliacao || '',
+        });
+      });
+    }
+  }
+
+  async excluir(item: GrupoExames): Promise<void> {
+    if (!item.id) return;
+
+    const mensagem = `Deseja realmente excluir ${item.grupoExame}?`;
+
+    if (!confirmarAcao(mensagem)) return;
+
+    await this.firestoreService.deleteSemestres(item.id);
+
+    this.snackBar.open('Exame excluído com sucesso!', 'Fechar', {
+      duration: 4000,
+    });
+  }
 
   fecharModal() {
     this.mostrarModal = false;

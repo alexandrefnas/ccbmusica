@@ -35,3 +35,5 @@ export function dataBRparaISO(data: string): string {
 export function confirmarAcao(mensagem: string): boolean {
   return window.confirm(mensagem);
 }
+
+
