@@ -22,6 +22,7 @@ import {
   Candidatos,
   Exames,
   FirestoreService,
+  GrupoExames,
 } from '../../../services/firestore.service';
 
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
@@ -30,7 +31,12 @@ import {
   converterISOParaBR,
   formatarDataString,
 } from '../../../../shared/shared.service';
-import { upper } from '../../../services/select.service';
+import {
+  listaPeriodo,
+  listaPeriodoPratico,
+  listaTipoExame,
+  upper,
+} from '../../../services/select.service';
 import { DecimalComponent } from '../../../component/inputs/decimal/decimal.component';
 
 @Component({
@@ -73,8 +79,12 @@ export class ExamesComponent implements OnInit {
       motivoCancelamento: ['', Validators.required],
     });
 
-    this.agendamentoEtapaForm = this.fb.group({
-      dataAgendada: ['', Validators.required],
+    // this.agendamentoEtapaForm = this.fb.group({
+    //   dataAgendada: ['', Validators.required],
+    // });
+
+    this.aceiteForm = this.fb.group({
+      idGrupoExame: ['', Validators.required],
     });
   }
   isMobile = window.innerWidth <= 576;
@@ -82,9 +92,11 @@ export class ExamesComponent implements OnInit {
 
   title = 'EXAMES';
   mostrarModal = false;
+  mostrarModalAceite = false;
 
   dadosForms: FormGroup;
   dadosParaEditar: Exames | null = null;
+  exameAceite: Exames | null = null;
 
   liberaCriar = false;
   liberaEditar = false;
@@ -103,31 +115,37 @@ export class ExamesComponent implements OnInit {
   mostrarModalAgendamentoEtapa = false;
   exameAgendamentoEtapa: Exames | null = null;
   etapaAgendamento: any | null = null;
-  agendamentoEtapaForm: FormGroup;
+  aceiteForm: FormGroup;
+  // agendamentoEtapaForm: FormGroup;
 
   listaAlunos: { value: string; label: string }[] = [];
+  listaGrupoExames: { value: string; label: string }[] = [];
+  gruposExames: GrupoExames[] = [];
+  // listaTipoExame = [
+  //   { value: 'TEÓRICO E PRÁTICO', label: 'TEÓRICO E PRÁTICO' },
+  //   { value: 'TEÓRICO', label: 'TEÓRICO' },
+  //   { value: 'PRÁTICO', label: 'PRÁTICO' },
+  // ];
 
-  listaTipoExame = [
-    { value: 'TEÓRICO E PRÁTICO', label: 'TEÓRICO E PRÁTICO' },
-    { value: 'TEÓRICO', label: 'TEÓRICO' },
-    { value: 'PRÁTICO', label: 'PRÁTICO' },
-  ];
+  // listaPeriodo = [
+  //   { value: '1º PERÍODO', label: '1º PERÍODO' },
+  //   { value: '2º PERÍODO', label: '2º PERÍODO' },
+  //   { value: '3º PERÍODO', label: '3º PERÍODO' },
+  //   { value: '4º PERÍODO', label: '4º PERÍODO' },
+  // ];
 
-  listaPeriodo = [
-    { value: '1º PERÍODO', label: '1º PERÍODO' },
-    { value: '2º PERÍODO', label: '2º PERÍODO' },
-    { value: '3º PERÍODO', label: '3º PERÍODO' },
-    { value: '4º PERÍODO', label: '4º PERÍODO' },
-  ];
+  // listaPratico = [
+  //   {
+  //     value: 'REUNIÃO DE JOVENS E MENORES',
+  //     label: 'REUNIÃO DE JOVENS E MENORES',
+  //   },
+  //   { value: 'CULTO OFICIAL', label: 'CULTO OFICIAL' },
+  //   { value: 'OFICIALIZAÇÃO', label: 'OFICIALIZAÇÃO' },
+  // ];
 
-  listaPratico = [
-    {
-      value: 'REUNIÃO DE JOVENS E MENORES',
-      label: 'REUNIÃO DE JOVENS E MENORES',
-    },
-    { value: 'CULTO OFICIAL', label: 'CULTO OFICIAL' },
-    { value: 'OFICIALIZAÇÃO', label: 'OFICIALIZAÇÃO' },
-  ];
+  listaTipoExame = listaTipoExame;
+  listaPeriodo = listaPeriodo;
+  listaPratico = listaPeriodoPratico;
 
   camposColunas = [
     'nomeAluno',
@@ -222,23 +240,31 @@ export class ExamesComponent implements OnInit {
       },
       callback: (item: Exames) => this.lancarNota(item),
     },
+    // {
+    //   label: '📅',
+    //   descricao: 'Agendar etapa',
+    //   classe: 'acao-editar',
+    //   visivel: (item: Exames) => {
+    //     const etapaAtual = item.etapas?.find(
+    //       (e) => e.ordem === item.etapaAtual,
+    //     );
+    //     return (
+    //       (!this.isMobile || !etapaAtual?.dataAgendada) &&
+    //       this.liberaEditar &&
+    //       item.status !== 'cancelado' &&
+    //       item.status !== 'aprovado' &&
+    //       item.status !== 'reprovado'
+    //     );
+    //   },
+    //   callback: (item: Exames) => this.agendarEtapa(item),
+    // },
     {
-      label: '📅',
-      descricao: 'Agendar etapa',
+      label: '✅',
+      descricao: 'Aceitar solicitação',
       classe: 'acao-editar',
-      visivel: (item: Exames) => {
-        const etapaAtual = item.etapas?.find(
-          (e) => e.ordem === item.etapaAtual,
-        );
-        return (
-          (!this.isMobile || !etapaAtual?.dataAgendada) &&
-          this.liberaEditar &&
-          item.status !== 'cancelado' &&
-          item.status !== 'aprovado' &&
-          item.status !== 'reprovado'
-        );
-      },
-      callback: (item: Exames) => this.agendarEtapa(item),
+      visivel: (item: Exames) =>
+        this.liberaEditar && item.status === 'solicitado',
+      callback: (item: Exames) => this.abrirAceite(item),
     },
     {
       label: '🔄',
@@ -289,6 +315,7 @@ export class ExamesComponent implements OnInit {
     this.liberaDeletar = this.permissao('delete');
 
     this.carregarAlunos();
+    this.carregarGrupoExames();
     this.carregarDados();
   }
 
@@ -324,6 +351,10 @@ export class ExamesComponent implements OnInit {
 
     return [];
   }
+
+get aceiteGrupoExameControl(): FormControl {
+  return this.aceiteForm.get('idGrupoExame') as FormControl;
+}
 
   carregarAlunos(): void {
     this.firestoreService.getCandidato().subscribe((lista: Candidatos[]) => {
@@ -475,6 +506,27 @@ export class ExamesComponent implements OnInit {
     });
   }
 
+  carregarGrupoExames(): void {
+    this.firestoreService.getSemestres().subscribe((lista: GrupoExames[]) => {
+      const listaPermitida =
+        this.auth.usuario?.perfil === 'admin'
+          ? lista
+          : lista.filter((item) =>
+              this.auth.temAcessoAoRegistro({
+                idSetor: item.idSetor,
+                idComum: item.idComum,
+              }),
+            );
+
+      this.gruposExames = listaPermitida.filter((g) => !g.concluido);
+
+      this.listaGrupoExames = this.gruposExames.map((g) => ({
+        value: g.id!,
+        label: `${g.grupoExame} - ${g.descricao}`,
+      }));
+    });
+  }
+
   formatarStatus(status: string): string {
     const mapa: any = {
       solicitado: 'SOLICITADO',
@@ -543,6 +595,32 @@ export class ExamesComponent implements OnInit {
     ];
   }
 
+  criarEtapasPorGrupo(grupo: GrupoExames, exame: Exames): any[] {
+    const periodoGrupo = grupo.periodos?.find(
+      (p: any) => p.categoriaExame === exame.tipoExame,
+    );
+
+    if (!periodoGrupo) return [];
+
+    const etapaPeriodo = periodoGrupo.etapas?.find(
+      (e: any) => e.tipo === exame.categoriaExame,
+    );
+
+    if (!etapaPeriodo) return [];
+
+    return etapaPeriodo.avaliacao.map((a: any) => ({
+      nome: a.nome,
+      ordem: a.ordem,
+      nota: null,
+      notaMinima: a.notaMinima,
+      notaMaxima: a.notaMaxima,
+      resultado: a.bloqueadaInicialmente ? 'bloqueado' : 'pendente',
+      dataAgendada: a.dataAvaliacao || '',
+      professorLancamento: '',
+      dataLancamento: '',
+    }));
+  }
+
   onSalvar(): void {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
@@ -554,25 +632,37 @@ export class ExamesComponent implements OnInit {
     //   ? formatarDataString(new Date(this.dadosForms.value.dataAgendada))
     //   : '';
 
-    const baseData: Exames = {
-      idAluno: this.dadosForms.value.idAluno,
-      tipoExame: upper(this.dadosForms.value.tipoExame),
-      categoriaExame: upper(this.dadosForms.value.categoriaExame),
-      observacao: upper(this.dadosForms.value.observacao),
-      dataSolicitacao:
-        this.dadosParaEditar?.dataSolicitacao || formatarDataString(new Date()),
-      status: 'solicitado',
-      etapaAtual: 1,
-      etapas:
-        this.dadosParaEditar?.etapas ||
-        this.criarEtapas(upper(this.dadosForms.value.tipoExame)),
-    };
+    // const baseData: Exames = {
+    //   idAluno: this.dadosForms.value.idAluno,
+    //   tipoExame: upper(this.dadosForms.value.tipoExame),
+    //   categoriaExame: upper(this.dadosForms.value.categoriaExame),
+    //   observacao: upper(this.dadosForms.value.observacao),
+    //   dataSolicitacao:
+    //     this.dadosParaEditar?.dataSolicitacao || formatarDataString(new Date()),
+    //   status: 'solicitado',
+    //   etapaAtual: 1,
+    //   etapas:
+    //     this.dadosParaEditar?.etapas ||
+    //     this.criarEtapas(upper(this.dadosForms.value.tipoExame)),
+    // };
 
     // if (baseData.dataAgendada) {
     //   baseData.etapas = baseData.etapas.map((e) =>
     //     e.ordem === 1 ? { ...e, dataAgendada: baseData.dataAgendada } : e,
     //   );
     // }
+
+    const baseData: Exames = {
+      idAluno: this.dadosForms.value.idAluno,
+      tipoExame: this.dadosForms.value.tipoExame,
+      categoriaExame: this.dadosForms.value.categoriaExame,
+      observacao: upper(this.dadosForms.value.observacao),
+      dataSolicitacao:
+        this.dadosParaEditar?.dataSolicitacao || formatarDataString(new Date()),
+      status: 'solicitado',
+      etapaAtual: 0,
+      etapas: [],
+    };
 
     const nomeAluno =
       this.listaAlunos.find((a) => a.value === baseData.idAluno)?.label ||
@@ -880,69 +970,69 @@ export class ExamesComponent implements OnInit {
   //   this.mostrarModalAgendamentoEtapa = true;
   // }
 
-  agendarEtapa(exame: Exames): void {
-    const etapa = exame.etapas.find(
-      (e) => Number(e.ordem) === Number(exame.etapaAtual),
-    );
+  // agendarEtapa(exame: Exames): void {
+  //   const etapa = exame.etapas.find(
+  //     (e) => Number(e.ordem) === Number(exame.etapaAtual),
+  //   );
 
-    if (!etapa) {
-      this.snackBar.open('Nenhuma etapa atual encontrada.', 'Fechar', {
-        duration: 3000,
-      });
-      return;
-    }
+  //   if (!etapa) {
+  //     this.snackBar.open('Nenhuma etapa atual encontrada.', 'Fechar', {
+  //       duration: 3000,
+  //     });
+  //     return;
+  //   }
 
-    // console.log('ETAPA ATUAL:', etapa);
-    // console.log('DATA DA ETAPA:', etapa.dataAgendada);
+  //   // console.log('ETAPA ATUAL:', etapa);
+  //   // console.log('DATA DA ETAPA:', etapa.dataAgendada);
 
-    this.exameAgendamentoEtapa = exame;
-    this.etapaAgendamento = etapa;
+  //   this.exameAgendamentoEtapa = exame;
+  //   this.etapaAgendamento = etapa;
 
-    this.agendamentoEtapaForm.reset();
+  //   this.agendamentoEtapaForm.reset();
 
-    this.mostrarModalAgendamentoEtapa = true;
+  //   this.mostrarModalAgendamentoEtapa = true;
 
-    setTimeout(() => {
-      this.agendamentoEtapaForm.patchValue({
-        dataAgendada: etapa.dataAgendada || '',
-      });
-    });
-  }
+  //   setTimeout(() => {
+  //     this.agendamentoEtapaForm.patchValue({
+  //       dataAgendada: etapa.dataAgendada || '',
+  //     });
+  //   });
+  // }
 
-  async salvarAgendamentoEtapa(): Promise<void> {
-    if (
-      !this.agendamentoEtapaForm.valid ||
-      !this.exameAgendamentoEtapa ||
-      !this.etapaAgendamento
-    ) {
-      this.agendamentoEtapaForm.markAllAsTouched();
-      return;
-    }
+  // async salvarAgendamentoEtapa(): Promise<void> {
+  //   if (
+  //     // !this.agendamentoEtapaForm.valid ||
+  //     !this.exameAgendamentoEtapa ||
+  //     !this.etapaAgendamento
+  //   ) {
+  //     // this.agendamentoEtapaForm.markAllAsTouched();
+  //     return;
+  //   }
 
-    const dataAgendada = formatarDataString(
-      new Date(this.agendamentoEtapaForm.value.dataAgendada),
-    );
+  //   const dataAgendada = formatarDataString(
+  //     new Date(this.agendamentoEtapaForm.value.dataAgendada),
+  //   );
 
-    // const dataAgendada = this.agendamentoEtapaForm.value.dataAgendada;
+  //   // const dataAgendada = this.agendamentoEtapaForm.value.dataAgendada;
 
-    const exame = this.exameAgendamentoEtapa;
-    const etapa = this.etapaAgendamento;
+  //   const exame = this.exameAgendamentoEtapa;
+  //   const etapa = this.etapaAgendamento;
 
-    const etapasAtualizadas = exame.etapas.map((e) =>
-      e.ordem === etapa.ordem ? { ...e, dataAgendada } : e,
-    );
+  //   const etapasAtualizadas = exame.etapas.map((e) =>
+  //     e.ordem === etapa.ordem ? { ...e, dataAgendada } : e,
+  //   );
 
-    await this.firestoreService.updateExame(exame.id!, {
-      etapas: etapasAtualizadas,
-      status: 'agendado',
-    });
+  //   await this.firestoreService.updateExame(exame.id!, {
+  //     etapas: etapasAtualizadas,
+  //     status: 'agendado',
+  //   });
 
-    this.snackBar.open('Etapa agendada com sucesso!', 'Fechar', {
-      duration: 4000,
-    });
+  //   this.snackBar.open('Etapa agendada com sucesso!', 'Fechar', {
+  //     duration: 4000,
+  //   });
 
-    this.fecharModalAgendamentoEtapa();
-  }
+  //   this.fecharModalAgendamentoEtapa();
+  // }
 
   // async cancelarExame(exame: Exames): Promise<void> {
   //   const confirmacao = confirm(
@@ -980,6 +1070,48 @@ export class ExamesComponent implements OnInit {
     setTimeout(() => {
       this.mostrarModalCancelamento = true;
     });
+  }
+
+  async confirmarAceite(): Promise<void> {
+    if (!this.aceiteForm.valid || !this.exameAceite) {
+      this.aceiteForm.markAllAsTouched();
+      return;
+    }
+
+    const grupoSelecionado = this.gruposExames.find(
+      (g) => g.id === this.aceiteForm.value.idGrupoExame,
+    );
+
+    if (!grupoSelecionado) {
+      this.snackBar.open('Grupo de avaliação não encontrado.', 'Fechar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const etapas = this.criarEtapasPorGrupo(grupoSelecionado, this.exameAceite);
+
+    if (!etapas.length) {
+      this.snackBar.open(
+        'Esse grupo não possui configuração para o tipo/período solicitado.',
+        'Fechar',
+        { duration: 4000 },
+      );
+      return;
+    }
+
+    await this.firestoreService.updateExame(this.exameAceite.id!, {
+      idGrupoExame: grupoSelecionado.id!,
+      etapas,
+      etapaAtual: 1,
+      status: 'agendado',
+    });
+
+    this.snackBar.open('Solicitação aceita com sucesso!', 'Fechar', {
+      duration: 4000,
+    });
+
+    this.fecharModalAceite();
   }
 
   async confirmarCancelamento(): Promise<void> {
@@ -1127,6 +1259,18 @@ export class ExamesComponent implements OnInit {
     }
   }
 
+  abrirAceite(exame: Exames): void {
+    this.exameAceite = exame;
+    this.aceiteForm.reset();
+    this.mostrarModalAceite = true;
+  }
+
+  fecharModalAceite(): void {
+    this.mostrarModalAceite = false;
+    this.exameAceite = null;
+    this.aceiteForm.reset();
+  }
+
   fecharModal(): void {
     this.mostrarModal = false;
     this.dadosForms.reset();
@@ -1148,10 +1292,10 @@ export class ExamesComponent implements OnInit {
     this.cancelamentoForm.reset();
   }
 
-  fecharModalAgendamentoEtapa(): void {
-    this.mostrarModalAgendamentoEtapa = false;
-    this.exameAgendamentoEtapa = null;
-    this.etapaAgendamento = null;
-    this.agendamentoEtapaForm.reset();
-  }
+  // fecharModalAgendamentoEtapa(): void {
+  //   this.mostrarModalAgendamentoEtapa = false;
+  //   this.exameAgendamentoEtapa = null;
+  //   this.etapaAgendamento = null;
+  //   this.agendamentoEtapaForm.reset();
+  // }
 }

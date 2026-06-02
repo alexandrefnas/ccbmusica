@@ -13,7 +13,6 @@ import {
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
-
 export interface GrupoExames {
   id?: string;
   grupoExame: string;
@@ -55,6 +54,7 @@ export interface EtapaExame {
 export interface Exames {
   id?: string;
   idAluno: string;
+  idGrupoExame?: string;
   tipoExame: string;
   status: StatusExame;
   categoriaExame: string;
@@ -108,31 +108,33 @@ export interface Candidatos {
 export class FirestoreService {
   constructor(private firestore: Firestore) {}
 
+  ////ModeloExame
+  // private modelosExameCollection = collection(this.firestore, 'grupoExames');
 
-////ModeloExame
-// private modelosExameCollection = collection(this.firestore, 'grupoExames');
+  addSemestres(data: GrupoExames) {
+    return addDoc(collection(this.firestore, 'grupoExames'), data);
+  }
 
-addSemestres(data: GrupoExames) {
-  return addDoc(collection(this.firestore, 'grupoExames'), data);
-}
+  getSemestres(): Observable<GrupoExames[]> {
+    const q = query(
+      collection(this.firestore, 'grupoExames'),
+      orderBy('grupoExame', 'desc'),
+    );
 
-getSemestres(): Observable<GrupoExames[]> {
-  const q = query(collection(this.firestore, 'grupoExames'), orderBy('grupoExame', 'desc'));
+    return collectionData(q, { idField: 'id' }) as Observable<GrupoExames[]>;
+  }
 
-  return collectionData(q, { idField: 'id' }) as Observable<GrupoExames[]>;
-}
+  updateSemestres(id: string, data: Partial<GrupoExames>) {
+    const ref = doc(this.firestore, `grupoExames/${id}`);
+    return updateDoc(ref, data);
+  }
 
-updateSemestres(id: string, data: Partial<GrupoExames>) {
-  const ref = doc(this.firestore, `grupoExames/${id}`);
-  return updateDoc(ref, data);
-}
+  deleteSemestres(id: string) {
+    const ref = doc(this.firestore, `grupoExames/${id}`);
+    return deleteDoc(ref);
+  }
 
-deleteSemestres(id: string) {
-  const ref = doc(this.firestore, `grupoExames/${id}`);
-  return deleteDoc(ref);
-}
-
-// FIM
+  // FIM
 
   //// Exames
   // async addExame(dados: Exames) {

@@ -1,37 +1,3 @@
-<!-- <div
-  class="form-field"
-  [class.focused]="isFocused || selectedValue || placeholder"
->
-  <label class="form-label">{{ label }}</label>
-
-    <div class="input-wrapper">
-      <select
-        class="form-input"
-        [ngModel]="selectedValue"
-        [ngStyle]="{ 'font-size.px': fontSize }"
-        (ngModelChange)="onSelectChange($event)"
-        (focus)="isFocused = true"
-        (blur)="onBlur()"
-        (keydown)="onKeyDown($event)"
-        [disabled]="disabled"
-      >
-         <option [value]="" disabled selected>Selecione...</option>
-        <option
-          class="list-format"
-          *ngFor="let nivel of niveisLimitados"
-          [value]="nivel.value"
-        >
-          {{ nivel.label }}
-        </option>
-      </select>
-    </div>
-
-  <div class="form-error" *ngIf="hasError() && !isFocused">
-    {{ errorMessage }}
-  </div>
-</div> -->
-
- 
 <div
   class="form-field"
   [class.focused]="isFocused || selectedValue || placeholder"

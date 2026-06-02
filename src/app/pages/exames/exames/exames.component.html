@@ -269,7 +269,7 @@
 </tcx-modal>
 
 <!-- AGENDAR ETAPAS -->
-<tcx-modal
+<!-- <tcx-modal
   [title]="'Agendar Etapa'"
   [visible]="mostrarModalAgendamentoEtapa"
   (onClose)="fecharModalAgendamentoEtapa()"
@@ -301,6 +301,46 @@
       <div class="linhaButton">
         <div class="form__button">
           <tcx-button label="Salvar" type="submit"></tcx-button>
+        </div>
+      </div>
+    </form>
+  </div>
+</tcx-modal> -->
+
+<tcx-modal
+  [title]="'Aceitar Solicitação'"
+  [visible]="mostrarModalAceite"
+  (onClose)="fecharModalAceite()"
+>
+  <div class="templates__form">
+    <form
+      [formGroup]="aceiteForm"
+      (ngSubmit)="confirmarAceite()"
+      style="width: 100%"
+    >
+      <div class="linha">
+        <p>
+          Aluno:
+          <strong>{{ getNomeAluno(exameAceite?.idAluno || "") }}</strong>
+        </p>
+      </div>
+
+      <div class="linha">
+        <div class="input-select">
+          <tcx-select
+            [label]="'Grupo de Avaliação'"
+            [placeholder]="''"
+            [niveisLimitados]="listaGrupoExames"
+            [formControl]="aceiteGrupoExameControl"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
+
+      <div class="linhaButton">
+        <div class="form__button">
+          <tcx-button label="Aceitar" type="submit"></tcx-button>
         </div>
       </div>
     </form>
