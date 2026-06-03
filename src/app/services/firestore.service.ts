@@ -45,6 +45,7 @@ export interface EtapaExame {
   ordem: number;
   nota: number | null;
   notaMinima: number;
+  notaMaxima: number;
   resultado: ResultadoEtapa;
   dataAgendada: string;
   dataLancamento: string;

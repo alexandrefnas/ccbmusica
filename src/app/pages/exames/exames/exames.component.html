@@ -16,7 +16,7 @@
       [colunas]="camposColunas"
       [colunasLabels]="tituloColunas"
       [dados]="dados"
-      [mostrarAcoes]="liberaEditar || liberaDeletar"
+      [mostrarAcoes]="liberaAcoes"
       [acoesTabela]="acoes"
       [tamanhosColunas]="tamanhoColunas"
       [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
@@ -160,17 +160,18 @@
 >
   <div class="templates__form">
     <form [formGroup]="notaForm" (ngSubmit)="salvarNota()" style="width: 100%">
-      <div class="linha" style="padding: 0 5px 10px; gap: 10px">
-        <p>
-          <span style="font-weight: 500">Etapa:</span>
-          {{ etapaSelecionada?.nome }}
-        </p>
-        <!-- </div>
-      <div class="linha" style="padding: 0 5px"> -->
+      <div class="dados-exame-modal">
+        <p><strong>Exame:</strong> {{ buscarLabel(listaTipoExame, exameSelecionado?.tipoExame || '') }}</p>
+        <p><strong>Nível:</strong> {{ buscarCategoriaExame(exameSelecionado?.categoriaExame || '') }}</p>
         <p *ngIf="etapaSelecionada?.dataLancamento as dataLancamento">
-          <span style="font-weight: 500">Data lançamento:</span>
-          {{ converterISOParaBR(dataLancamento) }}
+          <span>Data lançamento:</span> {{ converterISOParaBR(dataLancamento) }}
         </p>
+      </div>
+
+      <div class="dados-exame-modal">
+        <p><strong>Etapa:</strong> {{ etapaSelecionada?.nome }}</p>
+        <p><strong>Nota mín.:</strong> {{ etapaSelecionada?.notaMinima }}</p>
+        <p><strong>Nota máx.:</strong> {{ etapaSelecionada?.notaMaxima }}</p>
       </div>
 
       <!-- MOSTRAR PROFESSOR -->
@@ -184,12 +185,14 @@
             errorMessage="Campo obrigatório"
           />
         </div>
+        <!-- CAMPO NOTA -->
         <div class="input-text" style="width: 25%">
-          <tcx-decimal
+          <tcx-text
             label="Nota"
-            [maskType]="'numeric'"
-            [alinharDireita]="true"
+            type="number"
             formControlName="nota"
+            [min]="0"
+            [max]="etapaSelecionada?.notaMaxima"
             [required]="etapaSelecionada?.nota === null"
             errorMessage="Campo obrigatório"
           />
@@ -206,9 +209,6 @@
         </p>
       </div> -->
 
-      <!-- CAMPO NOTA -->
-      <!-- <div class="linha"></div> -->
-
       <!-- BOTÃO SALVAR -->
       <div class="linhaButton" style="margin-top: 20px">
         <div class="form__button">
@@ -221,8 +221,6 @@
         </div>
       </div>
     </form>
-
-    <!-- BOTÃO EXCLUIR FORA DO FORM -->
   </div>
 </tcx-modal>
 

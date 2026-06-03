@@ -37,6 +37,7 @@ export class DecimalComponent {
     | 'phone'
     | '' = '';
   @Input() value: string = '';
+  @Input() max?: number;
   @Output() valueChange = new EventEmitter<string>(); // Valor Formato
   @Output() rawValueChange = new EventEmitter<number>(); // Valor Limpo (ex: 1234.56)
   @Input() maxLength: number = 20; // ou o valor que quiser
@@ -49,23 +50,11 @@ export class DecimalComponent {
   onChange = (_: any) => {};
   onTouched = () => {};
 
- constructor(@Self() @Optional() public ngControl: NgControl) {
+  constructor(@Self() @Optional() public ngControl: NgControl) {
     if (ngControl) {
       ngControl.valueAccessor = this;
     }
   }
-
-
-  // ngControl: NgControl | null = null;
-
-  // constructor(private injector: Injector) {}
-
-  // Receber foco no Input
-  // @ViewChild('input') inputElementRef!: ElementRef<HTMLInputElement>;
-
-  // focus(): void {
-  //   this.inputElementRef?.nativeElement?.focus();
-  // }
 
   alinhaTexto(): { [klass: string]: any } {
     return this.alinharDireita ? { 'text-align': 'right' } : {};
@@ -87,7 +76,7 @@ export class DecimalComponent {
       },
       (err) => {
         console.error('Erro ao copiar:', err);
-      }
+      },
     );
   }
 
@@ -173,8 +162,8 @@ export class DecimalComponent {
 
       const formElements = Array.from(
         document.querySelectorAll<HTMLElement>(
-          'input, select, textarea, button, [tabindex]:not([tabindex="-1"])'
-        )
+          'input, select, textarea, button, [tabindex]:not([tabindex="-1"])',
+        ),
       ).filter((el) => !el.hasAttribute('disabled'));
 
       const index = formElements.indexOf(event.target as HTMLElement);
@@ -341,6 +330,10 @@ export class DecimalComponent {
 
     if (errors['min']) {
       return `O valor mínimo permitido é ${errors['min'].min}`;
+    }
+
+    if (errors['max']) {
+      return `O valor máximo permitido é ${errors['max'].max}`;
     }
 
     if (errors['maxlength']) {

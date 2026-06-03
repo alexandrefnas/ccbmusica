@@ -132,9 +132,13 @@ export class MenuComponent {
 
   abrirRota(rota: string): void {
     this.router.navigateByUrl(rota);
-    this.appcomp.fecharMenu();
+    this.fecharMenuMobile();
 
     // this.appcomp.alternarMenu = !this.appcomp.menuOculto;
+  }
+
+  fecharMenuMobile(): void {
+    this.appcomp.fecharMenu();
   }
 
   get cadastroFiltrados() {

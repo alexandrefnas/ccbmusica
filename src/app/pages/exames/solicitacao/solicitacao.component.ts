@@ -102,8 +102,8 @@ export class SolicitacaoComponent {
 
   camposColunas = [
     'nomeAluno',
-    'tipoExame',
-    'categoriaExame',
+    'tipoExameLabel',
+    'categoriaExameLabel',
     'dataSolicitacao',
     'dataAgendada',
     'statusLabel',
@@ -112,8 +112,8 @@ export class SolicitacaoComponent {
 
   tituloColunas = {
     nomeAluno: 'Aluno',
-    tipoExame: 'Exame',
-    categoriaExame: 'Categoria',
+    tipoExameLabel: 'Exame',
+    categoriaExameLabel: 'Categoria',
     dataSolicitacao: 'Solicitação',
     dataAgendada: 'Agendamento',
     statusLabel: 'Status',
@@ -122,8 +122,8 @@ export class SolicitacaoComponent {
 
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'center',
-    tipoExame: 'center',
-    categoriaExame: 'center',
+    tipoExameLabel: 'center',
+    categoriaExameLabel: 'center',
     dataSolicitacao: 'center',
     dataAgendada: 'center',
     statusLabel: 'center',
@@ -132,8 +132,8 @@ export class SolicitacaoComponent {
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'left',
-    tipoExame: 'center',
-    categoriaExame: 'center',
+    tipoExameLabel: 'center',
+    categoriaExameLabel: 'center',
     dataSolicitacao: 'center',
     dataAgendada: 'center',
     statusLabel: 'center',
@@ -142,8 +142,8 @@ export class SolicitacaoComponent {
 
   tamanhoColunas = {
     nomeAluno: { width: '24%' },
-    tipoExame: { width: '14%' },
-    categoriaExame: { width: '18%' },
+    tipoExameLabel: { width: '14%' },
+    categoriaExameLabel: { width: '18%' },
     dataSolicitacao: { width: '11%' },
     dataAgendada: { width: '11%' },
     statusLabel: { width: '11%' },
@@ -326,10 +326,12 @@ export class SolicitacaoComponent {
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
               'ALUNO NÃO CADASTRADO',
             // tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
-            tipoExame: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
-            categoriaExame: this.buscarCategoriaExame(
-              exame.categoriaExame || '',
-            ),
+            // tipoExame: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
+            // categoriaExame: this.buscarCategoriaExame(
+            //   exame.categoriaExame || '',
+            // ),
+tipoExameLabel: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
+categoriaExameLabel: this.buscarCategoriaExame(exame.categoriaExame || ''),
             statusLabel: this.formatarStatus(exame.status),
             etapaAtualLabel:
               exame.status === 'aprovado'
@@ -402,10 +404,11 @@ export class SolicitacaoComponent {
       dataSolicitacao:
         this.dadosParaEditar?.dataSolicitacao || formatarDataString(new Date()),
       status: 'solicitado',
-      etapaAtual: 1,
-      etapas:
-        this.dadosParaEditar?.etapas ||
-        this.criarEtapas(upper(this.dadosForms.value.tipoExame)),
+      etapaAtual: 0,
+      etapas: [],
+      // etapas:
+      //   this.dadosParaEditar?.etapas ||
+      //   this.criarEtapas(upper(this.dadosForms.value.tipoExame)),
     };
 
     // if (baseData.dataAgendada) {

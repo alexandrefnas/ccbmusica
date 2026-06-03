@@ -6,6 +6,8 @@
       [type]="type"
       [placeholder]="placeholder"
       [value]="value ?? ''"
+      [attr.min]="min"
+      [attr.max]="max"
       (input)="onInput($event)"
       (keydown)="onKeyDown($event)"
       (focus)="isFocused = true"
@@ -28,6 +30,6 @@
   </div>
 
   <div class="form-error" *ngIf="hasError() && !isFocused">
-    {{ errorMessage }}
+    {{ getErrorMessage() }}
   </div>
 </div>

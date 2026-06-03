@@ -23,6 +23,8 @@ export class TextComponent {
   @Input() placeholder: string = '';
   @Input() errorMessage: string = 'Este campo é obrigatório';
   @Input() value: any;
+  @Input() min?: number;
+  @Input() max?: number;
   @Input() isFocused: boolean = false;
   @Input() disabled: boolean = false;
   @Input() copiaConteudo: boolean = false;
@@ -124,5 +126,24 @@ export class TextComponent {
         next.focus();
       }
     }
+  }
+
+  getErrorMessage(): string {
+    const errors = this.ngControl?.control?.errors;
+    if (!errors) return '';
+
+    if (errors['required']) {
+      return this.errorMessage || 'Campo obrigatório';
+    }
+
+    if (errors['min']) {
+      return `O valor mínimo permitido é ${errors['min'].min}`;
+    }
+
+    if (errors['max']) {
+      return `O valor máximo permitido é ${errors['max'].max}`;
+    }
+
+    return 'Valor inválido';
   }
 }

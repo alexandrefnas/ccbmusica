@@ -177,6 +177,23 @@
   text-decoration: line-through;
 }
 
+.dados-exame-modal {
+  display: flex;
+  flex-direction: row;
+  padding: 0 5px 10px;
+  gap: 10px 20px;
+  /* flex-wrap: wrap; */
+}
+
+.dados-exame-modal p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.dados-exame-modal span {
+  font-weight: 500;
+}
+
 /* RESPONSIVIDADE */
 
 /* MOBILE */
@@ -194,17 +211,17 @@
     gap: 5px;
   }
 
-.linhaOff {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  .linhaOff {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 
-  gap: 8px;
-  width: 100%;
-  /* min-width: 450px; */
+    gap: 8px;
+    width: 100%;
+    /* min-width: 450px; */
 
-  margin-bottom: 10px;
-}
+    margin-bottom: 10px;
+  }
 
   .templates__form {
     width: 100%;

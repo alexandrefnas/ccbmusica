@@ -52,6 +52,7 @@
             [routerLink]="page.rota"
             routerLinkActive="menu-ativo"
             [routerLinkActiveOptions]="{ exact: true }"
+(click)="fecharMenuMobile()"
           >
             <i [class]="page.icon"></i>
             {{ page.label }}
@@ -88,6 +89,7 @@
             [routerLink]="page.rota"
             routerLinkActive="menu-ativo"
             [routerLinkActiveOptions]="{ exact: true }"
+            (click)="fecharMenuMobile()"
           >
             <i [class]="page.icon"></i>
             {{ page.label }}
@@ -124,6 +126,7 @@
             [routerLink]="page.rota"
             routerLinkActive="menu-ativo"
             [routerLinkActiveOptions]="{ exact: true }"
+(click)="fecharMenuMobile()"
           >
             <i [class]="page.icon"></i>
             {{ page.label }}

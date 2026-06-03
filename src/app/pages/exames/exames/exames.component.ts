@@ -49,7 +49,7 @@ import { DecimalComponent } from '../../../component/inputs/decimal/decimal.comp
     ButtonComponent,
     SelectComponent,
     TextComponent,
-    DataComponent,
+    // DataComponent,
     TableComponent,
     DecimalComponent,
   ],
@@ -149,8 +149,8 @@ export class ExamesComponent implements OnInit {
 
   camposColunas = [
     'nomeAluno',
-    'tipoExame',
-    'categoriaExame',
+    'tipoExameLabel',
+    'categoriaExameLabel',
     'dataSolicitacao',
     'dataAgendada',
     'statusLabel',
@@ -159,8 +159,8 @@ export class ExamesComponent implements OnInit {
 
   tituloColunas = {
     nomeAluno: 'Aluno',
-    tipoExame: 'Exame',
-    categoriaExame: 'Categoria',
+    tipoExameLabel: 'Exame',
+    categoriaExameLabel: 'Categoria',
     dataSolicitacao: 'Solicitação',
     dataAgendada: 'Agendamento',
     statusLabel: 'Status',
@@ -169,8 +169,8 @@ export class ExamesComponent implements OnInit {
 
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'center',
-    tipoExame: 'center',
-    categoriaExame: 'center',
+    tipoExameLabel: 'center',
+    categoriaExameLabel: 'center',
     dataSolicitacao: 'center',
     dataAgendada: 'center',
     statusLabel: 'center',
@@ -179,8 +179,8 @@ export class ExamesComponent implements OnInit {
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'left',
-    tipoExame: 'center',
-    categoriaExame: 'center',
+    tipoExameLabel: 'center',
+    categoriaExameLabel: 'center',
     dataSolicitacao: 'center',
     dataAgendada: 'center',
     statusLabel: 'center',
@@ -189,8 +189,8 @@ export class ExamesComponent implements OnInit {
 
   tamanhoColunas = {
     nomeAluno: { width: '24%' },
-    tipoExame: { width: '14%' },
-    categoriaExame: { width: '18%' },
+    tipoExameLabel: { width: '14%' },
+    categoriaExameLabel: { width: '18%' },
     dataSolicitacao: { width: '11%' },
     dataAgendada: { width: '11%' },
     statusLabel: { width: '11%' },
@@ -338,23 +338,47 @@ export class ExamesComponent implements OnInit {
     );
   }
 
+  // getListaCategoriaExame() {
+  //   const tipo = this.dadosForms.get('tipoExame')?.value;
+
+  //   if (tipo === 'TEÓRICO E PRÁTICO') {
+  //     return this.listaPeriodo;
+  //   }
+
+  //   if (tipo === 'PRÁTICO') {
+  //     return this.listaPratico;
+  //   }
+
+  //   return [];
+  // }
+
   getListaCategoriaExame() {
     const tipo = this.dadosForms.get('tipoExame')?.value;
 
-    if (tipo === 'TEÓRICO E PRÁTICO') {
+    if (tipo === '001') {
       return this.listaPeriodo;
     }
 
-    if (tipo === 'PRÁTICO') {
+    if (tipo === '002') {
       return this.listaPratico;
     }
 
     return [];
   }
 
-get aceiteGrupoExameControl(): FormControl {
-  return this.aceiteForm.get('idGrupoExame') as FormControl;
-}
+  get aceiteGrupoExameControl(): FormControl {
+    return this.aceiteForm.get('idGrupoExame') as FormControl;
+  }
+
+  get liberaAcoes(): boolean {
+    const temPermissao = this.liberaEditar || this.liberaDeletar;
+
+    const temItemSolicitado = this.dados.some(
+      (item) => item.status === 'solicitado',
+    );
+
+    return temPermissao;
+  }
 
   carregarAlunos(): void {
     this.firestoreService.getCandidato().subscribe((lista: Candidatos[]) => {
@@ -467,7 +491,18 @@ get aceiteGrupoExameControl(): FormControl {
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
               'ALUNO NÃO CADASTRADO',
-            tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
+            // tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
+            // tipoExame: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
+            // categoriaExame: this.buscarCategoriaExame(
+            //   exame.categoriaExame || '',
+            // ),tipoExameLabel: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
+            tipoExameLabel: this.buscarLabel(
+              this.listaTipoExame,
+              exame.tipoExame,
+            ),
+            categoriaExameLabel: this.buscarCategoriaExame(
+              exame.categoriaExame || '',
+            ),
             statusLabel: this.formatarStatus(exame.status),
             etapaAtualLabel:
               exame.status === 'aprovado'
@@ -540,60 +575,60 @@ get aceiteGrupoExameControl(): FormControl {
     return mapa[status] || status;
   }
 
-  criarEtapas(tipoExame: string) {
-    if (tipoExame === 'TEÓRICO') {
-      return [
-        {
-          nome: 'PARTE TEÓRICA',
-          ordem: 1,
-          nota: null,
-          notaMinima: 7,
-          resultado: 'pendente' as const,
-          dataAgendada: '',
-          professorLancamento: '',
-          dataLancamento: '',
-        },
-      ];
-    }
+  // criarEtapas(tipoExame: string) {
+  //   if (tipoExame === 'TEÓRICO') {
+  //     return [
+  //       {
+  //         nome: 'PARTE TEÓRICA',
+  //         ordem: 1,
+  //         nota: null,
+  //         notaMinima: 7,
+  //         resultado: 'pendente' as const,
+  //         dataAgendada: '',
+  //         professorLancamento: '',
+  //         dataLancamento: '',
+  //       },
+  //     ];
+  //   }
 
-    if (tipoExame === 'PRÁTICO') {
-      return [
-        {
-          nome: 'PARTE PRÁTICA',
-          ordem: 1,
-          nota: null,
-          notaMinima: 7,
-          resultado: 'pendente' as const,
-          dataAgendada: '',
-          professorLancamento: '',
-          dataLancamento: '',
-        },
-      ];
-    }
+  //   if (tipoExame === 'PRÁTICO') {
+  //     return [
+  //       {
+  //         nome: 'PARTE PRÁTICA',
+  //         ordem: 1,
+  //         nota: null,
+  //         notaMinima: 7,
+  //         resultado: 'pendente' as const,
+  //         dataAgendada: '',
+  //         professorLancamento: '',
+  //         dataLancamento: '',
+  //       },
+  //     ];
+  //   }
 
-    return [
-      {
-        nome: 'PARTE TEÓRICA',
-        ordem: 1,
-        nota: null,
-        notaMinima: 7,
-        resultado: 'pendente' as const,
-        dataAgendada: '',
-        professorLancamento: '',
-        dataLancamento: '',
-      },
-      {
-        nome: 'PARTE PRÁTICA',
-        ordem: 2,
-        nota: null,
-        notaMinima: 7,
-        resultado: 'bloqueado' as const,
-        dataAgendada: '',
-        professorLancamento: '',
-        dataLancamento: '',
-      },
-    ];
-  }
+  //   return [
+  //     {
+  //       nome: 'PARTE TEÓRICA',
+  //       ordem: 1,
+  //       nota: null,
+  //       notaMinima: 7,
+  //       resultado: 'pendente' as const,
+  //       dataAgendada: '',
+  //       professorLancamento: '',
+  //       dataLancamento: '',
+  //     },
+  //     {
+  //       nome: 'PARTE PRÁTICA',
+  //       ordem: 2,
+  //       nota: null,
+  //       notaMinima: 7,
+  //       resultado: 'bloqueado' as const,
+  //       dataAgendada: '',
+  //       professorLancamento: '',
+  //       dataLancamento: '',
+  //     },
+  //   ];
+  // }
 
   criarEtapasPorGrupo(grupo: GrupoExames, exame: Exames): any[] {
     const periodoGrupo = grupo.periodos?.find(
@@ -619,6 +654,21 @@ get aceiteGrupoExameControl(): FormControl {
       professorLancamento: '',
       dataLancamento: '',
     }));
+  }
+
+  buscarLabel(
+    lista: { value: string; label: string }[],
+    value: string,
+  ): string {
+    return lista.find((item) => item.value === value)?.label || value;
+  }
+
+  buscarCategoriaExame(value: string): string {
+    return (
+      this.listaPeriodo.find((x) => x.value === value)?.label ||
+      this.listaPratico.find((x) => x.value === value)?.label ||
+      value
+    );
   }
 
   onSalvar(): void {
@@ -720,10 +770,21 @@ get aceiteGrupoExameControl(): FormControl {
       idAluno: exame.idAluno || '',
       tipoExame: exame.tipoExame || '',
       categoriaExame: exame.categoriaExame || '',
-      // dataAgendada: exame.dataAgendada || '',
-      // professorResponsavel: exame.professorResponsavel || '',
       observacao: exame.observacao || '',
     });
+
+    // this.dadosForms.patchValue({
+    //   idAluno: exame.idAluno || '',
+    //   tipoExameLabel: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
+    //   categoriaExameLabel: this.buscarCategoriaExame(
+    //     exame.categoriaExame || '',
+    //   ),
+    //   // tipoExame: exame.tipoExame || '',
+    //   // categoriaExame: exame.categoriaExame || '',
+    //   // dataAgendada: exame.dataAgendada || '',
+    //   // professorResponsavel: exame.professorResponsavel || '',
+    //   observacao: exame.observacao || '',
+    // });
   }
 
   // async lancarNota(exame: Exames): Promise<void> {
@@ -797,6 +858,29 @@ get aceiteGrupoExameControl(): FormControl {
   //   });
   // }
 
+  // lancarNota(exame: Exames): void {
+  //   const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
+
+  //   if (!etapa) {
+  //     this.snackBar.open('Nenhuma etapa disponível.', 'Fechar', {
+  //       duration: 3000,
+  //     });
+  //     return;
+  //   }
+  //   console.log('exame:', exame);
+  //   this.exameSelecionado = exame;
+  //   this.etapaSelecionada = etapa;
+  //   this.notaForm.reset();
+
+  //   this.notaForm.patchValue({
+  //     nota: etapa.nota ?? '',
+  //     professorLancamento:
+  //       etapa.professorLancamento || this.auth.usuario?.nome || '',
+  //   });
+
+  //   this.mostrarModalNota = true;
+  // }
+
   lancarNota(exame: Exames): void {
     const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
 
@@ -809,6 +893,17 @@ get aceiteGrupoExameControl(): FormControl {
 
     this.exameSelecionado = exame;
     this.etapaSelecionada = etapa;
+
+    const notaControl = this.notaForm.get('nota');
+
+    notaControl?.setValidators([
+      Validators.required,
+      Validators.min(0),
+      Validators.max(etapa.notaMaxima),
+    ]);
+
+    notaControl?.updateValueAndValidity();
+
     this.notaForm.reset();
 
     this.notaForm.patchValue({
@@ -831,6 +926,30 @@ get aceiteGrupoExameControl(): FormControl {
     // }
 
     if (!this.exameSelecionado || !this.etapaSelecionada) {
+      return;
+    }
+
+    const notaDigitada = this.converterNotaParaNumero(this.notaForm.value.nota);
+    const notaMaxima = this.etapaSelecionada?.notaMaxima ?? 0;
+
+    if (notaDigitada > notaMaxima) {
+      this.snackBar.open(
+        `A nota não pode ser maior que ${notaMaxima}.`,
+        'Fechar',
+        { duration: 3000 },
+      );
+      return;
+    }
+
+    if (notaDigitada < 0) {
+      this.snackBar.open('A nota não pode ser menor que zero.', 'Fechar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (this.notaForm.invalid) {
+      this.notaForm.markAllAsTouched();
       return;
     }
 
@@ -948,6 +1067,14 @@ get aceiteGrupoExameControl(): FormControl {
     });
 
     this.fecharModalNota();
+  }
+
+  converterNotaParaNumero(valor: any): number {
+    if (valor === null || valor === undefined || valor === '') {
+      return 0;
+    }
+
+    return Number(String(valor).replace(',', '.'));
   }
 
   // agendarEtapa(exame: Exames): void {
