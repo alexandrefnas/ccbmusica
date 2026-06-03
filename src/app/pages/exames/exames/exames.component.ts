@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -15,8 +15,8 @@ import { ModalComponent } from '../../../modal/modal/modal.component';
 import { ButtonComponent } from '../../../component/button/button.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { TextComponent } from '../../../component/inputs/text/text.component';
-import { DataComponent } from '../../../component/inputs/data/data.component';
-import { TableComponent } from '../../../component/table/table.component';
+// import { DataComponent } from '../../../component/inputs/data/data.component';
+// import { TableComponent } from '../../../component/table/table.component';
 
 import {
   Candidatos,
@@ -37,7 +37,8 @@ import {
   listaTipoExame,
   upper,
 } from '../../../services/select.service';
-import { DecimalComponent } from '../../../component/inputs/decimal/decimal.component';
+// import { DecimalComponent } from '../../../component/inputs/decimal/decimal.component';
+import { TableComponentSelect } from "../../../component/table-select/table.component";
 
 @Component({
   selector: 'tcx-exames',
@@ -50,9 +51,10 @@ import { DecimalComponent } from '../../../component/inputs/decimal/decimal.comp
     SelectComponent,
     TextComponent,
     // DataComponent,
-    TableComponent,
-    DecimalComponent,
-  ],
+    // TableComponent,
+    // DecimalComponent,
+    TableComponentSelect
+],
   templateUrl: './exames.component.html',
   styleUrl: './exames.component.css',
 })
@@ -93,6 +95,9 @@ export class ExamesComponent implements OnInit {
   title = 'EXAMES';
   mostrarModal = false;
   mostrarModalAceite = false;
+
+  examesSelecionados: Exames[] = [];
+  mostrarModalAceiteLote = false;
 
   dadosForms: FormGroup;
   dadosParaEditar: Exames | null = null;
@@ -258,14 +263,14 @@ export class ExamesComponent implements OnInit {
     //   },
     //   callback: (item: Exames) => this.agendarEtapa(item),
     // },
-    {
-      label: '✅',
-      descricao: 'Aceitar solicitação',
-      classe: 'acao-editar',
-      visivel: (item: Exames) =>
-        this.liberaEditar && item.status === 'solicitado',
-      callback: (item: Exames) => this.abrirAceite(item),
-    },
+    // {
+    //   label: '✅',
+    //   descricao: 'Aceitar solicitação',
+    //   classe: 'acao-editar',
+    //   visivel: (item: Exames) =>
+    //     this.liberaEditar && item.status === 'solicitado',
+    //   callback: (item: Exames) => this.abrirAceite(item),
+    // },
     {
       label: '🔄',
       descricao: 'Alterar nota',
@@ -1198,6 +1203,101 @@ export class ExamesComponent implements OnInit {
       this.mostrarModalCancelamento = true;
     });
   }
+
+// SELECIONAR
+aoSelecionarExames(lista: Exames[]): void {
+  this.examesSelecionados = lista;
+}
+
+podeSelecionarExame = (item: Exames): boolean => {
+  return this.liberaEditar && item.status === 'solicitado';
+};
+
+abrirAceiteEmLote(): void {
+  if (!this.examesSelecionados.length) {
+    this.snackBar.open('Selecione pelo menos uma solicitação.', 'Fechar', {
+      duration: 3000,
+    });
+    return;
+  }
+
+  this.aceiteForm.reset();
+  this.mostrarModalAceiteLote = true;
+}
+
+fecharModalAceiteLote(): void {
+  this.mostrarModalAceiteLote = false;
+  this.aceiteForm.reset();
+  this.limparSelecaoExames();
+}
+
+async confirmarAceiteEmLote(): Promise<void> {
+  if (!this.aceiteForm.valid) {
+    this.aceiteForm.markAllAsTouched();
+    return;
+  }
+
+  const grupoSelecionado = this.gruposExames.find(
+    (g) => g.id === this.aceiteForm.value.idGrupoExame,
+  );
+
+  if (!grupoSelecionado) {
+    this.snackBar.open('Grupo de avaliação não encontrado.', 'Fechar', {
+      duration: 3000,
+    });
+    return;
+  }
+
+  const examesValidos: Exames[] = [];
+
+  for (const exame of this.examesSelecionados) {
+    const etapas = this.criarEtapasPorGrupo(grupoSelecionado, exame);
+
+    if (etapas.length) {
+      examesValidos.push({ ...exame, etapas });
+    }
+  }
+
+  if (!examesValidos.length) {
+    this.snackBar.open(
+      'Nenhuma solicitação selecionada é compatível com esse grupo.',
+      'Fechar',
+      { duration: 4000 },
+    );
+    return;
+  }
+
+  const confirmacao = confirm(
+    `Deseja realmente aceitar ${examesValidos.length} solicitação(ões)?`,
+  );
+
+  if (!confirmacao) return;
+
+  await Promise.all(
+    examesValidos.map((exame) =>
+      this.firestoreService.updateExame(exame.id!, {
+        idGrupoExame: grupoSelecionado.id!,
+        etapas: exame.etapas,
+        etapaAtual: 1,
+        status: 'agendado',
+      }),
+    ),
+  );
+
+  this.snackBar.open('Solicitações aceitas com sucesso!', 'Fechar', {
+    duration: 4000,
+  });
+
+  this.examesSelecionados = [];
+  this.fecharModalAceiteLote();
+}
+
+@ViewChild(TableComponentSelect) tableComponent!: TableComponentSelect;
+limparSelecaoExames(): void {
+  this.examesSelecionados = [];
+  this.tableComponent?.limparSelecao();
+}
+// FIM SELECIONAR
 
   async confirmarAceite(): Promise<void> {
     if (!this.aceiteForm.valid || !this.exameAceite) {

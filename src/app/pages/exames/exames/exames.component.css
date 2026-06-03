@@ -81,6 +81,12 @@
   margin-top: 10px;
 }
 
+.button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
 .container__button,
 .form__button {
   width: 120px;

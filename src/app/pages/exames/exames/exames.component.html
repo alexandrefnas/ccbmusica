@@ -5,14 +5,25 @@
     </div>
 
     <div class="button-container" *ngIf="liberaCriar">
-      <button class="buttons" (click)="buttonClick()">
+      <div class="button-container" *ngIf="liberaEditar">
+        <button
+          class="buttons"
+          type="button"
+          title="Aceitar selecionados"
+          [disabled]="examesSelecionados.length === 0"
+          (click)="abrirAceiteEmLote()"
+        >
+          <i class="bi bi-calendar-check"></i>
+        </button>
+      </div>
+      <button class="buttons" (click)="buttonClick()" title="Nova solicitação">
         <i class="bi bi-file-earmark-plus"></i> Novo
       </button>
     </div>
   </div>
 
   <div id="tela__container-tabela">
-    <tcx-table
+    <tcx-table-select
       [colunas]="camposColunas"
       [colunasLabels]="tituloColunas"
       [dados]="dados"
@@ -22,6 +33,9 @@
       [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
       [alinhamentosColunas]="alinhamentoColuna"
       [destacarLinhas]="regrasDestaque"
+      [permitirSelecao]="true"
+      [podeSelecionar]="podeSelecionarExame"
+      (selecionadosChange)="aoSelecionarExames($event)"
     />
   </div>
 </div>
@@ -161,8 +175,14 @@
   <div class="templates__form">
     <form [formGroup]="notaForm" (ngSubmit)="salvarNota()" style="width: 100%">
       <div class="dados-exame-modal">
-        <p><strong>Exame:</strong> {{ buscarLabel(listaTipoExame, exameSelecionado?.tipoExame || '') }}</p>
-        <p><strong>Nível:</strong> {{ buscarCategoriaExame(exameSelecionado?.categoriaExame || '') }}</p>
+        <p>
+          <strong>Exame:</strong>
+          {{ buscarLabel(listaTipoExame, exameSelecionado?.tipoExame || "") }}
+        </p>
+        <p>
+          <strong>Nível:</strong>
+          {{ buscarCategoriaExame(exameSelecionado?.categoriaExame || "") }}
+        </p>
         <p *ngIf="etapaSelecionada?.dataLancamento as dataLancamento">
           <span>Data lançamento:</span> {{ converterISOParaBR(dataLancamento) }}
         </p>
@@ -339,6 +359,47 @@
       <div class="linhaButton">
         <div class="form__button">
           <tcx-button label="Aceitar" type="submit"></tcx-button>
+        </div>
+      </div>
+    </form>
+  </div>
+</tcx-modal>
+
+<!-- AGENDAR ETAPAS EM LOTE -->
+<tcx-modal
+  [title]="'Aceitar Solicitações Selecionadas'"
+  [visible]="mostrarModalAceiteLote"
+  (onClose)="fecharModalAceiteLote()"
+>
+  <div class="templates__form">
+    <form
+      [formGroup]="aceiteForm"
+      (ngSubmit)="confirmarAceiteEmLote()"
+      style="width: 100%"
+    >
+      <div class="linha">
+        <p>
+          Solicitações selecionadas:
+          <strong>{{ examesSelecionados.length }}</strong>
+        </p>
+      </div>
+
+      <div class="linha">
+        <div class="input-select">
+          <tcx-select
+            [label]="'Grupo de Avaliação'"
+            [placeholder]="''"
+            [niveisLimitados]="listaGrupoExames"
+            [formControl]="aceiteGrupoExameControl"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
+
+      <div class="linhaButton">
+        <div class="form__button">
+          <tcx-button label="Aceitar Selecionados" type="submit"></tcx-button>
         </div>
       </div>
     </form>

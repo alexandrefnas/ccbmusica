@@ -1,0 +1,218 @@
+:host {
+  display: block;
+  /* flex-direction: column; */
+  width: 100%;
+  height: 100%;
+}
+
+/* =====TABELAS===== */
+.table-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+  scrollbar-gutter: stable;
+}
+
+.table-wrapper::-webkit-scrollbar:horizontal {
+  height: 0px;
+}
+
+.table-wrapper {
+  scrollbar-width: thin;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse; /* importante */
+  border-spacing: 0;
+  border: 1px solid #e0e0e0; /* 👈 borda externa */
+  border-top: none;
+  font-size: 14px;
+  /* border-right: none; */
+}
+
+/* ===== CABEÇALHO ===== */
+.tabela thead {
+  background: #f4f6f9;
+}
+
+.tabela th {
+  text-align: left;
+  padding: 12px 14px;
+  /* font-weight: 600; */
+  color: #333;
+  /* border-bottom: 2px solid #e0e0e0; */
+  white-space: nowrap;
+}
+
+/* ===== LINHAS ===== */
+.tabela td {
+  padding: 10px 14px;
+  /* border-bottom: 1px solid #e0e0e0; */
+  color: #444;
+  vertical-align: middle;
+}
+
+.tabela tbody td {
+  /* border: none; */
+  border: 1px solid #e0e0e0;
+}
+
+/* Classes para destaque de linha via destacarLinhas */
+.tabela tbody tr.linha-vermelha td {
+  background-color: #ffdddd !important;
+  color: #b33a3a;
+  /* font-weight: bold; */
+}
+
+.tabela tbody tr.linha-sucesso td {
+  background-color: #e6ffea !important;
+  color: #2e7d32;
+}
+
+.tabela tbody tr.linha-aviso td {
+  background-color: #fff9c4 !important;
+  color: #8a6d3b;
+}
+/* // */
+
+/* ===== ÚLTIMA LINHA SEM BORDA ===== */
+.tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tr.linha-selecionada {
+  background-color: #dbeafe !important; /* azul claro */
+}
+
+tr.linha-selecionada:hover {
+  background-color: #bfdbfe !important;
+}
+
+tr.linha-selecionada td {
+  background-color: #dbeafe !important;
+}
+
+tr.linha-selecionada:hover td {
+  background-color: #bfdbfe !important;
+}
+
+/* Cabeçalho fixo */
+.tabela thead th {
+  position: sticky;
+  top: 0;
+  background: #f4f6f9;
+  z-index: 2;
+
+  /* remove conflito */
+  border: 1px solid #e0e0e0;
+
+  /* cria borda visual fixa */
+
+  /* box-shadow: none; */
+}
+
+.sticky-acoes:last-child {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.tabela th,
+.tabela td {
+  /* border: 1px solid #ddd; */
+  border: 1px solid #e0e0e0;
+  height: 100%;
+  vertical-align: middle;
+  padding: 8px;
+  text-align: left;
+}
+/* FIM Cabeçalho fixo */
+
+/* ===== AÇÕES ===== */
+.sticky-acoes {
+  position: sticky;
+  right: 0;
+  z-index: 3;
+  background: #fff;
+
+  /* separação interna */
+  border-left: 1px solid #e0e0e0;
+
+  /* borda externa direita */
+  border-right: 1px solid #e0e0e0; /* 👈 força a borda visível */
+
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Botões de ação */
+.container__mostrar-acoes {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* centraliza verticalmente */
+  gap: 4px;
+  white-space: nowrap;
+  height: 100%;
+}
+
+.mostrar-acoes__button {
+  display: inline-block;
+}
+
+.tabela tbody tr:hover td {
+  background: #a8c1f3 !important;
+  transition: background 0.2s ease-in-out;
+}
+
+.tabela tbody tr:hover td.sticky-acoes {
+  background: #a8c1f3 !important;
+}
+
+/* / / */
+.buttons-stile {
+  padding: 3px;
+  border: 1px solid #ccc;
+  box-shadow:
+    inset 1px 1px 0 #fff,
+    inset -1px -1px 0 #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.buttons-stile:active {
+  border: 1px solid #ccc;
+  box-shadow:
+    inset -1px -1px 0 #fff,
+    inset 1px 1px 0 #999;
+  transform: translateY(2px);
+}
+/* // */
+
+/* Responsividade */
+@media (max-width: 575px) {
+  .tabela {
+    font-size: 10px;
+    /* font-weight: 600; */
+  }
+
+  .buttons-stile {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 575px) and (max-width: 991.98px) {
+  .tabela {
+    font-size: 12px;
+    /* font-weight: 600; */
+  }
+}

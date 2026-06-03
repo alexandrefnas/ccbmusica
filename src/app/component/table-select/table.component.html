@@ -1,0 +1,103 @@
+<div class="table-wrapper">
+  <table class="tabela">
+    <tr *ngIf="!this.dados || this.dados.length === 0">
+      <td colspan="6" style="text-align: center; padding: 20px; width: 100%">
+        {{ mensagemVazio }}
+      </td>
+    </tr>
+    <thead>
+      <tr>
+        <th *ngIf="permitirSelecao" style="text-align: center; width: 40px">
+          <input
+            type="checkbox"
+            [checked]="todosSelecionados()"
+            (change)="selecionarTodos($event)"
+          />
+        </th>
+        <th
+          *ngFor="let coluna of colunas"
+          [ngStyle]="getEstiloColunaTitulo(coluna)"
+          (click)="ordenarPor(coluna)"
+          class="th-ordenavel"
+        >
+          <span class="th-conteudo">
+            {{ colunasLabels[coluna] || coluna }}
+
+            <span class="setas" *ngIf="podeOrdenar(coluna)">
+              <span *ngIf="colunaOrdenada !== coluna" class="seta neutra"
+                >⇅</span
+              >
+              <span
+                *ngIf="colunaOrdenada === coluna && direcaoOrdenacao === 'asc'"
+                class="seta ativa"
+                >▲</span
+              >
+              <span
+                *ngIf="colunaOrdenada === coluna && direcaoOrdenacao === 'desc'"
+                class="seta ativa"
+                >▼</span
+              >
+            </span>
+          </span>
+        </th>
+        <th
+          *ngIf="mostrarAcoes"
+          class="sticky-acoes"
+          style="text-align: center"
+        >
+          Ações
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        *ngFor="let item of dados"
+        (click)="getClassesDestaque(item)"
+        [ngClass]="getClassesDestaque(item)"
+        [class.linha-selecionada]="destacarLinhas === item.id"
+      >
+        <td *ngIf="permitirSelecao" style="text-align: center; width: 40px">
+          <input
+            type="checkbox"
+            [disabled]="podeSelecionar && !podeSelecionar(item)"
+            [checked]="isSelecionado(item)"
+            (click)="$event.stopPropagation()"
+            (change)="selecionarItem(item, $event)"
+          />
+        </td>
+        <td [ngStyle]="getEstiloColuna(coluna)" *ngFor="let coluna of colunas">
+          {{ item[coluna] }}
+        </td>
+
+        <td
+          *ngIf="mostrarAcoes"
+          class="sticky-acoes"
+          [ngClass]="getClassesDestaque(item)"
+          [class.linha-selecionada]="destacarLinhas === item.id"
+        >
+          <!-- [ngStyle]="{ 'text-align': 'center', 'white-space': 'nowrap' }" -->
+          <!-- [ngStyle]="getEstiloColuna('mostrarAcoes')" -->
+          <div class="container__mostrar-acoes">
+            <ng-container *ngFor="let acao of acoesTabela">
+              <div
+                class="mostrar-acoes__button"
+                *ngIf="!acao.visivel || acao.visivel(item)"
+              >
+                <button
+                  class="buttons-stile"
+                  [title]="acao.descricao || ''"
+                  *ngIf="!acao.visivel || acao.visivel(item)"
+                  [ngClass]="acao.classe || ''"
+                  (click)="acao.callback(item)"
+                >
+                  {{ acao.label }}
+                </button>
+              </div>
+            </ng-container>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
