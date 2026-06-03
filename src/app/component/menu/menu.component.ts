@@ -46,7 +46,7 @@ export class MenuComponent {
     {
       label: 'Grupo Avaliações',
       rota: '/semestres',
-      tabela: 'modelosExame',
+      tabela: 'grupoExames',
       icon: 'bi bi-calendar3',
     },
   ];
