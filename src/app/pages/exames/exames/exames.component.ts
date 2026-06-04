@@ -130,6 +130,9 @@ export class ExamesComponent implements OnInit {
 
   gruposExames: GrupoExames[] = [];
 
+  paginaAtual = 1;
+  itensPorPagina = 20;
+
   statusFiltro = 'solicitado';
 
   listaStatusFiltro = [
@@ -335,6 +338,31 @@ export class ExamesComponent implements OnInit {
     return etapas.length > 0;
   }
 
+  proximaPagina(): void {
+    if (this.paginaAtual < this.totalPaginas) {
+      this.paginaAtual++;
+      this.limparSelecaoExames();
+    }
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaAtual > 1) {
+      this.paginaAtual--;
+      this.limparSelecaoExames();
+    }
+  }
+
+  get dadosPaginados(): any[] {
+    const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
+
+    return this.dados.slice(inicio, fim);
+  }
+
+  get totalPaginas(): number {
+    return Math.ceil(this.dados.length / this.itensPorPagina);
+  }
+
   getControl(controlName: string): FormControl {
     const control = this.dadosForms.get(controlName);
     if (!control) {
@@ -392,10 +420,9 @@ export class ExamesComponent implements OnInit {
     return temPermissao;
   }
 
-  get filtroStatusOp(): boolean{
-
-    return this.filtroStatus = !this.filtroStatus;
-}
+  get filtroStatusOp(): boolean {
+    return (this.filtroStatus = !this.filtroStatus);
+  }
 
   carregarAlunos(): void {
     this.firestoreService.getCandidato().subscribe((lista: Candidatos[]) => {
@@ -542,7 +569,6 @@ export class ExamesComponent implements OnInit {
 
       // this.dados = [...dadosExames].sort((a, b) => {
       this.dadosTodos = [...dadosExames].sort((a, b) => {
-
         const statusA = ordemStatus[a.status] || 999;
         const statusB = ordemStatus[b.status] || 999;
 
@@ -562,23 +588,24 @@ export class ExamesComponent implements OnInit {
     });
   }
 
-aoSelecionarStatusFiltro(status: string): void {
-  this.statusFiltro = status || 'TODOS';
-  this.aplicarFiltroStatus();
-  this.limparSelecaoExames();
-  this.filtroStatusOp;
-}
-
-aplicarFiltroStatus(): void {
-  if (this.statusFiltro === 'TODOS') {
-    this.dados = [...this.dadosTodos];
-    return;
+  aoSelecionarStatusFiltro(status: string): void {
+    this.statusFiltro = status || 'TODOS';
+    this.aplicarFiltroStatus();
+    this.limparSelecaoExames();
+    this.filtroStatusOp;
   }
 
-  this.dados = this.dadosTodos.filter(
-    (item) => item.status === this.statusFiltro,
-  );
-}
+  aplicarFiltroStatus(): void {
+    if (this.statusFiltro === 'TODOS') {
+      this.dados = [...this.dadosTodos];
+      return;
+    }
+
+    this.dados = this.dadosTodos.filter(
+      (item) => item.status === this.statusFiltro,
+    );
+    this.paginaAtual = 1;
+  }
 
   calcularIdade(dataNascimento?: string): string {
     if (!dataNascimento) return '';
@@ -722,6 +749,12 @@ aplicarFiltroStatus(): void {
     value: string,
   ): string {
     return lista.find((item) => item.value === value)?.label || value;
+  }
+
+  primeiraMaiuscula(texto: string): string {
+    if (!texto) return '';
+
+    return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
   }
 
   buscarCategoriaExame(value: string): string {
