@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   FormBuilder,
@@ -28,6 +28,7 @@ import {
 import {
   listaPeriodo,
   listaPeriodoPratico,
+  listaStatusFiltro,
   listaTipoExame,
   upper,
 } from '../../../services/select.service';
@@ -84,6 +85,11 @@ export class SolicitacaoComponent {
   isMobile = window.innerWidth <= 576;
   converterISOParaBR = converterISOParaBR;
 
+  paginaAtual = 1;
+  itensPorPagina = 20;
+  filtroStatus = false;
+
+
   dadosForms: FormGroup;
   dadosParaEditar: Exames | null = null;
 
@@ -99,6 +105,11 @@ export class SolicitacaoComponent {
   listaTipoExame = listaTipoExame;
   listaPeriodo = listaPeriodo;
   listaPratico = listaPeriodoPratico;
+ listaStatusFiltro = listaStatusFiltro;
+
+  statusFiltro = 'TODOS';
+  dadosTodos: any[] = [];
+
 
   camposColunas = [
     'nomeAluno',
@@ -141,7 +152,7 @@ export class SolicitacaoComponent {
   };
 
   tamanhoColunas = {
-    nomeAluno: { width: '24%',minWidth: '160px' },
+    nomeAluno: { width: '24%', minWidth: '160px' },
     tipoExameLabel: { width: '14%' },
     categoriaExameLabel: { width: '18%' },
     dataSolicitacao: { width: '11%' },
@@ -195,6 +206,42 @@ export class SolicitacaoComponent {
     return this.auth.temPermissao('solicitacoes', tipo);
   }
 
+  primeiraMaiuscula(texto: string): string {
+    if (!texto) return '';
+
+    return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
+  }
+
+  proximaPagina(): void {
+    if (this.paginaAtual < this.totalPaginas) {
+      this.paginaAtual++;
+      // this.limparSelecaoExames();
+    }
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaAtual > 1) {
+      this.paginaAtual--;
+      // this.limparSelecaoExames();
+    }
+  }
+
+  get dadosPaginados(): any[] {
+    const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
+
+    return this.dados.slice(inicio, fim);
+  }
+
+  get totalPaginas(): number {
+  return Math.max(1, Math.ceil(this.dados.length / this.itensPorPagina));
+  }
+
+  // @ViewChild(TableComponent) tableComponent!: TableComponent;
+  // limparSelecaoExames(): void {
+  //   // this.examesSelecionados = [];
+  //   this.tableComponent?.limparSelecao();
+  // }
   // ngOnInit(): void {
   //   this.carregarAlunos();
   //   this.carregarDados();
@@ -330,8 +377,13 @@ export class SolicitacaoComponent {
             // categoriaExame: this.buscarCategoriaExame(
             //   exame.categoriaExame || '',
             // ),
-tipoExameLabel: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
-categoriaExameLabel: this.buscarCategoriaExame(exame.categoriaExame || ''),
+            tipoExameLabel: this.buscarLabel(
+              this.listaTipoExame,
+              exame.tipoExame,
+            ),
+            categoriaExameLabel: this.buscarCategoriaExame(
+              exame.categoriaExame || '',
+            ),
             statusLabel: this.formatarStatus(exame.status),
             etapaAtualLabel:
               exame.status === 'aprovado'
@@ -351,7 +403,8 @@ categoriaExameLabel: this.buscarCategoriaExame(exame.categoriaExame || ''),
         cancelado: 6,
       };
 
-      this.dados = [...dadosExames].sort((a, b) => {
+      // this.dados = [...dadosExames].sort((a, b) => {
+      this.dadosTodos = [...dadosExames].sort((a, b) => {
         const statusA = ordemStatus[a.status] || 999;
         const statusB = ordemStatus[b.status] || 999;
 
@@ -367,6 +420,7 @@ categoriaExameLabel: this.buscarCategoriaExame(exame.categoriaExame || ''),
 
         return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
       });
+      this.aplicarFiltroStatus();
     });
   }
 
@@ -383,6 +437,25 @@ categoriaExameLabel: this.buscarCategoriaExame(exame.categoriaExame || ''),
       this.listaPratico.find((x) => x.value === value)?.label ||
       value
     );
+  }
+
+  aoSelecionarStatusFiltro(status: string): void {
+    this.statusFiltro = status || 'TODOS';
+    this.aplicarFiltroStatus();
+    // this.limparSelecaoExames();
+    this.filtroStatusOp;
+  }
+
+  aplicarFiltroStatus(): void {
+    if (this.statusFiltro === 'TODOS') {
+      this.dados = [...this.dadosTodos];
+      return;
+    }
+
+    this.dados = this.dadosTodos.filter(
+      (item) => item.status === this.statusFiltro,
+    );
+    this.paginaAtual = 1;
   }
 
   onSalvar(): void {
@@ -507,6 +580,11 @@ categoriaExameLabel: this.buscarCategoriaExame(exame.categoriaExame || ''),
   }
 
   // geters
+
+  get filtroStatusOp(): boolean {
+    return (this.filtroStatus = !this.filtroStatus);
+  }
+
   getControl(controlName: string): FormControl {
     const control = this.dadosForms.get(controlName);
     if (!control) {

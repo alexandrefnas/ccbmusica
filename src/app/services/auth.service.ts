@@ -105,6 +105,7 @@ export class AuthService {
         return docData(ref, { idField: 'uid' }).pipe(
           map((usuario) => {
             this.authUserSnapshot = usuario as Usuarios;
+            this.usuarioLogado$.next(usuario as Usuarios);
             this.authInicializado$.next(true);
             return usuario as Usuarios;
           }),
@@ -345,4 +346,3 @@ export class AuthService {
     return temPermissao && temAcesso;
   }
 }
-

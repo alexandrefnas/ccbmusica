@@ -34,6 +34,7 @@ import {
 import {
   listaPeriodo,
   listaPeriodoPratico,
+  listaStatusFiltro,
   listaTipoExame,
   upper,
 } from '../../../services/select.service';
@@ -135,15 +136,16 @@ export class ExamesComponent implements OnInit {
 
   statusFiltro = 'solicitado';
 
-  listaStatusFiltro = [
-    { value: 'TODOS', label: 'TODOS' },
-    { value: 'solicitado', label: 'SOLICITADO' },
-    { value: 'agendado', label: 'AGENDADO' },
-    { value: 'emAndamento', label: 'EM ANDAMENTO' },
-    { value: 'aprovado', label: 'APROVADO' },
-    { value: 'reprovado', label: 'REPROVADO' },
-    { value: 'cancelado', label: 'CANCELADO' },
-  ];
+  listaStatusFiltro = listaStatusFiltro;
+//  [
+//     { value: 'TODOS', label: 'TODOS' },
+//     { value: 'solicitado', label: 'SOLICITADO' },
+//     { value: 'agendado', label: 'AGENDADO' },
+//     { value: 'emAndamento', label: 'EM ANDAMENTO' },
+//     { value: 'aprovado', label: 'APROVADO' },
+//     { value: 'reprovado', label: 'REPROVADO' },
+//     { value: 'cancelado', label: 'CANCELADO' },
+//   ];
 
   dadosTodos: any[] = [];
 
@@ -319,14 +321,28 @@ export class ExamesComponent implements OnInit {
     // },
   ];
 
-  ngOnInit(): void {
-    this.liberaEditar = this.permissao('update');
-    this.liberaCriar = this.permissao('create');
-    this.liberaDeletar = this.permissao('delete');
+  // ngOnInit(): void {
+  //   this.liberaEditar = this.permissao('update');
+  //   this.liberaCriar = this.permissao('create');
+  //   this.liberaDeletar = this.permissao('delete');
 
-    this.carregarAlunos();
-    this.carregarGrupoExames();
-    this.carregarDados();
+  //   this.carregarAlunos();
+  //   this.carregarGrupoExames();
+  //   this.carregarDados();
+  // }
+
+  ngOnInit(): void {
+    this.auth.getUsuarioAtualObservable().subscribe((usuario) => {
+      if (!usuario) return;
+
+      this.liberaEditar = this.permissao('update');
+      this.liberaCriar = this.permissao('create');
+      this.liberaDeletar = this.permissao('delete');
+
+      this.carregarAlunos();
+      this.carregarGrupoExames();
+      this.carregarDados();
+    });
   }
 
   permissao(tipo: keyof PermissoesCRUD): boolean {
@@ -360,7 +376,7 @@ export class ExamesComponent implements OnInit {
   }
 
   get totalPaginas(): number {
-    return Math.ceil(this.dados.length / this.itensPorPagina);
+    return Math.max(1, Math.ceil(this.dados.length / this.itensPorPagina));
   }
 
   getControl(controlName: string): FormControl {
@@ -512,8 +528,17 @@ export class ExamesComponent implements OnInit {
       this.firestoreService.getExames(),
       this.firestoreService.getCandidato(),
     ]).subscribe(([exames, alunos]) => {
+      // const alunosPermitidos = alunos.filter((a) =>
+      //   this.auth.podeVerRegistro(a, 'candidatos'),
+      // );
+      if (!this.auth.temPermissao('exames', 'read')) {
+        this.dados = [];
+        this.dadosTodos = [];
+        return;
+      }
+
       const alunosPermitidos = alunos.filter((a) =>
-        this.auth.podeVerRegistro(a, 'candidatos'),
+        this.auth.temAcessoAoRegistro(a),
       );
 
       const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
@@ -1415,10 +1440,12 @@ export class ExamesComponent implements OnInit {
     this.aceiteForm.reset();
 
     this.listaGrupoExamesFiltrada = this.gruposExames
-      .filter((grupo) =>
-        this.examesSelecionados.every((exame) =>
-          this.grupoCompativelComExame(grupo, exame),
-        ),
+      .filter(
+        (grupo) =>
+          !grupo.concluido &&
+          this.examesSelecionados.every((exame) =>
+            this.grupoCompativelComExame(grupo, exame),
+          ),
       )
       .map((g) => ({
         value: g.id!,
@@ -1705,28 +1732,28 @@ export class ExamesComponent implements OnInit {
   //   this.mostrarModalAceite = true;
   // }
 
-  abrirAceite(exame: Exames): void {
-    this.exameAceite = exame;
-    this.aceiteForm.reset();
+  // abrirAceite(exame: Exames): void {
+  //   this.exameAceite = exame;
+  //   this.aceiteForm.reset();
 
-    this.listaGrupoExamesFiltrada = this.gruposExames
-      .filter((grupo) => this.grupoCompativelComExame(grupo, exame))
-      .map((g) => ({
-        value: g.id!,
-        label: `${g.grupoExame} - ${g.descricao}`,
-      }));
+  //   this.listaGrupoExamesFiltrada = this.gruposExames
+  //     .filter((grupo) => this.grupoCompativelComExame(grupo, exame))
+  //     .map((g) => ({
+  //       value: g.id!,
+  //       label: `${g.grupoExame} - ${g.descricao}`,
+  //     }));
 
-    if (!this.listaGrupoExamesFiltrada.length) {
-      this.snackBar.open(
-        'Nenhum grupo de avaliação compatível com essa solicitação.',
-        'Fechar',
-        { duration: 4000 },
-      );
-      return;
-    }
+  //   if (!this.listaGrupoExamesFiltrada.length) {
+  //     this.snackBar.open(
+  //       'Nenhum grupo de avaliação compatível com essa solicitação.',
+  //       'Fechar',
+  //       { duration: 4000 },
+  //     );
+  //     return;
+  //   }
 
-    this.mostrarModalAceite = true;
-  }
+  //   this.mostrarModalAceite = true;
+  // }
 
   fecharModalAceite(): void {
     this.mostrarModalAceite = false;

@@ -38,6 +38,7 @@
   flex-direction: row;
   font-weight: bold;
   align-items: center;
+  gap: 10px;
 }
 
 #tela__container-tabela {
@@ -49,7 +50,8 @@
   min-height: 0;
 }
 
-h2 {
+h2,
+p {
   font-weight: normal;
   color: grey;
 }
@@ -87,8 +89,16 @@ h2 {
 
 .container__button,
 .form__button {
-  width: 120px;
+  width: auto;
+  min-width: 120px;
   height: 28px;
+  padding: 5px 10px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
 /* INPUTS */
@@ -127,7 +137,7 @@ h2 {
 
 .buttons:hover {
   background: #ececec;
-  transform: scale(1.05);
+  /* transform: scale(1.05); */
 }
 
 .container__button > button {
@@ -181,8 +191,52 @@ h2 {
   text-decoration: line-through;
 }
 
-/* RESPONSIVIDADE */
+/* PAGINAÇÃO */
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  /* background: #f5f5f5; */
+}
+
+.paginacao span {
+  font-size: 12px;
+  color: #555;
+  min-width: 120px;
+  text-align: center;
+}
+
+.paginacao .buttons {
+  width: 32px;
+  height: 28px;
+
+  border: 1px solid #ccc;
+  box-shadow:
+    inset 1px 1px 0 #fff,
+    inset -1px -1px 0 #999;
+
+  cursor: pointer;
+}
+
+.paginacao .buttons:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.paginacao .buttons:not(:disabled):active {
+  box-shadow:
+    inset -1px -1px 0 #fff,
+    inset 1px 1px 0 #999;
+  transform: translateY(1px);
+}
+/* FIM PAGINAÇÃO */
+
+/* RESPONSIVIDADE */
 /* MOBILE */
 @media (max-width: 576px) {
   .container__tela {

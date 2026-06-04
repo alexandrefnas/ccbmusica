@@ -129,15 +129,15 @@ export class SemestresComponent {
     concluidoLabel: 'center',
   };
 
-tamanhoColunas = {
-  grupoExame: { width: '15%' },
-  descricao: { width: '25%' },
-  tipoExameLabel: { width: '10%' },
-  datasLabel: { width: '25%' },
-  comumLabel: { width: '20%' },
-  // qtdPeriodos: { width: '5%' },
-  concluidoLabel: { width: '5%' },
-};
+  tamanhoColunas = {
+    grupoExame: { width: '15%' },
+    descricao: { width: '25%' },
+    tipoExameLabel: { width: '10%' },
+    datasLabel: { width: '25%' },
+    comumLabel: { width: '20%' },
+    // qtdPeriodos: { width: '5%' },
+    concluidoLabel: { width: '5%' },
+  };
 
   acoes = [
     {
@@ -146,6 +146,13 @@ tamanhoColunas = {
       classe: 'acao-editar',
       visivel: (item: GrupoExames) => this.liberaEditar && !item.concluido,
       callback: (item: GrupoExames) => this.editar(item),
+    },
+    {
+      label: '✅',
+      descricao: 'Concluir grupo',
+      classe: 'acao-editar',
+      visivel: (item: GrupoExames) => this.liberaEditar && !item.concluido,
+      callback: (item: GrupoExames) => this.concluirGrupoExame(item),
     },
     {
       label: '🗑️',
@@ -637,6 +644,22 @@ tamanhoColunas = {
         });
       });
     }
+  }
+
+  async concluirGrupoExame(item: GrupoExames): Promise<void> {
+    if (!item.id) return;
+
+    const mensagem = `Deseja realmente concluir ${item.grupoExame}?`;
+
+    if (!confirmarAcao(mensagem)) return;
+
+    await this.firestoreService.updateSemestres(item.id, {
+      concluido: true,
+    });
+
+    this.snackBar.open('Grupo de avaliação concluído com sucesso!', 'Fechar', {
+      duration: 4000,
+    });
   }
 
   async excluir(item: GrupoExames): Promise<void> {

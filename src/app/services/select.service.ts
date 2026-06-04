@@ -65,40 +65,40 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
 
   regional: {
     acessos: {
-      candidatos: { read: true, create: true, update: true, delete: true },
-      grupoExames: { read: true, create: true, update: true, delete: true },
+      candidatos: { read: true, create: true, update: true, delete: false },
+      grupoExames: { read: true, create: true, update: true, delete: false },
       solicitacoes: { read: true, create: true, update: true, delete: true },
-      exames: { read: true, create: true, update: true, delete: true },
+      exames: { read: true, create: true, update: true, delete: false },
       igrejas: { read: true, create: false, update: false, delete: false },
       instrumentos: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
-      usuarios: { read: true, create: true, update: true, delete: true },
+      usuarios: { read: true, create: true, update: true, delete: false },
     },
   },
 
   secretario: {
     acessos: {
-      candidatos: { read: true, create: true, update: true, delete: true },
-      grupoExames: { read: true, create: true, update: true, delete: true },
+      candidatos: { read: true, create: true, update: true, delete: false },
+      grupoExames: { read: true, create: true, update: true, delete: false },
       solicitacoes: { read: true, create: true, update: true, delete: true },
-      exames: { read: true, create: true, update: true, delete: true },
+      exames: { read: true, create: true, update: true, delete: false },
       igrejas: { read: true, create: false, update: false, delete: false },
       instrumentos: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
-      usuarios: { read: true, create: true, update: true, delete: true },
+      usuarios: { read: true, create: true, update: true, delete: false },
     },
   },
 
   encarregado: {
     acessos: {
-      candidatos: { read: true, create: true, update: true, delete: true },
+      candidatos: { read: true, create: true, update: true, delete: false },
       grupoExames: {
         read: false,
         create: false,
         update: false,
         delete: false,
       },
-      solicitacoes: { read: true, create: true, update: true, delete: true },
+      solicitacoes: { read: true, create: true, update: true, delete: false },
       igrejas: { read: false, create: false, update: false, delete: false },
       exames: { read: false, create: false, update: false, delete: false },
       instrumentos: {
@@ -317,3 +317,14 @@ const grupoExames2 = [
     ],
   },
 ];
+
+
+  export const listaStatusFiltro = [
+    { value: 'TODOS', label: 'TODOS' },
+    { value: 'solicitado', label: 'SOLICITADO' },
+    { value: 'agendado', label: 'AGENDADO' },
+    { value: 'emAndamento', label: 'EM ANDAMENTO' },
+    { value: 'aprovado', label: 'APROVADO' },
+    { value: 'reprovado', label: 'REPROVADO' },
+    { value: 'cancelado', label: 'CANCELADO' },
+  ];

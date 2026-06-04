@@ -1,21 +1,41 @@
 <div class="container__tela">
   <div id="tela__barra-menu">
     <div id="barra-titulo__container">
-      <h2>SOLICITAÇÕE DE TEXTES E EXAMES</h2>
+      <h2>SOLICITAÇÕE </h2> -
+      <p style="font-style: normal;" >({{ primeiraMaiuscula(statusFiltro) }})</p>
     </div>
 
-    <div class="button-container" *ngIf="liberaCriar">
-      <button class="buttons" (click)="buttonClick()">
+    <div class="button-container">
+      <!-- <div class="button-container" > -->
+      <button class="buttons" *ngIf="liberaCriar" (click)="buttonClick()">
         <i class="bi bi-file-earmark-plus"></i> Novo
       </button>
+      <!-- </div> -->
+      <button
+        class="buttons"
+        type="button"
+        title="Filtro Status"
+        (click)="(filtroStatusOp)"
+      >
+        <i class="bi bi-search"></i>
+      </button>
     </div>
+  </div>
+  <div style="width: 180px; padding-top: 10px" *ngIf="filtroStatus">
+    <tcx-select
+      [label]="'Filtro Status'"
+      [placeholder]="''"
+      [niveisLimitados]="listaStatusFiltro"
+      [(ngModel)]="statusFiltro"
+      (valorMudou)="aoSelecionarStatusFiltro($event)"
+    />
   </div>
 
   <div id="tela__container-tabela">
     <tcx-table
       [colunas]="camposColunas"
       [colunasLabels]="tituloColunas"
-      [dados]="dados"
+      [dados]="dadosPaginados"
       [mostrarAcoes]="liberaAcoes"
       [acoesTabela]="acoes"
       [tamanhosColunas]="tamanhoColunas"
@@ -23,6 +43,28 @@
       [alinhamentosColunas]="alinhamentoColuna"
       [destacarLinhas]="regrasDestaque"
     />
+  </div>
+  <div class="paginacao">
+    <button
+      class="buttons"
+      (click)="paginaAnterior()"
+      [disabled]="paginaAtual === 1"
+    >
+      <i class="bi bi-chevron-left"></i>
+    </button>
+
+    <span>
+      Página {{ paginaAtual }} de {{ totalPaginas }} ({{ dados.length }}
+      registros)
+    </span>
+
+    <button
+      class="buttons"
+      (click)="proximaPagina()"
+      [disabled]="paginaAtual >= totalPaginas"
+    >
+      <i class="bi bi-chevron-right"></i>
+    </button>
   </div>
 </div>
 
@@ -136,7 +178,7 @@
       </div>
 
       <!-- MOSTRAR DATA -->
-      <!-- <div class="linha">
+<!-- <div class="linha">
         <p>
           Data lançamento:
           <strong>
@@ -145,10 +187,10 @@
         </p>
       </div> -->
 
-      <!-- CAMPO NOTA -->
-      <!-- <div class="linha"></div> -->
+<!-- CAMPO NOTA -->
+<!-- <div class="linha"></div> -->
 
-      <!-- BOTÃO SALVAR --
+<!-- BOTÃO SALVAR --
       <div class="linhaButton" style="margin-top: 20px">
         <div class="form__button">
           <tcx-button label="Salvar" type="submit"></tcx-button>
