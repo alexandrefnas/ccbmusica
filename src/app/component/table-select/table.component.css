@@ -25,7 +25,7 @@
 
 .tabela {
   width: 100%;
-  border-collapse: collapse; /* importante */
+  border-collapse: separate; /* importante */
   border-spacing: 0;
   border: 1px solid #e0e0e0; /* 👈 borda externa */
   border-top: none;

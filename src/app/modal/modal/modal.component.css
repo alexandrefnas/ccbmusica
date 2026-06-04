@@ -47,7 +47,8 @@
     inset 1px 1px 0 #999;
   background-color: #e0e0e0;
   border-radius: 10px;
-  overflow: hidden;
+  /* overflow: hidden; */
+  overflow: visible;
 }
 
 .title_container {
@@ -106,7 +107,8 @@
   padding: 10px;
   box-sizing: border-box;
 
-  overflow-y: auto;
+  /* overflow-y: auto; */
+  overflow-y: visible;
 }
 
 /* RESPONSIVIDADE */

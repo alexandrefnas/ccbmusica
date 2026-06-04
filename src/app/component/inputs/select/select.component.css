@@ -10,7 +10,7 @@
   position: relative;
   width: 100%;
   z-index: auto;
-border-radius: 5px;
+  border-radius: 5px;
 }
 
 .form-input {
@@ -83,16 +83,16 @@ option.list-format {
   width: 100%;
   /* background: #ccc; */
   border: 1px solid #ccc;
-  z-index: 999;
+  z-index: 9999;
 
   max-height: 200px; /* 👈 controla quantidade visível */
   overflow-y: auto;
 }
 
 .option {
-  padding: 3px 8px;
+  padding: 10px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .option:hover {
@@ -102,7 +102,7 @@ option.list-format {
 .custom-select {
   display: flex;
   align-items: center;
-    white-space: nowrap;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 

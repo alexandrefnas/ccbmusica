@@ -38,7 +38,7 @@ import {
   upper,
 } from '../../../services/select.service';
 // import { DecimalComponent } from '../../../component/inputs/decimal/decimal.component';
-import { TableComponentSelect } from "../../../component/table-select/table.component";
+import { TableComponentSelect } from '../../../component/table-select/table.component';
 
 @Component({
   selector: 'tcx-exames',
@@ -53,8 +53,8 @@ import { TableComponentSelect } from "../../../component/table-select/table.comp
     // DataComponent,
     // TableComponent,
     // DecimalComponent,
-    TableComponentSelect
-],
+    TableComponentSelect,
+  ],
   templateUrl: './exames.component.html',
   styleUrl: './exames.component.css',
 })
@@ -102,6 +102,7 @@ export class ExamesComponent implements OnInit {
   dadosForms: FormGroup;
   dadosParaEditar: Exames | null = null;
   exameAceite: Exames | null = null;
+  filtroStatus = false;
 
   liberaCriar = false;
   liberaEditar = false;
@@ -125,28 +126,23 @@ export class ExamesComponent implements OnInit {
 
   listaAlunos: { value: string; label: string }[] = [];
   listaGrupoExames: { value: string; label: string }[] = [];
+  listaGrupoExamesFiltrada: { value: string; label: string }[] = [];
+
   gruposExames: GrupoExames[] = [];
-  // listaTipoExame = [
-  //   { value: 'TEÓRICO E PRÁTICO', label: 'TEÓRICO E PRÁTICO' },
-  //   { value: 'TEÓRICO', label: 'TEÓRICO' },
-  //   { value: 'PRÁTICO', label: 'PRÁTICO' },
-  // ];
 
-  // listaPeriodo = [
-  //   { value: '1º PERÍODO', label: '1º PERÍODO' },
-  //   { value: '2º PERÍODO', label: '2º PERÍODO' },
-  //   { value: '3º PERÍODO', label: '3º PERÍODO' },
-  //   { value: '4º PERÍODO', label: '4º PERÍODO' },
-  // ];
+  statusFiltro = 'solicitado';
 
-  // listaPratico = [
-  //   {
-  //     value: 'REUNIÃO DE JOVENS E MENORES',
-  //     label: 'REUNIÃO DE JOVENS E MENORES',
-  //   },
-  //   { value: 'CULTO OFICIAL', label: 'CULTO OFICIAL' },
-  //   { value: 'OFICIALIZAÇÃO', label: 'OFICIALIZAÇÃO' },
-  // ];
+  listaStatusFiltro = [
+    { value: 'TODOS', label: 'TODOS' },
+    { value: 'solicitado', label: 'SOLICITADO' },
+    { value: 'agendado', label: 'AGENDADO' },
+    { value: 'emAndamento', label: 'EM ANDAMENTO' },
+    { value: 'aprovado', label: 'APROVADO' },
+    { value: 'reprovado', label: 'REPROVADO' },
+    { value: 'cancelado', label: 'CANCELADO' },
+  ];
+
+  dadosTodos: any[] = [];
 
   listaTipoExame = listaTipoExame;
   listaPeriodo = listaPeriodo;
@@ -154,6 +150,7 @@ export class ExamesComponent implements OnInit {
 
   camposColunas = [
     'nomeAluno',
+    'idadeAluno',
     'tipoExameLabel',
     'categoriaExameLabel',
     'dataSolicitacao',
@@ -164,6 +161,7 @@ export class ExamesComponent implements OnInit {
 
   tituloColunas = {
     nomeAluno: 'Aluno',
+    idadeAluno: 'Idade',
     tipoExameLabel: 'Exame',
     categoriaExameLabel: 'Categoria',
     dataSolicitacao: 'Solicitação',
@@ -174,6 +172,7 @@ export class ExamesComponent implements OnInit {
 
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'center',
+    idadeAluno: 'center',
     tipoExameLabel: 'center',
     categoriaExameLabel: 'center',
     dataSolicitacao: 'center',
@@ -184,6 +183,7 @@ export class ExamesComponent implements OnInit {
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'left',
+    idadeAluno: 'center',
     tipoExameLabel: 'center',
     categoriaExameLabel: 'center',
     dataSolicitacao: 'center',
@@ -193,7 +193,9 @@ export class ExamesComponent implements OnInit {
   };
 
   tamanhoColunas = {
-    nomeAluno: { width: '24%' },
+    nomeAluno: { width: '24%', minWidth: '160px' },
+    idadeAluno: { width: '6%', minWidth: '60px' },
+
     tipoExameLabel: { width: '14%' },
     categoriaExameLabel: { width: '18%' },
     dataSolicitacao: { width: '11%' },
@@ -271,47 +273,47 @@ export class ExamesComponent implements OnInit {
     //     this.liberaEditar && item.status === 'solicitado',
     //   callback: (item: Exames) => this.abrirAceite(item),
     // },
-    {
-      label: '🔄',
-      descricao: 'Alterar nota',
-      classe: 'acao-editar',
-      visivel: (item: Exames) =>
-        !this.isMobile &&
-        this.liberaEditar &&
-        item.status !== 'cancelado' &&
-        item.status !== 'solicitado' &&
-        item.etapas?.some((e) => e.nota !== null),
+    // {
+    //   label: '🔄',
+    //   descricao: 'Alterar nota',
+    //   classe: 'acao-editar',
+    //   visivel: (item: Exames) =>
+    //     !this.isMobile &&
+    //     this.liberaEditar &&
+    //     item.status !== 'cancelado' &&
+    //     item.status !== 'solicitado' &&
+    //     item.etapas?.some((e) => e.nota !== null),
 
-      callback: (item: Exames) => this.alterarNota(item),
-    },
-    {
-      label: '✏️',
-      descricao: 'Editar',
-      classe: 'acao-editar',
-      visivel: (item: Exames) =>
-        !this.isMobile && this.liberaEditar && item.status !== 'cancelado',
-      callback: (item: Exames) => this.editar(item),
-    },
-    {
-      label: '🚫',
-      descricao: 'Cancelar',
-      classe: 'acao-cancelar',
-      visivel: (item: Exames) =>
-        !this.isMobile &&
-        this.liberaEditar &&
-        item.status !== 'cancelado' &&
-        item.status !== 'aprovado' &&
-        item.status !== 'reprovado',
-      callback: (item: Exames) => this.cancelarExame(item),
-    },
-    {
-      label: '🗑️',
-      descricao: 'Excluir',
-      classe: 'acao-excluir',
-      visivel: (item: Exames) =>
-        !this.isMobile && this.liberaDeletar && item.status === 'solicitado',
-      callback: (item: Exames) => this.excluir(item),
-    },
+    //   callback: (item: Exames) => this.alterarNota(item),
+    // },
+    // {
+    //   label: '✏️',
+    //   descricao: 'Editar',
+    //   classe: 'acao-editar',
+    //   visivel: (item: Exames) =>
+    //     !this.isMobile && this.liberaEditar && item.status !== 'cancelado',
+    //   callback: (item: Exames) => this.editar(item),
+    // },
+    // {
+    //   label: '🚫',
+    //   descricao: 'Cancelar',
+    //   classe: 'acao-cancelar',
+    //   visivel: (item: Exames) =>
+    //     !this.isMobile &&
+    //     this.liberaEditar &&
+    //     item.status !== 'cancelado' &&
+    //     item.status !== 'aprovado' &&
+    //     item.status !== 'reprovado',
+    //   callback: (item: Exames) => this.cancelarExame(item),
+    // },
+    // {
+    //   label: '🗑️',
+    //   descricao: 'Excluir',
+    //   classe: 'acao-excluir',
+    //   visivel: (item: Exames) =>
+    //     !this.isMobile && this.liberaDeletar && item.status === 'solicitado',
+    //   callback: (item: Exames) => this.excluir(item),
+    // },
   ];
 
   ngOnInit(): void {
@@ -326,6 +328,11 @@ export class ExamesComponent implements OnInit {
 
   permissao(tipo: keyof PermissoesCRUD): boolean {
     return this.auth.temPermissao('exames', tipo);
+  }
+
+  grupoCompativelComExame(grupo: GrupoExames, exame: Exames): boolean {
+    const etapas = this.criarEtapasPorGrupo(grupo, exame);
+    return etapas.length > 0;
   }
 
   getControl(controlName: string): FormControl {
@@ -384,6 +391,11 @@ export class ExamesComponent implements OnInit {
 
     return temPermissao;
   }
+
+  get filtroStatusOp(): boolean{
+
+    return this.filtroStatus = !this.filtroStatus;
+}
 
   carregarAlunos(): void {
     this.firestoreService.getCandidato().subscribe((lista: Candidatos[]) => {
@@ -492,6 +504,7 @@ export class ExamesComponent implements OnInit {
 
           return {
             ...exame,
+            idadeAluno: this.calcularIdade(alunoFiltro?.dataNascimento),
             dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
@@ -527,7 +540,9 @@ export class ExamesComponent implements OnInit {
         cancelado: 6,
       };
 
-      this.dados = [...dadosExames].sort((a, b) => {
+      // this.dados = [...dadosExames].sort((a, b) => {
+      this.dadosTodos = [...dadosExames].sort((a, b) => {
+
         const statusA = ordemStatus[a.status] || 999;
         const statusB = ordemStatus[b.status] || 999;
 
@@ -543,7 +558,48 @@ export class ExamesComponent implements OnInit {
 
         return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
       });
+      this.aplicarFiltroStatus();
     });
+  }
+
+aoSelecionarStatusFiltro(status: string): void {
+  this.statusFiltro = status || 'TODOS';
+  this.aplicarFiltroStatus();
+  this.limparSelecaoExames();
+  this.filtroStatusOp;
+}
+
+aplicarFiltroStatus(): void {
+  if (this.statusFiltro === 'TODOS') {
+    this.dados = [...this.dadosTodos];
+    return;
+  }
+
+  this.dados = this.dadosTodos.filter(
+    (item) => item.status === this.statusFiltro,
+  );
+}
+
+  calcularIdade(dataNascimento?: string): string {
+    if (!dataNascimento) return '';
+
+    const hoje = new Date();
+    const nascimento = new Date(dataNascimento);
+
+    let idade = hoje.getFullYear() - nascimento.getFullYear();
+
+    const mesAtual = hoje.getMonth();
+    const mesNascimento = nascimento.getMonth();
+
+    const aindaNaoFezAniversario =
+      mesAtual < mesNascimento ||
+      (mesAtual === mesNascimento && hoje.getDate() < nascimento.getDate());
+
+    if (aindaNaoFezAniversario) {
+      idade--;
+    }
+
+    return `${idade}`;
   }
 
   carregarGrupoExames(): void {
@@ -1204,100 +1260,224 @@ export class ExamesComponent implements OnInit {
     });
   }
 
-// SELECIONAR
-aoSelecionarExames(lista: Exames[]): void {
-  this.examesSelecionados = lista;
-}
-
-podeSelecionarExame = (item: Exames): boolean => {
-  return this.liberaEditar && item.status === 'solicitado';
-};
-
-abrirAceiteEmLote(): void {
-  if (!this.examesSelecionados.length) {
-    this.snackBar.open('Selecione pelo menos uma solicitação.', 'Fechar', {
-      duration: 3000,
-    });
-    return;
+  // SELECIONAR
+  aoSelecionarExames(lista: Exames[]): void {
+    this.examesSelecionados = lista;
   }
 
-  this.aceiteForm.reset();
-  this.mostrarModalAceiteLote = true;
-}
+  podeSelecionarExame = (item: Exames): boolean => {
+    return this.liberaEditar && item.status === 'solicitado';
+  };
 
-fecharModalAceiteLote(): void {
-  this.mostrarModalAceiteLote = false;
-  this.aceiteForm.reset();
-  this.limparSelecaoExames();
-}
-
-async confirmarAceiteEmLote(): Promise<void> {
-  if (!this.aceiteForm.valid) {
-    this.aceiteForm.markAllAsTouched();
-    return;
+  get podeAceitarSelecionados(): boolean {
+    return (
+      this.examesSelecionados.length > 0 &&
+      this.examesSelecionados.every((item) => item.status === 'solicitado') &&
+      this.liberaEditar
+    );
   }
 
-  const grupoSelecionado = this.gruposExames.find(
-    (g) => g.id === this.aceiteForm.value.idGrupoExame,
-  );
-
-  if (!grupoSelecionado) {
-    this.snackBar.open('Grupo de avaliação não encontrado.', 'Fechar', {
-      duration: 3000,
-    });
-    return;
+  get exameSelecionadoUnico(): Exames | null {
+    return this.examesSelecionados.length === 1
+      ? this.examesSelecionados[0]
+      : null;
   }
 
-  const examesValidos: Exames[] = [];
+  get podeEditar(): boolean {
+    const item = this.exameSelecionadoUnico;
 
-  for (const exame of this.examesSelecionados) {
-    const etapas = this.criarEtapasPorGrupo(grupoSelecionado, exame);
+    return !!(
+      item &&
+      !this.isMobile &&
+      this.liberaEditar &&
+      item.status !== 'cancelado'
+    );
+  }
 
-    if (etapas.length) {
-      examesValidos.push({ ...exame, etapas });
+  get podeAlterarNota(): boolean {
+    const item = this.exameSelecionadoUnico;
+
+    return !!(
+      item &&
+      !this.isMobile &&
+      this.liberaEditar &&
+      item.status !== 'cancelado' &&
+      item.status !== 'solicitado' &&
+      item.etapas?.some((e) => e.nota !== null)
+    );
+  }
+
+  get podeCancelar(): boolean {
+    const item = this.exameSelecionadoUnico;
+
+    return !!(
+      item &&
+      !this.isMobile &&
+      this.liberaEditar &&
+      item.status !== 'cancelado' &&
+      item.status !== 'aprovado' &&
+      item.status !== 'reprovado'
+    );
+  }
+
+  get podeExcluir(): boolean {
+    const item = this.exameSelecionadoUnico;
+
+    return !!(
+      item &&
+      !this.isMobile &&
+      this.liberaDeletar &&
+      item.status === 'solicitado'
+    );
+  }
+
+  editarSelecionado(): void {
+    if (this.exameSelecionadoUnico) {
+      this.editar(this.exameSelecionadoUnico);
     }
   }
 
-  if (!examesValidos.length) {
-    this.snackBar.open(
-      'Nenhuma solicitação selecionada é compatível com esse grupo.',
-      'Fechar',
-      { duration: 4000 },
-    );
-    return;
+  alterarNotaSelecionado(): void {
+    if (this.exameSelecionadoUnico) {
+      this.alterarNota(this.exameSelecionadoUnico);
+    }
   }
 
-  const confirmacao = confirm(
-    `Deseja realmente aceitar ${examesValidos.length} solicitação(ões)?`,
-  );
+  cancelarSelecionado(): void {
+    if (this.exameSelecionadoUnico) {
+      this.cancelarExame(this.exameSelecionadoUnico);
+    }
+  }
 
-  if (!confirmacao) return;
+  excluirSelecionado(): void {
+    if (this.exameSelecionadoUnico) {
+      this.excluir(this.exameSelecionadoUnico);
+    }
+  }
 
-  await Promise.all(
-    examesValidos.map((exame) =>
-      this.firestoreService.updateExame(exame.id!, {
-        idGrupoExame: grupoSelecionado.id!,
-        etapas: exame.etapas,
-        etapaAtual: 1,
-        status: 'agendado',
-      }),
-    ),
-  );
+  // abrirAceiteEmLote(): void {
+  //   if (!this.podeAceitarSelecionados) {
+  //     this.snackBar.open(
+  //       'Selecione apenas solicitações com status SOLICITADO.',
+  //       'Fechar',
+  //       { duration: 3000 },
+  //     );
+  //     return;
+  //   }
 
-  this.snackBar.open('Solicitações aceitas com sucesso!', 'Fechar', {
-    duration: 4000,
-  });
+  //   this.aceiteForm.reset();
+  //   this.mostrarModalAceiteLote = true;
+  // }
 
-  this.examesSelecionados = [];
-  this.fecharModalAceiteLote();
-}
+  abrirAceiteEmLote(): void {
+    if (!this.podeAceitarSelecionados) {
+      this.snackBar.open(
+        'Selecione apenas solicitações com status SOLICITADO.',
+        'Fechar',
+        { duration: 3000 },
+      );
+      return;
+    }
 
-@ViewChild(TableComponentSelect) tableComponent!: TableComponentSelect;
-limparSelecaoExames(): void {
-  this.examesSelecionados = [];
-  this.tableComponent?.limparSelecao();
-}
-// FIM SELECIONAR
+    this.aceiteForm.reset();
+
+    this.listaGrupoExamesFiltrada = this.gruposExames
+      .filter((grupo) =>
+        this.examesSelecionados.every((exame) =>
+          this.grupoCompativelComExame(grupo, exame),
+        ),
+      )
+      .map((g) => ({
+        value: g.id!,
+        label: `${g.grupoExame} - ${g.descricao}`,
+      }));
+
+    if (!this.listaGrupoExamesFiltrada.length) {
+      this.snackBar.open(
+        'Nenhum grupo de avaliação é compatível com todas as solicitações selecionadas.',
+        'Fechar',
+        { duration: 4000 },
+      );
+      return;
+    }
+
+    this.mostrarModalAceiteLote = true;
+  }
+
+  fecharModalAceiteLote(): void {
+    this.mostrarModalAceiteLote = false;
+    this.listaGrupoExamesFiltrada = [];
+    this.aceiteForm.reset();
+    this.limparSelecaoExames();
+  }
+
+  async confirmarAceiteEmLote(): Promise<void> {
+    if (!this.aceiteForm.valid) {
+      this.aceiteForm.markAllAsTouched();
+      return;
+    }
+
+    const grupoSelecionado = this.gruposExames.find(
+      (g) => g.id === this.aceiteForm.value.idGrupoExame,
+    );
+
+    if (!grupoSelecionado) {
+      this.snackBar.open('Grupo de avaliação não encontrado.', 'Fechar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const examesValidos: Exames[] = [];
+
+    for (const exame of this.examesSelecionados) {
+      const etapas = this.criarEtapasPorGrupo(grupoSelecionado, exame);
+
+      if (etapas.length) {
+        examesValidos.push({ ...exame, etapas });
+      }
+    }
+
+    if (!examesValidos.length) {
+      this.snackBar.open(
+        'Nenhuma solicitação selecionada é compatível com esse grupo.',
+        'Fechar',
+        { duration: 4000 },
+      );
+      return;
+    }
+
+    const confirmacao = confirm(
+      `Deseja realmente aceitar ${examesValidos.length} solicitação(ões)?`,
+    );
+
+    if (!confirmacao) return;
+
+    await Promise.all(
+      examesValidos.map((exame) =>
+        this.firestoreService.updateExame(exame.id!, {
+          idGrupoExame: grupoSelecionado.id!,
+          etapas: exame.etapas,
+          etapaAtual: 1,
+          status: 'agendado',
+        }),
+      ),
+    );
+
+    this.snackBar.open('Solicitações aceitas com sucesso!', 'Fechar', {
+      duration: 4000,
+    });
+
+    this.examesSelecionados = [];
+    this.fecharModalAceiteLote();
+  }
+
+  @ViewChild(TableComponentSelect) tableComponent!: TableComponentSelect;
+  limparSelecaoExames(): void {
+    this.examesSelecionados = [];
+    this.tableComponent?.limparSelecao();
+  }
+  // FIM SELECIONAR
 
   async confirmarAceite(): Promise<void> {
     if (!this.aceiteForm.valid || !this.exameAceite) {
@@ -1486,15 +1666,39 @@ limparSelecaoExames(): void {
     }
   }
 
+  // abrirAceite(exame: Exames): void {
+  //   this.exameAceite = exame;
+  //   this.aceiteForm.reset();
+  //   this.mostrarModalAceite = true;
+  // }
+
   abrirAceite(exame: Exames): void {
     this.exameAceite = exame;
     this.aceiteForm.reset();
+
+    this.listaGrupoExamesFiltrada = this.gruposExames
+      .filter((grupo) => this.grupoCompativelComExame(grupo, exame))
+      .map((g) => ({
+        value: g.id!,
+        label: `${g.grupoExame} - ${g.descricao}`,
+      }));
+
+    if (!this.listaGrupoExamesFiltrada.length) {
+      this.snackBar.open(
+        'Nenhum grupo de avaliação compatível com essa solicitação.',
+        'Fechar',
+        { duration: 4000 },
+      );
+      return;
+    }
+
     this.mostrarModalAceite = true;
   }
 
   fecharModalAceite(): void {
     this.mostrarModalAceite = false;
     this.exameAceite = null;
+    this.listaGrupoExamesFiltrada = [];
     this.aceiteForm.reset();
   }
 

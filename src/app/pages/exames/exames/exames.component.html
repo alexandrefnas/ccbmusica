@@ -1,25 +1,86 @@
 <div class="container__tela">
   <div id="tela__barra-menu">
     <div id="barra-titulo__container">
-      <h2 style="font-weight: normal; color: grey">EXAMES</h2>
+      <h2 style="font-weight: normal; color: grey">EXAMES - ({{statusFiltro | titlecase }})</h2>
     </div>
 
     <div class="button-container" *ngIf="liberaCriar">
-      <div class="button-container" *ngIf="liberaEditar">
-        <button
-          class="buttons"
-          type="button"
-          title="Aceitar selecionados"
-          [disabled]="examesSelecionados.length === 0"
-          (click)="abrirAceiteEmLote()"
-        >
-          <i class="bi bi-calendar-check"></i>
-        </button>
-      </div>
-      <button class="buttons" (click)="buttonClick()" title="Nova solicitação">
+      <!-- <div class="button-container" *ngIf="liberaEditar"> -->
+      <button
+        class="buttons"
+        type="button"
+        title="Editar Solicitação."
+        *ngIf="podeEditar"
+        (click)="editarSelecionado()"
+      >
+        <i class="bi bi-pencil"></i>
+      </button>
+
+      <button
+        class="buttons"
+        type="button"
+        title="Alterar Nota."
+        *ngIf="podeAlterarNota"
+        (click)="alterarNotaSelecionado()"
+      >
+        <i class="bi bi-repeat"></i>
+      </button>
+
+      <button
+        class="buttons"
+        type="button"
+        title="Aceitar Selecionados."
+        *ngIf="podeAceitarSelecionados"
+        (click)="abrirAceiteEmLote()"
+      >
+        <i class="bi bi-calendar-check"></i>
+      </button>
+      <button
+        class="buttons"
+        type="button"
+        title="Nova Solicitação."
+        (click)="buttonClick()"
+      >
         <i class="bi bi-file-earmark-plus"></i> Novo
       </button>
+      <button
+        class="buttons"
+        type="button"
+        title="Cancelar Solicitação."
+        *ngIf="podeCancelar"
+        (click)="cancelarSelecionado()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+
+      <button
+        class="buttons"
+        type="button"
+        title="Excluir Solicitação."
+        *ngIf="podeExcluir"
+        (click)="excluirSelecionado()"
+      >
+        <i class="bi bi-trash"></i>
+      </button>
+      <button
+        class="buttons"
+        type="button"
+        title="Filtro Status"
+        (click)="(filtroStatusOp)"
+      >
+        <i class="bi bi-search"></i>
+      </button>
+      <!-- </div> -->
     </div>
+  </div>
+  <div style="width: 180px; padding-top: 10px" *ngIf="filtroStatus">
+    <tcx-select
+      [label]="'Filtro Status'"
+      [placeholder]="''"
+      [niveisLimitados]="listaStatusFiltro"
+      [(ngModel)]="statusFiltro"
+      (valorMudou)="aoSelecionarStatusFiltro($event)"
+    />
   </div>
 
   <div id="tela__container-tabela">
@@ -34,9 +95,9 @@
       [alinhamentosColunas]="alinhamentoColuna"
       [destacarLinhas]="regrasDestaque"
       [permitirSelecao]="true"
-      [podeSelecionar]="podeSelecionarExame"
       (selecionadosChange)="aoSelecionarExames($event)"
     />
+    <!-- /* [podeSelecionar]="podeSelecionarExame" */ -->
   </div>
 </div>
 
@@ -389,7 +450,7 @@
           <tcx-select
             [label]="'Grupo de Avaliação'"
             [placeholder]="''"
-            [niveisLimitados]="listaGrupoExames"
+            [niveisLimitados]="listaGrupoExamesFiltrada"
             [formControl]="aceiteGrupoExameControl"
             [required]="true"
             errorMessage="Campo obrigatório"
@@ -398,8 +459,8 @@
       </div>
 
       <div class="linhaButton">
-        <div class="form__button">
-          <tcx-button label="Aceitar Selecionados" type="submit"></tcx-button>
+        <div>
+          <button class="buttons" type="submit">Aceitar Selecionados</button>
         </div>
       </div>
     </form>

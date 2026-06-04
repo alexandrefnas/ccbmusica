@@ -141,7 +141,7 @@ export class SolicitacaoComponent {
   };
 
   tamanhoColunas = {
-    nomeAluno: { width: '24%' },
+    nomeAluno: { width: '24%',minWidth: '160px' },
     tipoExameLabel: { width: '14%' },
     categoriaExameLabel: { width: '18%' },
     dataSolicitacao: { width: '11%' },
