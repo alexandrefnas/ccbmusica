@@ -138,7 +138,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
 
 export const listaTipoExame = [
   { value: '001', label: 'MSA' },
-  { value: '002', label: 'PRÁTICO' },
+  { value: '002', label: 'INSTRUMENTO' },
   // { value: '002', label: 'TEÓRICO' },
 ];
 
