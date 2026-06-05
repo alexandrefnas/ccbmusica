@@ -1,8 +1,9 @@
 :host {
-  display: block;
+  display: flex;
   width: 100%;
   height: 100%;
-  position: relative;
+  box-sizing: border-box;
+  /* position: relative; */
 }
 
 .container__Menu {
@@ -12,8 +13,21 @@
   width: 100%;
   height: auto;
   font-size: 14px;
-  overflow-y: auto;
+  padding: 0 0 15px 0;
+  /* overflow-y: auto; */
   /* gap: 15px; */
+/* margin: 13px 0; */
+  overflow-y: auto;
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE e Edge antigo */
+  -ms-overflow-style: none;
+}
+
+/* Chrome, Edge e Safari */
+.container__Menu::-webkit-scrollbar {
+  display: none;
 }
 
 .demonstrativo__tabela {

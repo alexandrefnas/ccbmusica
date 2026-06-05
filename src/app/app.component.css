@@ -18,6 +18,7 @@
   align-items: center;
   z-index: 9999;
   font-family: Arial, sans-serif;
+  /* border: solid 1px red; */
 }
 
 #splash-screen .logo {
@@ -68,7 +69,6 @@
   justify-content: space-between;
   height: 50px;
   padding: 0 30px;
-  /* border: solid 1px red; */
 }
 
 .container__screen {
@@ -76,21 +76,24 @@
   flex-direction: row;
   width: 100%;
   height: calc(100% - 40px);
+  /* padding-bottom: 15px; */
   overflow: hidden;
   /* height: 100%; */
 }
 
 .container__menu-lateral {
+display: flex;
   box-sizing: border-box;
-  width: 200px;
+  width: 240px;
+  height: 100%;
   background-color: #dadada;
-  /* background: linear-gradient(to bottom, #9b9da0, #5d6268); */
-
   transition: width 0.3s ease;
-  padding: 3px;
+  padding: 0  10px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  /* overflow: hidden; */
+
 }
+
 
 .container__menu-lateral.oculto {
   width: 0;
