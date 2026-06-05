@@ -33,6 +33,7 @@ import { ButtonComponent } from '../../../component/button/button.component';
 import { CommonModule } from '@angular/common';
 import { DataComponent } from '../../../component/inputs/data/data.component';
 import { TableComponent } from '../../../component/table/table.component';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-semestres',
@@ -56,6 +57,7 @@ export class SemestresComponent {
     private firestoreService: FirestoreService,
     private auth: AuthService,
     private snackBar: MatSnackBar,
+    private alertService: AlertService,
   ) {
     this.dadosForms = this.fb.group({
       grupoExame: ['', Validators.required],
@@ -470,10 +472,12 @@ export class SemestresComponent {
     this.dadosForms.reset();
   }
 
-  onSalvar(): void {
+  async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
-      alert('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.aviso(
+        'Formulário inválido. Preencha os campos obrigatórios.',
+      );
       return;
     }
     const usuarioLogado = this.auth.usuario;
@@ -513,7 +517,8 @@ export class SemestresComponent {
       //   return;
       // }
 
-      if (!confirmarAcao(mensagem)) return;
+      // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
       this.firestoreService
         .updateSemestres(this.dadosParaEditar.id!, data)
@@ -651,7 +656,8 @@ export class SemestresComponent {
 
     const mensagem = `Deseja realmente concluir ${item.grupoExame}?`;
 
-    if (!confirmarAcao(mensagem)) return;
+    // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
     await this.firestoreService.updateSemestres(item.id, {
       concluido: true,
@@ -667,7 +673,8 @@ export class SemestresComponent {
 
     const mensagem = `Deseja realmente excluir ${item.grupoExame}?`;
 
-    if (!confirmarAcao(mensagem)) return;
+    // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
     await this.firestoreService.deleteSemestres(item.id);
 

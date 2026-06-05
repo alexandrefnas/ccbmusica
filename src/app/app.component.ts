@@ -3,10 +3,11 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MenuComponent } from './component/menu/menu.component';
 import { AuthService } from './services/auth.service';
+import { TcxAlertComponent } from "./component/tcx-alert/tcx-alert.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MenuComponent, CommonModule],
+  imports: [RouterOutlet, MenuComponent, CommonModule, TcxAlertComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })

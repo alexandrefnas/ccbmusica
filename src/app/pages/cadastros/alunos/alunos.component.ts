@@ -29,6 +29,7 @@ import {
 } from '../../../services/firestore.service';
 import { upper } from '../../../services/select.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-alunos',
@@ -52,6 +53,7 @@ export class AlunosComponent implements OnInit {
     private firestoreService: FirestoreService,
     private auth: AuthService,
     private snackBar: MatSnackBar,
+    private alertService: AlertService,
   ) {
     this.dadosForms = this.fb.group({
       nomeAluno: ['', Validators.required],
@@ -374,10 +376,11 @@ export class AlunosComponent implements OnInit {
     });
   }
 
-  onSalvar(): void {
+  async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
-      alert('Formulário inválido. Preencha os campos obrigatórios.');
+      // alert('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.erro('Formulário inválido. Preencha os campos obrigatórios.');
       return;
     }
 
@@ -386,7 +389,8 @@ export class AlunosComponent implements OnInit {
     );
 
     if (!igrejaSelecionada) {
-      alert('Comum inválida.');
+      // alert('Comum inválida.');
+      this.alertService.erro('Comum inválida.');
       return;
     }
 
@@ -429,7 +433,8 @@ export class AlunosComponent implements OnInit {
         return;
       }
 
-      if (!confirmarAcao(mensagem)) return;
+      // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
       this.firestoreService
         .updateCandidato(this.dadosParaEditar.id!, baseData)
@@ -444,7 +449,8 @@ export class AlunosComponent implements OnInit {
           this.fecharModal();
         });
     } else {
-      if (!confirmarAcao(mensagem)) return;
+      // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
       this.firestoreService.addCandidato(baseData).then(() => {
         this.snackBar.open(

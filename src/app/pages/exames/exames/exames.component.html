@@ -1,7 +1,9 @@
 <div class="container__tela">
   <div id="tela__barra-menu">
     <div id="barra-titulo__container">
-      <h2 style="font-weight: normal; color: grey">EXAMES - ({{primeiraMaiuscula(statusFiltro) }})</h2>
+      <h2 style="font-weight: normal; color: grey">
+        EXAMES - ({{ primeiraMaiuscula(statusFiltro) }})
+      </h2>
     </div>
 
     <div class="button-container" *ngIf="liberaCriar">
@@ -99,7 +101,7 @@
     />
     <!-- /* [podeSelecionar]="podeSelecionarExame" */ -->
   </div>
-<!-- <div class="paginacao">
+  <!-- <div class="paginacao">
   <button
     class="buttons"
     (click)="paginaAnterior()"
@@ -121,73 +123,77 @@
   </button>
 </div>
 </div> -->
-<div class="paginacao">
-  <button
-    class="buttons"
-    (click)="paginaAnterior()"
-    [disabled]="paginaAtual === 1"
-  >
-   <i class="bi bi-chevron-left"></i>
-  </button>
+  <div class="paginacao">
+    <button
+      class="buttons"
+      (click)="paginaAnterior()"
+      [disabled]="paginaAtual === 1"
+    >
+      <i class="bi bi-chevron-left"></i>
+    </button>
 
-  <span>
-    Página {{ paginaAtual }} de {{ totalPaginas }}
-    ({{ dados.length }} registros)
-  </span>
+    <span>
+      Página {{ paginaAtual }} de {{ totalPaginas }} ({{ dados.length }}
+      registros)
+    </span>
 
-  <button
-    class="buttons"
-    (click)="proximaPagina()"
-    [disabled]="paginaAtual >= totalPaginas"
-  >
-  <i class="bi bi-chevron-right"></i>
-  </button>
-</div>
+    <button
+      class="buttons"
+      (click)="proximaPagina()"
+      [disabled]="paginaAtual >= totalPaginas"
+    >
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
 
-<!-- SOLICITAR/EDITAR EXAME -->
-<tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
-  <div class="templates__form">
-    <form [formGroup]="dadosForms" (ngSubmit)="onSalvar()" style="width: 100%">
-      <div class="linha">
-        <div class="input-select">
-          <tcx-select
-            [label]="'Aluno'"
-            [placeholder]="''"
-            [niveisLimitados]="listaAlunos"
-            [formControl]="getControl('idAluno')"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-          />
+  <!-- SOLICITAR/EDITAR EXAME -->
+  <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
+    <div class="templates__form">
+      <form
+        [formGroup]="dadosForms"
+        (ngSubmit)="onSalvar()"
+        style="width: 100%"
+      >
+        <div class="linha">
+          <div class="input-select">
+            <tcx-select
+              [label]="'Aluno'"
+              [placeholder]="''"
+              [niveisLimitados]="listaAlunos"
+              [formControl]="getControl('idAluno')"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="linha">
-        <div class="input-select">
-          <tcx-select
-            [label]="'Tipo de Exame'"
-            [placeholder]="''"
-            [niveisLimitados]="listaTipoExame"
-            [formControl]="getControl('tipoExame')"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-            (valorMudou)="onTipoExameChange()"
-          />
+        <div class="linha">
+          <div class="input-select">
+            <tcx-select
+              [label]="'Tipo de Exame'"
+              [placeholder]="''"
+              [niveisLimitados]="listaTipoExame"
+              [formControl]="getControl('tipoExame')"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+              (valorMudou)="onTipoExameChange()"
+            />
+          </div>
         </div>
-      </div>
-      <div class="linha" *ngIf="getListaCategoriaExame().length > 0">
-        <div class="input-select">
-          <tcx-select
-            [label]="'Categoria'"
-            [placeholder]="''"
-            [niveisLimitados]="getListaCategoriaExame()"
-            [formControl]="getControl('categoriaExame')"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-          />
+        <div class="linha" *ngIf="getListaCategoriaExame().length > 0">
+          <div class="input-select">
+            <tcx-select
+              [label]="'Categoria'"
+              [placeholder]="''"
+              [niveisLimitados]="getListaCategoriaExame()"
+              [formControl]="getControl('categoriaExame')"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
         </div>
-      </div>
 
-      <!-- <div class="linha">
+        <!-- <div class="linha">
         <div class="input-data">
           <tcx-data
             label="Data Agendada"
@@ -207,27 +213,27 @@
         </div>
       </div> -->
 
-      <div class="linha">
-        <div class="input-text">
-          <tcx-text
-            label="Observação"
-            type="text"
-            formControlName="observacao"
-            [required]="false"
-          />
+        <div class="linha">
+          <div class="input-text">
+            <tcx-text
+              label="Observação"
+              type="text"
+              formControlName="observacao"
+              [required]="false"
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="linhaButton">
-        <div class="form__button">
-          <tcx-button label="Salvar" type="submit"></tcx-button>
+        <div class="linhaButton">
+          <div class="form__button">
+            <tcx-button label="Salvar" type="submit"></tcx-button>
+          </div>
         </div>
-      </div>
-    </form>
-  </div>
-</tcx-modal>
+      </form>
+    </div>
+  </tcx-modal>
 
-<!-- <tcx-modal
+  <!-- <tcx-modal
   [title]="'Lançar Nota'"
   [visible]="mostrarModalNota"
   (onClose)="fecharModalNota()"
@@ -267,64 +273,80 @@
   </div>
 </tcx-modal> -->
 
-<!-- LANÇAR NOTAS -->
-<tcx-modal
-  [title]="
-    'Lançar Nota - ' +
-    (getNomeAluno(exameSelecionado?.idAluno || '') | slice: 0 : 12)
-  "
-  [visible]="mostrarModalNota"
-  (onClose)="fecharModalNota()"
->
-  <div class="templates__form">
-    <form [formGroup]="notaForm" (ngSubmit)="salvarNota()" style="width: 100%">
-      <div class="dados-exame-modal">
-        <p>
-          <strong>Exame:</strong>
-          {{ buscarLabel(listaTipoExame, exameSelecionado?.tipoExame || "") }}
-        </p>
-        <p>
-          <strong>Nível:</strong>
-          {{ buscarCategoriaExame(exameSelecionado?.categoriaExame || "") }}
-        </p>
-        <p *ngIf="etapaSelecionada?.dataLancamento as dataLancamento">
-          <span>Data lançamento:</span> {{ converterISOParaBR(dataLancamento) }}
-        </p>
-      </div>
-
-      <div class="dados-exame-modal">
-        <p><strong>Etapa:</strong> {{ etapaSelecionada?.nome }}</p>
-        <p><strong>Nota mín.:</strong> {{ etapaSelecionada?.notaMinima }}</p>
-        <p><strong>Nota máx.:</strong> {{ etapaSelecionada?.notaMaxima }}</p>
-      </div>
-
-      <!-- MOSTRAR PROFESSOR -->
-      <div class="linha linhaOff">
-        <div class="input-text">
-          <tcx-text
-            label="Professor"
-            type="text"
-            formControlName="professorLancamento"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-          />
+  <!-- LANÇAR NOTAS -->
+  <tcx-modal
+    [title]="
+      'Lançar Nota - ' +
+      (getNomeAluno(exameSelecionado?.idAluno || '') | slice: 0 : 12)
+    "
+    [visible]="mostrarModalNota"
+    (onClose)="fecharModalNota()"
+  >
+    <div class="templates__form">
+      <form
+        [formGroup]="notaForm"
+        (ngSubmit)="salvarNota()"
+        style="width: 100%"
+      >
+        <div class="dados-exame-modal">
+          <p>
+            <strong>Exame:</strong>
+            {{ buscarLabel(listaTipoExame, exameSelecionado?.tipoExame || "") }}
+          </p>
+          <p>
+            <strong>Nível:</strong>
+            {{ buscarCategoriaExame(exameSelecionado?.categoriaExame || "") }}
+          </p>
+          <p *ngIf="etapaSelecionada?.dataLancamento as dataLancamento">
+            <span>Data lançamento:</span>
+            {{ converterISOParaBR(dataLancamento) }}
+          </p>
         </div>
-        <!-- CAMPO NOTA -->
-        <div class="input-text" style="width: 25%">
-          <tcx-text
-            label="Nota"
-            type="number"
-            formControlName="nota"
-            [min]="0"
-            [max]="etapaSelecionada?.notaMaxima"
-            [required]="etapaSelecionada?.nota === null"
-            errorMessage="Campo obrigatório"
-          />
-        </div>
-      </div>
+        <div class="dados-exame-modal" *ngIf="exameSelecionado?.tipoExame === '002'">
+          <p>
+            <strong>Instrumento:</strong>
+            {{ getNomeInstrumento(exameSelecionado?.instrumentoAluno || "") }}
+          </p>
 
-      <!-- MOSTRAR DATA -->
-      <!-- <div class="linha">
+          <p>
+            <strong>Afinação:</strong>
+            {{ exameSelecionado?.afinacaoAluno || "Não informada" }}
+          </p>
+        </div>
+
+        <div class="dados-exame-modal">
+          <p><strong>Etapa:</strong> {{ etapaSelecionada?.nome }}</p>
+          <p><strong>Nota mín.:</strong> {{ etapaSelecionada?.notaMinima }}</p>
+          <p><strong>Nota máx.:</strong> {{ etapaSelecionada?.notaMaxima }}</p>
+        </div>
+
+        <!-- MOSTRAR PROFESSOR -->
+        <div class="linha linhaOff">
+          <div class="input-text">
+            <tcx-text
+              label="Professor"
+              type="text"
+              formControlName="professorLancamento"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
+          <!-- CAMPO NOTA -->
+          <div class="input-text" style="width: 25%">
+            <tcx-text
+              label="Nota"
+              type="number"
+              formControlName="nota"
+              [min]="0"
+              [max]="etapaSelecionada?.notaMaxima"
+              [required]="etapaSelecionada?.nota === null"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
+        </div>
+
+        <!-- MOSTRAR DATA -->
+        <!-- <div class="linha">
         <p>
           Data lançamento:
           <strong>
@@ -333,65 +355,68 @@
         </p>
       </div> -->
 
-      <!-- BOTÃO SALVAR -->
-      <div class="linhaButton" style="margin-top: 20px">
-        <div class="form__button">
-          <tcx-button label="Salvar" type="submit"></tcx-button>
+        <!-- BOTÃO SALVAR -->
+        <div class="linhaButton" style="margin-top: 20px">
+          <div class="form__button">
+            <tcx-button label="Salvar" type="submit"></tcx-button>
+          </div>
+          <div
+            class="container__button"
+            *ngIf="etapaSelecionada?.nota !== null"
+          >
+            <button type="button" class="buttons" (click)="excluirNota()">
+              Excluir Nota
+            </button>
+          </div>
         </div>
-        <div class="container__button" *ngIf="etapaSelecionada?.nota !== null">
-          <button type="button" class="buttons" (click)="excluirNota()">
-            Excluir Nota
-          </button>
+      </form>
+    </div>
+  </tcx-modal>
+
+  <!-- CANCELAR EXAME -->
+  <tcx-modal
+    [title]="'Cancelar Exame'"
+    [visible]="mostrarModalCancelamento"
+    (onClose)="fecharModalCancelamento()"
+  >
+    <div class="templates__form">
+      <form
+        [formGroup]="cancelamentoForm"
+        (ngSubmit)="confirmarCancelamento()"
+        style="width: 100%"
+      >
+        <div class="linha">
+          <p>
+            Cancelar exame de:
+            <span style="font-weight: 500">
+              {{ getNomeAluno(exameCancelamento?.idAluno || "") }}
+            </span>
+          </p>
         </div>
-      </div>
-    </form>
-  </div>
-</tcx-modal>
 
-<!-- CANCELAR EXAME -->
-<tcx-modal
-  [title]="'Cancelar Exame'"
-  [visible]="mostrarModalCancelamento"
-  (onClose)="fecharModalCancelamento()"
->
-  <div class="templates__form">
-    <form
-      [formGroup]="cancelamentoForm"
-      (ngSubmit)="confirmarCancelamento()"
-      style="width: 100%"
-    >
-      <div class="linha">
-        <p>
-          Cancelar exame de:
-          <span style="font-weight: 500">
-            {{ getNomeAluno(exameCancelamento?.idAluno || "") }}
-          </span>
-        </p>
-      </div>
-
-      <div class="linha">
-        <div class="input-text">
-          <tcx-text
-            label="Motivo do cancelamento"
-            type="text"
-            formControlName="motivoCancelamento"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-          />
+        <div class="linha">
+          <div class="input-text">
+            <tcx-text
+              label="Motivo do cancelamento"
+              type="text"
+              formControlName="motivoCancelamento"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="linhaButton">
-        <div class="form__button">
-          <tcx-button label="Cancelar Exame" type="submit"></tcx-button>
+        <div class="linhaButton">
+          <div class="form__button">
+            <tcx-button label="Cancelar Exame" type="submit"></tcx-button>
+          </div>
         </div>
-      </div>
-    </form>
-  </div>
-</tcx-modal>
+      </form>
+    </div>
+  </tcx-modal>
 
-<!-- AGENDAR ETAPAS -->
-<!-- <tcx-modal
+  <!-- AGENDAR ETAPAS -->
+  <!-- <tcx-modal
   [title]="'Agendar Etapa'"
   [visible]="mostrarModalAgendamentoEtapa"
   (onClose)="fecharModalAgendamentoEtapa()"
@@ -429,7 +454,7 @@
   </div>
 </tcx-modal> -->
 
-<!-- <tcx-modal
+  <!-- <tcx-modal
   [title]="'Aceitar Solicitação'"
   [visible]="mostrarModalAceite"
   (onClose)="fecharModalAceite()"
@@ -469,43 +494,44 @@
   </div>
 </tcx-modal> -->
 
-<!-- AGENDAR ETAPAS EM LOTE -->
-<tcx-modal
-  [title]="'Aceitar Solicitações Selecionadas'"
-  [visible]="mostrarModalAceiteLote"
-  (onClose)="fecharModalAceiteLote()"
->
-  <div class="templates__form">
-    <form
-      [formGroup]="aceiteForm"
-      (ngSubmit)="confirmarAceiteEmLote()"
-      style="width: 100%"
-    >
-      <div class="linha">
-        <p>
-          Solicitações selecionadas:
-          <strong>{{ examesSelecionados.length }}</strong>
-        </p>
-      </div>
-
-      <div class="linha">
-        <div class="input-select">
-          <tcx-select
-            [label]="'Grupo de Avaliação'"
-            [placeholder]="''"
-            [niveisLimitados]="listaGrupoExamesFiltrada"
-            [formControl]="aceiteGrupoExameControl"
-            [required]="true"
-            errorMessage="Campo obrigatório"
-          />
+  <!-- AGENDAR ETAPAS EM LOTE -->
+  <tcx-modal
+    [title]="'Aceitar Solicitações Selecionadas'"
+    [visible]="mostrarModalAceiteLote"
+    (onClose)="fecharModalAceiteLote()"
+  >
+    <div class="templates__form">
+      <form
+        [formGroup]="aceiteForm"
+        (ngSubmit)="confirmarAceiteEmLote()"
+        style="width: 100%"
+      >
+        <div class="linha">
+          <p>
+            Solicitações selecionadas:
+            <strong>{{ examesSelecionados.length }}</strong>
+          </p>
         </div>
-      </div>
 
-      <div class="linhaButton">
-        <div>
-          <button class="buttons" type="submit">Aceitar Selecionados</button>
+        <div class="linha">
+          <div class="input-select">
+            <tcx-select
+              [label]="'Grupo de Avaliação'"
+              [placeholder]="''"
+              [niveisLimitados]="listaGrupoExamesFiltrada"
+              [formControl]="aceiteGrupoExameControl"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
         </div>
-      </div>
-    </form>
-  </div>
-</tcx-modal>
+
+        <div class="linhaButton">
+          <div>
+            <button class="buttons" type="submit">Aceitar Selecionados</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </tcx-modal>
+</div>

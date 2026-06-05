@@ -32,6 +32,7 @@ import {
   Igrejas,
   Setor,
 } from '../../../services/firestore.service';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-usuarios',
@@ -151,6 +152,7 @@ export class UsuariosComponent implements OnInit {
     private cd: ChangeDetectorRef,
     private snackBar: MatSnackBar,
     private firestoreService: FirestoreService,
+    private alertService: AlertService,
   ) {
     this.dadosForms = this.fb.group({
       nome: ['', Validators.required],
@@ -368,7 +370,9 @@ export class UsuariosComponent implements OnInit {
   prepararDados() {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
-      alert('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.aviso(
+        'Formulário inválido. Preencha os campos obrigatórios.',
+      );
       return;
     }
     this.nome = this.dadosForms.value.nome;
@@ -439,7 +443,9 @@ export class UsuariosComponent implements OnInit {
     }
     // só admin pode criar admin
     if (this.perfil === 'admin' && usuarioLogado?.perfil !== 'admin') {
-      alert('Você não tem permissão para criar administradores.');
+      this.alertService.aviso(
+        'Você não tem permissão para criar administradores.',
+      );
       return;
     }
 
@@ -447,7 +453,7 @@ export class UsuariosComponent implements OnInit {
       // const perfilConfig = this.tipoPerfil[this.perfil];
       const perfilConfig = TIPO_PERFIL[this.perfil];
       if (!perfilConfig) {
-        alert('Perfil inválido');
+        this.alertService.aviso('Perfil inválido');
         return;
       }
       await this.auth.cadastrar(this.email, this.senha, {
@@ -458,7 +464,7 @@ export class UsuariosComponent implements OnInit {
         acessos: perfilConfig.acessos,
       });
 
-      alert('Usuário cadastrado com sucesso!');
+      this.alertService.sucesso('Usuário cadastrado com sucesso!');
 
       this.nome = '';
       this.email = '';
@@ -466,8 +472,8 @@ export class UsuariosComponent implements OnInit {
       this.perfil = 'instrutor';
       this.fecharModal();
     } catch (erro) {
-      console.error(erro);
-      alert('Erro ao cadastrar: ' + (erro as any).message);
+      // console.error(erro);
+      this.alertService.erro('Erro ao cadastrar: ' + (erro as any).message);
     } finally {
       this.carregando = false;
     }
@@ -477,7 +483,8 @@ export class UsuariosComponent implements OnInit {
     if (!this.dadosParaEditar?.uid) return;
 
     const mensagem = `Deseja realmente alterar o acesso do usuário ${this.dadosParaEditar.nome}?`;
-    if (!confirmarAcao(mensagem)) return;
+    // if (!confirmarAcao(mensagem)) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     const dadosAtualizados = this.dadosForms.value;
 

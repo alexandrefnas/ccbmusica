@@ -3,6 +3,7 @@ import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-alterar-senha',
@@ -21,6 +22,7 @@ export class AlterarSenhaComponent {
   constructor(
     private auth: AuthService,
     private router: Router,
+private alertService: AlertService
   ) {}
 
   visualizador(tipo: string) {
@@ -32,7 +34,7 @@ export class AlterarSenhaComponent {
     const email = this.auth.usuarioEmail?.email;
 
     if (!email || !this.senhaAtual || !this.novaSenha) {
-      alert('Preencha todos os campos.');
+      this.alertService.aviso('Preencha todos os campos.');
       return;
     }
 
@@ -44,14 +46,14 @@ export class AlterarSenhaComponent {
         this.senhaAtual,
         this.novaSenha,
       );
-      alert('Senha alterada com sucesso!');
+      this.alertService.sucesso('Senha alterada com sucesso!');
       // this.email = '';
       this.senhaAtual = '';
       this.novaSenha = '';
       this.router.navigate(['/home']);
     } catch (erro) {
       console.error(erro);
-      alert('Erro ao alterar senha');
+      this.alertService.erro('Erro ao alterar senha');
       // alert('Erro ao alterar senha: ' + (erro as any).message);
     } finally {
       this.carregando = false;

@@ -9,6 +9,7 @@ import {
   Self,
 } from '@angular/core';
 import { NgControl } from '@angular/forms';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-text',
@@ -36,7 +37,7 @@ export class TextComponent {
   // ngControl: NgControl | null = null;
 
   // constructor(private injector: Injector) {}
-  constructor(@Self() @Optional() public ngControl: NgControl) {
+  constructor(@Self() @Optional() public ngControl: NgControl,private alertService: AlertService) {
     if (ngControl) {
       ngControl.valueAccessor = this;
     }
@@ -64,10 +65,10 @@ export class TextComponent {
 
     navigator.clipboard.writeText(this.value).then(
       () => {
-        alert('Copiado para a área de transferência!');
+        this.alertService.sucesso('Copiado para a área de transferência!');
       },
       (err) => {
-        console.error('Erro ao copiar:', err);
+        this.alertService.erro('Erro ao copiar:', err);
       },
     );
   }

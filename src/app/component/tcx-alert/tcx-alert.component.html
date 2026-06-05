@@ -1,0 +1,21 @@
+<div class="alert-overlay" *ngIf="visible">
+  <div class="alert-box" [ngClass]="dados.tipo">
+    <div class="alert-icon">
+      <i [class]="icone"></i>
+      <h3>{{ dados.titulo }}</h3>
+    </div>
+    <!-- <h3>{{ dados.titulo }}</h3> -->
+
+
+    <p>{{ dados.mensagem }}</p>
+
+    <div class="botoes" *ngIf="dados.tipo !== 'confirmacao'">
+      <button type="button" (click)="fechar()">OK</button>
+    </div>
+
+    <div class="botoes" *ngIf="dados.tipo === 'confirmacao'">
+      <button type="button" class="btn-nao" (click)="cancelar()">Não</button>
+      <button type="button" class="btn-sim" (click)="confirmar()">Sim</button>
+    </div>
+  </div>
+</div>

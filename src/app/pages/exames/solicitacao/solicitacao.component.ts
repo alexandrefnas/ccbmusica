@@ -34,6 +34,7 @@ import {
 } from '../../../services/select.service';
 import { combineLatest } from 'rxjs';
 import { TextComponent } from '../../../component/inputs/text/text.component';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-solicitacao',
@@ -56,6 +57,7 @@ export class SolicitacaoComponent {
     private firestoreService: FirestoreService,
     private auth: AuthService,
     private snackBar: MatSnackBar,
+    private alertService: AlertService,
   ) {
     this.dadosForms = this.fb.group({
       idAluno: ['', Validators.required],
@@ -89,7 +91,6 @@ export class SolicitacaoComponent {
   itensPorPagina = 20;
   filtroStatus = false;
 
-
   dadosForms: FormGroup;
   dadosParaEditar: Exames | null = null;
 
@@ -105,11 +106,10 @@ export class SolicitacaoComponent {
   listaTipoExame = listaTipoExame;
   listaPeriodo = listaPeriodo;
   listaPratico = listaPeriodoPratico;
- listaStatusFiltro = listaStatusFiltro;
+  listaStatusFiltro = listaStatusFiltro;
 
   statusFiltro = 'TODOS';
   dadosTodos: any[] = [];
-
 
   camposColunas = [
     'nomeAluno',
@@ -234,7 +234,7 @@ export class SolicitacaoComponent {
   }
 
   get totalPaginas(): number {
-  return Math.max(1, Math.ceil(this.dados.length / this.itensPorPagina));
+    return Math.max(1, Math.ceil(this.dados.length / this.itensPorPagina));
   }
 
   // @ViewChild(TableComponent) tableComponent!: TableComponent;
@@ -461,7 +461,9 @@ export class SolicitacaoComponent {
   onSalvar(): void {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
-      alert('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.aviso(
+        'Formulário inválido. Preencha os campos obrigatórios.',
+      );
       return;
     }
 
@@ -498,7 +500,8 @@ export class SolicitacaoComponent {
       ? `Deseja realmente alterar o exame de ${nomeAluno}?`
       : `Deseja realmente solicitar exame para ${nomeAluno}?`;
 
-    if (!confirmarAcao(mensagem)) return;
+    // if (!confirmarAcao(mensagem)) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     if (this.dadosParaEditar?.id) {
       this.firestoreService
@@ -559,11 +562,9 @@ export class SolicitacaoComponent {
   }
 
   async excluir(exame: Exames): Promise<void> {
-    const confirmacao = confirm(
-      `Tem certeza que deseja excluir a solicitação de "${(exame as any).nomeAluno}"?`,
-    );
-
-    if (!confirmacao) return;
+    const confirmacao = `Tem certeza que deseja excluir a solicitação de "${(exame as any).nomeAluno}"?`;
+    // if (!confirmacao) return;
+    if (!(await this.alertService.confirmar(confirmacao))) return;
 
     if (exame.id) {
       await this.firestoreService.deleteExame(exame.id);

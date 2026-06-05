@@ -7,6 +7,8 @@
 //   return `${dia}/${mes}/${ano}`; // DD/MM/YYYY
 // }
 
+import { AlertService } from "../app/services/alert.service";
+
 export function converterISOParaBR(dataISO: string): string {
   if (!dataISO) return '';
 
@@ -36,4 +38,11 @@ export function confirmarAcao(mensagem: string): boolean {
   return window.confirm(mensagem);
 }
 
+
+export function confirmarAcaoN(
+  alertService: AlertService,
+  mensagem: string
+): Promise<boolean> {
+  return alertService.confirmar(mensagem);
+}
 

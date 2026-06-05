@@ -1,5 +1,5 @@
 <ng-container *ngIf="authService.authInicializado$ | async; else loading">
-<!-- <ng-container> -->
+  <!-- <ng-container> -->
   <div class="container">
     <div class="conteiner__menu-topo" *ngIf="logado">
       <div class="menu-topo-left">
@@ -35,6 +35,7 @@
       <!-- Conteúdo -->
       <div class="container__router">
         <router-outlet />
+        <tcx-alert />
       </div>
     </div>
   </div>

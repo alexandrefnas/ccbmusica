@@ -23,6 +23,7 @@ import { TableComponent } from '../../../component/table/table.component';
 import { upper } from '../../../services/select.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-igrejas',
@@ -45,6 +46,7 @@ export class IgrejasComponent implements OnInit {
     private firestoreService: FirestoreService,
     private auth: AuthService,
     private snackBar: MatSnackBar,
+    private alertService: AlertService,
   ) {
     this.dadosForms = this.fb.group({
       nomeCongregacao: ['', Validators.required],
@@ -96,9 +98,9 @@ export class IgrejasComponent implements OnInit {
   };
 
   tamanhoColunas = {
-    nomeCongregacao: { width: '25%' },
-    nomeSetor: { width: '25%' },
-    localizacao: { width: '45%' },
+    nomeCongregacao: { width: '40%', minwidth:'250px' },
+    nomeSetor: { width: '25%', minwidth:'150px' },
+    localizacao: { width: '35%', maxwidth: '250px' },
   };
 
   // Buttons
@@ -201,10 +203,12 @@ export class IgrejasComponent implements OnInit {
     return control as FormControl;
   }
 
-  onSalvar(): void {
+  async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
-      alert('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.aviso(
+        'Formulário inválido. Preencha os campos obrigatórios.',
+      );
       return;
     }
 
@@ -234,7 +238,8 @@ export class IgrejasComponent implements OnInit {
         return;
       }
 
-      if (!confirmarAcao(mensagem)) return;
+      // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
       this.firestoreService
         .updateIgrejas(this.dadosParaEditar.id!, baseData)
@@ -249,7 +254,8 @@ export class IgrejasComponent implements OnInit {
           this.fecharModal();
         });
     } else {
-      if (!confirmarAcao(mensagem)) return;
+      // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
       this.firestoreService.addIgrejas(baseData).then(() => {
         this.snackBar.open(

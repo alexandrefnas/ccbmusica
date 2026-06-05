@@ -23,6 +23,7 @@ import {
   Exames,
   FirestoreService,
   GrupoExames,
+  Instrumentos,
 } from '../../../services/firestore.service';
 
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
@@ -40,6 +41,13 @@ import {
 } from '../../../services/select.service';
 // import { DecimalComponent } from '../../../component/inputs/decimal/decimal.component';
 import { TableComponentSelect } from '../../../component/table-select/table.component';
+import { AlertService } from '../../../services/alert.service';
+
+type ExameTabela = Exames & {
+  idadeAluno?: string;
+  instrumentoAluno?: string;
+  afinacaoAluno?: string;
+};
 
 @Component({
   selector: 'tcx-exames',
@@ -65,6 +73,7 @@ export class ExamesComponent implements OnInit {
     private firestoreService: FirestoreService,
     private auth: AuthService,
     private snackBar: MatSnackBar,
+    private alertService: AlertService,
   ) {
     this.notaForm = this.fb.group({
       nota: [''],
@@ -90,6 +99,7 @@ export class ExamesComponent implements OnInit {
       idGrupoExame: ['', Validators.required],
     });
   }
+
   isMobile = window.innerWidth <= 576;
   converterISOParaBR = converterISOParaBR;
 
@@ -110,7 +120,7 @@ export class ExamesComponent implements OnInit {
   liberaDeletar = false;
 
   mostrarModalNota = false;
-  exameSelecionado: Exames | null = null;
+  exameSelecionado: ExameTabela | null = null;
   etapaSelecionada: any | null = null;
   notaForm: FormGroup;
 
@@ -128,26 +138,21 @@ export class ExamesComponent implements OnInit {
   listaAlunos: { value: string; label: string }[] = [];
   listaGrupoExames: { value: string; label: string }[] = [];
   listaGrupoExamesFiltrada: { value: string; label: string }[] = [];
+  listaInstrumentos: Instrumentos[] = [];
 
   gruposExames: GrupoExames[] = [];
 
   paginaAtual = 1;
   itensPorPagina = 20;
 
-  statusFiltro = 'solicitado';
+  statusFiltro = 'TODOS';
 
   listaStatusFiltro = listaStatusFiltro;
-//  [
-//     { value: 'TODOS', label: 'TODOS' },
-//     { value: 'solicitado', label: 'SOLICITADO' },
-//     { value: 'agendado', label: 'AGENDADO' },
-//     { value: 'emAndamento', label: 'EM ANDAMENTO' },
-//     { value: 'aprovado', label: 'APROVADO' },
-//     { value: 'reprovado', label: 'REPROVADO' },
-//     { value: 'cancelado', label: 'CANCELADO' },
-//   ];
 
-  dadosTodos: any[] = [];
+  // dadosTodos: any[] = [];
+
+  dadosTodos: ExameTabela[] = [];
+  dados: ExameTabela[] = [];
 
   listaTipoExame = listaTipoExame;
   listaPeriodo = listaPeriodo;
@@ -229,7 +234,7 @@ export class ExamesComponent implements OnInit {
     },
   ];
 
-  dados: any[] = [];
+  // dados: any[] = [];
 
   acoes = [
     {
@@ -250,7 +255,7 @@ export class ExamesComponent implements OnInit {
           !!etapaAtual?.dataAgendada
         );
       },
-      callback: (item: Exames) => this.lancarNota(item),
+      callback: (item: ExameTabela) => this.lancarNota(item),
     },
     // {
     //   label: '📅',
@@ -332,6 +337,10 @@ export class ExamesComponent implements OnInit {
   // }
 
   ngOnInit(): void {
+    this.firestoreService.getInstrumento().subscribe((lista) => {
+      this.listaInstrumentos = lista;
+    });
+
     this.auth.getUsuarioAtualObservable().subscribe((usuario) => {
       if (!usuario) return;
 
@@ -366,6 +375,13 @@ export class ExamesComponent implements OnInit {
       this.paginaAtual--;
       this.limparSelecaoExames();
     }
+  }
+
+  getNomeInstrumento(id: string): string {
+    return (
+      this.listaInstrumentos.find((i) => i.id === id)?.nomeInstrumento ||
+      'Não informado'
+    );
   }
 
   get dadosPaginados(): any[] {
@@ -429,9 +445,9 @@ export class ExamesComponent implements OnInit {
   get liberaAcoes(): boolean {
     const temPermissao = this.liberaEditar || this.liberaDeletar;
 
-    const temItemSolicitado = this.dados.some(
-      (item) => item.status === 'solicitado',
-    );
+    // const temItemSolicitado = this.dados.some(
+    //   (item) => item.status === 'solicitado',
+    // );
 
     return temPermissao;
   }
@@ -557,15 +573,12 @@ export class ExamesComponent implements OnInit {
           return {
             ...exame,
             idadeAluno: this.calcularIdade(alunoFiltro?.dataNascimento),
+            instrumentoAluno: alunoFiltro?.idInstrumento || '',
+            afinacaoAluno: alunoFiltro?.afinacao || '',
             dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
               'ALUNO NÃO CADASTRADO',
-            // tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
-            // tipoExame: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
-            // categoriaExame: this.buscarCategoriaExame(
-            //   exame.categoriaExame || '',
-            // ),tipoExameLabel: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
             tipoExameLabel: this.buscarLabel(
               this.listaTipoExame,
               exame.tipoExame,
@@ -790,10 +803,13 @@ export class ExamesComponent implements OnInit {
     );
   }
 
-  onSalvar(): void {
+  async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
-      alert('Formulário inválido. Preencha os campos obrigatórios.');
+      // alert('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.erro(
+        'Formulário inválido. Preencha os campos obrigatórios.',
+      );
       return;
     }
 
@@ -841,7 +857,12 @@ export class ExamesComponent implements OnInit {
       ? `Deseja realmente alterar o exame de ${nomeAluno}?`
       : `Deseja realmente solicitar exame para ${nomeAluno}?`;
 
-    if (!confirmarAcao(mensagem)) return;
+    // if (!confirmarAcao(mensagem)) return;
+    const confirmou = await this.alertService.confirmar(mensagem);
+
+    if (!confirmou) {
+      return;
+    }
 
     if (this.dadosParaEditar?.id) {
       this.firestoreService
@@ -1000,9 +1021,8 @@ export class ExamesComponent implements OnInit {
   //   this.mostrarModalNota = true;
   // }
 
-  lancarNota(exame: Exames): void {
+  lancarNota(exame: ExameTabela): void {
     const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
-
     if (!etapa) {
       this.snackBar.open('Nenhuma etapa disponível.', 'Fechar', {
         duration: 3000,
@@ -1108,7 +1128,8 @@ export class ExamesComponent implements OnInit {
     const nomeAluno = this.getNomeAluno(exame.idAluno);
     const mensagem = `Deseja realmente salvar a nota ${nota} para ${nomeAluno}?`;
 
-    if (!confirmarAcao(mensagem)) return;
+    // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
     const etapasAtualizadas = exame.etapas.map((e) => {
       if (e.ordem !== etapa.ordem) {
@@ -1319,7 +1340,7 @@ export class ExamesComponent implements OnInit {
   }
 
   // SELECIONAR
-  aoSelecionarExames(lista: Exames[]): void {
+  aoSelecionarExames(lista: ExameTabela[]): void {
     this.examesSelecionados = lista;
   }
 
@@ -1335,7 +1356,7 @@ export class ExamesComponent implements OnInit {
     );
   }
 
-  get exameSelecionadoUnico(): Exames | null {
+  get exameSelecionadoUnico(): ExameTabela | null {
     return this.examesSelecionados.length === 1
       ? this.examesSelecionados[0]
       : null;
@@ -1507,7 +1528,7 @@ export class ExamesComponent implements OnInit {
       return;
     }
 
-    const confirmacao = confirm(
+    const confirmacao = await this.alertService.confirmar(
       `Deseja realmente aceitar ${examesValidos.length} solicitação(ões)?`,
     );
 
@@ -1590,7 +1611,7 @@ export class ExamesComponent implements OnInit {
     const nomeAluno = this.getNomeAluno(this.exameCancelamento.idAluno);
     const mensagem = `Deseja realmente cancelar o exame de ${nomeAluno}?`;
 
-    if (!confirmarAcao(mensagem)) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     const motivo = upper(this.cancelamentoForm.value.motivoCancelamento);
 
@@ -1652,7 +1673,7 @@ export class ExamesComponent implements OnInit {
     const nomeAluno = this.getNomeAluno(exame.idAluno);
     const mensagem = `Deseja realmente excluir a nota de ${nomeAluno}?`;
 
-    if (!confirmarAcao(mensagem)) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     const etapasAtualizadas = exame.etapas.map((e) => {
       if (e.ordem < etapa.ordem) {
@@ -1712,7 +1733,7 @@ export class ExamesComponent implements OnInit {
   }
 
   async excluir(exame: Exames): Promise<void> {
-    const confirmacao = confirm(
+    const confirmacao = await this.alertService.confirmar(
       `Tem certeza que deseja excluir o exame de "${(exame as any).nomeAluno}"?`,
     );
 

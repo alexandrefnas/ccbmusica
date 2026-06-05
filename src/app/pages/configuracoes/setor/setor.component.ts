@@ -16,6 +16,7 @@ import { confirmarAcao } from '../../../../shared/shared.service';
 import { FirestoreService, Setor } from '../../../services/firestore.service';
 import { TableComponent } from '../../../component/table/table.component';
 import { upper } from '../../../services/select.service';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-setor',
@@ -124,6 +125,7 @@ export class SetorComponent implements OnInit {
     private fb: FormBuilder,
     private firestoreService: FirestoreService,
     private snackBar: MatSnackBar,
+    private alertService: AlertService,
   ) {
     this.dadosForms = this.fb.group({
       nomeSetor: ['', Validators.required],
@@ -225,10 +227,12 @@ export class SetorComponent implements OnInit {
     }
   }
 
-  onSalvar(): void {
+  async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
-      alert('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.aviso(
+        'Formulário inválido. Preencha os campos obrigatórios.',
+      );
       return;
     }
 
@@ -242,10 +246,8 @@ export class SetorComponent implements OnInit {
     };
 
     const mensagem = this.dadosParaEditar
-      ? `Deseja realmente alterar ${this.dadosParaEditar.nomeSetor}?`
+      ? `Deseja realmente altera ${this.dadosParaEditar.nomeSetor}?`
       : `Deseja realmente salvar ${baseData.nomeSetor}?`;
-
-    // if (!confirmarAcao(mensagem)) return;
 
     if (this.dadosParaEditar) {
       const alterado = Object.keys(baseData).some(
@@ -260,7 +262,8 @@ export class SetorComponent implements OnInit {
         return;
       }
 
-      if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
+      // if (!confirmarAcao(mensagem)) return;
 
       this.firestoreService
         .updateSetor(this.dadosParaEditar.id!, baseData)
@@ -275,7 +278,8 @@ export class SetorComponent implements OnInit {
           this.fecharModal();
         });
     } else {
-      if (!confirmarAcao(mensagem)) return;
+      // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
       this.firestoreService.addSetor(baseData).then(() => {
         this.snackBar.open(

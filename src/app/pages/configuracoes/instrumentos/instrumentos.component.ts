@@ -21,6 +21,7 @@ import { TableComponent } from '../../../component/table/table.component';
 import { upper } from '../../../services/select.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'tcx-instrumentos',
@@ -128,6 +129,7 @@ export class InstrumentosComponent {
     private auth: AuthService,
     private firestoreService: FirestoreService,
     private snackBar: MatSnackBar,
+private alertService: AlertService
   ) {
     this.dadosForms = this.fb.group({
       nomeInstrumento: ['', Validators.required],
@@ -266,10 +268,10 @@ export class InstrumentosComponent {
     }
   }
 
-  onSalvar(): void {
+  async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
-      alert('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.aviso('Formulário inválido. Preencha os campos obrigatórios.');
       return;
     }
 
@@ -302,7 +304,8 @@ export class InstrumentosComponent {
         return;
       }
 
-      if (!confirmarAcao(mensagem)) return;
+      // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
 
       this.firestoreService
         .updateInstrumento(this.dadosParaEditar.id!, baseData)
@@ -317,8 +320,8 @@ export class InstrumentosComponent {
           this.fecharModal();
         });
     } else {
-      if (!confirmarAcao(mensagem)) return;
-
+      // if (!confirmarAcao(mensagem)) return;
+      if (!(await this.alertService.confirmar(mensagem))) return;
       this.firestoreService.addInstrumento(baseData).then(() => {
         this.snackBar.open(
           `${baseData.nomeSetor} salvo com sucesso!`,
