@@ -94,6 +94,8 @@ export class UsuariosComponent implements OnInit {
   perfil: Perfil = 'instrutor';
   carregando = false;
   ignorarMudancaPerfil = false;
+  houveAlteracao = false;
+  private valorOriginalFormulario = '';
 
   listaTipoUsuario = LISTA_TIPO_USUARIO;
 
@@ -174,6 +176,102 @@ export class UsuariosComponent implements OnInit {
     return this.auth.temPermissao('usuarios', tipo);
   }
 
+  private atualizarStatusAlteracao(): void {
+    const valorAtual = JSON.stringify(this.dadosForms.getRawValue());
+    this.houveAlteracao = valorAtual !== this.valorOriginalFormulario;
+  }
+
+  private getAcessosLogado(): any {
+    return this.auth.usuario?.acessos || {};
+  }
+
+  private limitarAcessosPeloUsuarioLogado(acessos: any): any {
+    const logado = this.auth.usuario;
+
+    if (!logado) return acessos;
+
+    // Admin pode liberar tudo
+    if (logado.perfil === 'admin') {
+      return acessos;
+    }
+
+    const acessosLogado = this.getAcessosLogado();
+    const acessosLimitados = JSON.parse(JSON.stringify(acessos));
+
+    this.todosModulos.forEach((modulo) => {
+      const permissoesLogado = acessosLogado?.[modulo];
+
+      if (!acessosLimitados[modulo]) return;
+
+      ['read', 'create', 'update', 'delete'].forEach((permissao) => {
+        if (permissoesLogado?.[permissao] !== true) {
+          acessosLimitados[modulo][permissao] = false;
+        }
+      });
+
+      // Se read for false, todo o resto também fica false
+      if (acessosLimitados[modulo].read !== true) {
+        acessosLimitados[modulo].create = false;
+        acessosLimitados[modulo].update = false;
+        acessosLimitados[modulo].delete = false;
+      }
+    });
+
+    return acessosLimitados;
+  }
+
+  private aplicarRegraReadFalse(): void {
+    const acessosGroup = this.dadosForms.get('acessos') as FormGroup;
+    if (!acessosGroup) return;
+
+    this.todosModulos.forEach((modulo) => {
+      const grupo = acessosGroup.get(modulo) as FormGroup;
+      if (!grupo) return;
+
+      grupo.get('read')?.valueChanges.subscribe((read: boolean) => {
+        if (read === false) {
+          grupo.patchValue(
+            {
+              create: false,
+              update: false,
+              delete: false,
+            },
+            { emitEvent: false },
+          );
+        }
+      });
+    });
+  }
+
+  private bloquearPermissoesNaoPermitidas(): void {
+    const logado = this.auth.usuario;
+    const acessosGroup = this.dadosForms.get('acessos') as FormGroup;
+
+    if (!logado || !acessosGroup) return;
+
+    // Admin pode alterar tudo
+    if (logado.perfil === 'admin') return;
+
+    const acessosLogado = this.getAcessosLogado();
+
+    this.todosModulos.forEach((modulo) => {
+      const grupo = acessosGroup.get(modulo) as FormGroup;
+      if (!grupo) return;
+
+      ['read', 'create', 'update', 'delete'].forEach((permissao) => {
+        const podeLiberar = acessosLogado?.[modulo]?.[permissao] === true;
+        const control = grupo.get(permissao);
+
+        if (!podeLiberar) {
+          control?.setValue(false, { emitEvent: false });
+          control?.disable({ emitEvent: false });
+        } else {
+          control?.enable({ emitEvent: false });
+        }
+      });
+    });
+  }
+
   // ngOnInit(): void {
   //   this.escutarMudancaPerfil();
   //   this.carregarDados();
@@ -207,9 +305,18 @@ export class UsuariosComponent implements OnInit {
 
       const config = TIPO_PERFIL[perfil];
 
+      // this.dadosForms.patchValue({
+      //   acessos: JSON.parse(JSON.stringify(config.acessos)),
+      // });
+      const acessosLimitados = this.limitarAcessosPeloUsuarioLogado(
+        config.acessos,
+      );
+
       this.dadosForms.patchValue({
-        acessos: JSON.parse(JSON.stringify(config.acessos)),
+        acessos: acessosLimitados,
       });
+
+      this.bloquearPermissoesNaoPermitidas();
     });
   }
 
@@ -461,7 +568,8 @@ export class UsuariosComponent implements OnInit {
         perfil: this.perfil,
         idSetor: idSetorFinal,
         idComum: idComumFinal,
-        acessos: perfilConfig.acessos,
+        // acessos: perfilConfig.acessos,
+        acessos: this.limitarAcessosPeloUsuarioLogado(perfilConfig.acessos),
       });
 
       this.alertService.sucesso('Usuário cadastrado com sucesso!');
@@ -482,11 +590,16 @@ export class UsuariosComponent implements OnInit {
   async salvar(): Promise<void> {
     if (!this.dadosParaEditar?.uid) return;
 
-    const mensagem = `Deseja realmente alterar o acesso do usuário ${this.dadosParaEditar.nome}?`;
+    const mensagem = `Deseja realmente alterar o acesso do usuários ${this.dadosParaEditar.nome}?`;
     // if (!confirmarAcao(mensagem)) return;
     if (!(await this.alertService.confirmar(mensagem))) return;
 
-    const dadosAtualizados = this.dadosForms.value;
+    // const dadosAtualizados = this.dadosForms.value;
+    const dadosAtualizados = this.dadosForms.getRawValue();
+
+    dadosAtualizados.acessos = this.limitarAcessosPeloUsuarioLogado(
+      dadosAtualizados.acessos,
+    );
 
     try {
       await this.auth.updateUsuario(this.dadosParaEditar.uid, dadosAtualizados);
@@ -494,6 +607,11 @@ export class UsuariosComponent implements OnInit {
       this.snackBar.open('Atualizado com sucesso!', 'Fechar', {
         duration: 3000,
       });
+      this.valorOriginalFormulario = JSON.stringify(
+        this.dadosForms.getRawValue(),
+      );
+      this.dadosForms.markAsPristine();
+      this.houveAlteracao = false;
 
       this.liberacoes = false;
     } catch (error) {
@@ -630,6 +748,21 @@ export class UsuariosComponent implements OnInit {
       },
       { emitEvent: false }, // 💥 ISSO resolve tudo
     );
+    const acessosAtuais =
+      select.acessos ?? TIPO_PERFIL[select.perfil as Perfil].acessos;
+
+    const acessosLimitados =
+      this.limitarAcessosPeloUsuarioLogado(acessosAtuais);
+
+    this.dadosForms.patchValue(
+      {
+        acessos: acessosLimitados,
+      },
+      { emitEvent: false },
+    );
+
+    this.aplicarRegraReadFalse();
+    this.bloquearPermissoesNaoPermitidas();
 
     this.listaComunsSelect = this.listaComuns
       .filter((c) => c.idSetor === select.idSetor)
@@ -637,6 +770,16 @@ export class UsuariosComponent implements OnInit {
         value: c.id!,
         label: c.nomeCongregacao,
       }));
+
+    this.valorOriginalFormulario = JSON.stringify(
+      this.dadosForms.getRawValue(),
+    );
+    this.houveAlteracao = false;
+    this.dadosForms.markAsPristine();
+
+    this.dadosForms.valueChanges.subscribe(() => {
+      this.atualizarStatusAlteracao();
+    });
 
     // libera depois de carregar
     setTimeout(() => {

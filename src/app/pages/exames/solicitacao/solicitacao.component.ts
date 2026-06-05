@@ -84,6 +84,8 @@ export class SolicitacaoComponent {
     // this.liberaDeletar = this.permissao('delete');
   }
 
+  houveAlteracao = false;
+
   isMobile = window.innerWidth <= 576;
   converterISOParaBR = converterISOParaBR;
 
@@ -458,7 +460,7 @@ export class SolicitacaoComponent {
     this.paginaAtual = 1;
   }
 
-  onSalvar(): void {
+  async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
       this.alertService.aviso(
