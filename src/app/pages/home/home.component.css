@@ -49,7 +49,7 @@
 }
 
 /* / CARD/ */
-.container__card {
+/* .container__card {
   display: flex;
   flex-direction: column;
   width: 300px;
@@ -87,7 +87,6 @@
   font-size: 20px;
 
 }
-/* border: solid 1px red; */
 
 .card-value {
   display: flex;
@@ -103,7 +102,6 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  /* justify-content: space-between; */
   width: 100%;
   flex: 1;
 }
@@ -120,8 +118,130 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+} */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
+.container__card {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  min-height: 170px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f4f7ff, #dfe9ff);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
+}
+
+.card-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #c7d3ec;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2f3a4a;
+}
+
+.subtitulo {
+  font-size: 12px;
+  color: #6f7c90;
+}
+
+.total {
+  min-width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #2f5fb3;
+  font-size: 22px;
+  font-weight: bold;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: inset 0 0 0 2px #b8c9ef;
+}
+
+.card-value {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.componente-value {
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.65);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.componente-value-title {
+  width: 100%;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.componente-value-total {
+  font-size: 11px;
+  color: #6f7c90;
+}
+
+.componente-value-status {
+  display: flex;
+  gap: 8px;
+}
+
+.status-result {
+  min-width: 34px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.status-result span {
+  font-size: 10px;
+}
+
+.status-result strong {
+  font-size: 14px;
+}
+
+.aprovado {
+  background: #e4f8ea;
+  color: #1f8f3a;
+}
+
+.reprovado {
+  background: #fde7e7;
+  color: #c73535;
+}
 /* /FIM CARD/ */
 
 /* / FIM TELA CONTAINER/ */
@@ -135,6 +255,10 @@
     overflow: hidden;
     min-width: 300px;
   }
+
+.cards-container {
+justify-content: center;
+}
 }
 
 /* Table */

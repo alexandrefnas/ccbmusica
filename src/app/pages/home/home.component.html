@@ -1,10 +1,10 @@
 <div class="container__tela">
   <div id="barra-titulo__container">
-    <h2>Painel de Contole</h2>
+    <h2>Resumo</h2>
   </div>
 
   <div class="tela__container">
-    <div class="container__card" *ngFor="let c of dados; let i = index">
+    <!-- <div class="container__card" *ngFor="let c of dados; let i = index">
       <div class="card-titulo">
         <div class="componente-titulo">
           <p>{{dados[i].nome}}</p>
@@ -21,6 +21,42 @@
           <div class="componente-value-status">
             <div class="status-result"><p>AP</p> <p>{{v.aprovado}}</p></div>
             <div class="status-result"><p>RP</p><P>{{v.reprovado}}</P></div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+    <div class="cards-container">
+      <div class="container__card" *ngFor="let c of dados">
+        <div class="card-titulo">
+          <div>
+            <p class="titulo">{{ c.nome }}</p>
+            <span class="subtitulo">Resumo geral</span>
+          </div>
+
+          <div class="total">
+            {{ c.total }}
+          </div>
+        </div>
+
+        <div class="card-value">
+          <div class="componente-value" *ngFor="let v of c.detalhamento">
+            <div class="componente-value-title" [title]="v.label">
+              {{ v.label }}
+            </div>
+
+            <div class="componente-value-total">Total: {{ v.total }}</div>
+
+            <div class="componente-value-status">
+              <div class="status-result aprovado">
+                <span>AP</span>
+                <strong>{{ v.aprovado }}</strong>
+              </div>
+
+              <div class="status-result reprovado">
+                <span>RP</span>
+                <strong>{{ v.reprovado }}</strong>
+              </div>
+            </div>
           </div>
         </div>
       </div>
