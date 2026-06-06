@@ -385,12 +385,12 @@ export class IgrejasComponent implements OnInit {
   }
 
   async excluir(dados: Igrejas): Promise<void> {
-    const confirmacao = confirm(
-      `Tems certeza que deseja excluir "${dados.nomeCongregacao}"?`,
-    );
-    if (!confirmacao) {
-      return;
-    }
+    const mensagem =`Tems certeza que deseja excluir "${dados.nomeCongregacao}"?`;
+    // if (!confirmacao) {
+    //   return;
+    // }
+
+  if (!(await this.alertService.confirmar(mensagem))) return;
 
     if (dados.id) {
       try {

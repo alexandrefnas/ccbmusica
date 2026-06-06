@@ -16,19 +16,12 @@
   box-sizing: border-box;
 }
 
-#barra-titulo__container {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  /* margin-top: 20px; */
-  font-weight: bold;
-  align-items: center;
-  /* border-bottom: 2px solid #ccc; */
-}
-
 #tela__barra-menu {
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
   width: 100%;
   margin-top: 20px;
   padding: 8px 0;
@@ -39,6 +32,15 @@
     inset 0 -1px 0 #dcdcdc,
     inset 0 -2px 0 #999;
 }
+
+#barra-titulo__container {
+  display: flex;
+  flex-direction: row;
+  /* width: 100%; */
+  font-weight: bold;
+  align-items: center;
+}
+
 
 #tela__container-tabela {
   width: 100%;
@@ -85,7 +87,10 @@
 }
 
 .button-container {
-  width: 80px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  /* width: 80px; */
 }
 
 .form__button {

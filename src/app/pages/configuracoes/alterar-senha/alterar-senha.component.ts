@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AlertService } from '../../../services/alert.service';
+import { MenuComponent } from '../../../component/menu/menu.component';
 
 @Component({
   selector: 'tcx-alterar-senha',
@@ -22,7 +23,8 @@ export class AlterarSenhaComponent {
   constructor(
     private auth: AuthService,
     private router: Router,
-private alertService: AlertService
+    private alertService: AlertService,
+    // private menu: MenuComponent,
   ) {}
 
   visualizador(tipo: string) {
@@ -51,6 +53,7 @@ private alertService: AlertService
       this.senhaAtual = '';
       this.novaSenha = '';
       this.router.navigate(['/home']);
+      // this.menu.menuHome();
     } catch (erro) {
       console.error(erro);
       this.alertService.erro('Erro ao alterar senha');

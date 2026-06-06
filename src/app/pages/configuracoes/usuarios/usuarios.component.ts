@@ -50,6 +50,7 @@ import { AlertService } from '../../../services/alert.service';
   styleUrl: './usuarios.component.css',
 })
 export class UsuariosComponent implements OnInit {
+// #region Variaveis
   liberaEditar: boolean = false;
   liberaCriar: boolean = false;
   liberaDeletar: boolean = false;
@@ -147,6 +148,7 @@ export class UsuariosComponent implements OnInit {
   ////Fim
 
   dadosForms: FormGroup;
+// #endregion
 
   constructor(
     private fb: FormBuilder,
@@ -263,7 +265,7 @@ export class UsuariosComponent implements OnInit {
         const control = grupo.get(permissao);
 
         if (!podeLiberar) {
-          control?.setValue(false, { emitEvent: false });
+          // control?.setValue(false, { emitEvent: false });
           control?.disable({ emitEvent: false });
         } else {
           control?.enable({ emitEvent: false });
@@ -293,31 +295,32 @@ export class UsuariosComponent implements OnInit {
   }
 
   private escutarMudancaPerfil() {
-    this.getControl('perfil')?.valueChanges.subscribe((perfil: Perfil) => {
-      if (this.ignorarMudancaPerfil) return;
-      if (!perfil) return;
+    this.getControl('perfil')?.valueChanges.subscribe(
+      async (perfil: Perfil) => {
+        if (this.ignorarMudancaPerfil) return;
+        if (!perfil) return;
 
-      const confirmar = confirm(
-        'Deseja aplicar as permissões padrão deste perfil?',
-      );
+        const mensagem = 'Deseja aplicar as permissões padrão deste perfil?';
 
-      if (!confirmar) return;
+        // if (!confirmar) retur;
+        if (!(await this.alertService.confirmar(mensagem))) return;
 
-      const config = TIPO_PERFIL[perfil];
+        const config = TIPO_PERFIL[perfil];
 
-      // this.dadosForms.patchValue({
-      //   acessos: JSON.parse(JSON.stringify(config.acessos)),
-      // });
-      const acessosLimitados = this.limitarAcessosPeloUsuarioLogado(
-        config.acessos,
-      );
+        // this.dadosForms.patchValue({
+        //   acessos: JSON.parse(JSON.stringify(config.acessos)),
+        // });
+        const acessosLimitados = this.limitarAcessosPeloUsuarioLogado(
+          config.acessos,
+        );
 
-      this.dadosForms.patchValue({
-        acessos: acessosLimitados,
-      });
+        this.dadosForms.patchValue({
+          acessos: acessosLimitados,
+        });
 
-      this.bloquearPermissoesNaoPermitidas();
-    });
+        this.bloquearPermissoesNaoPermitidas();
+      },
+    );
   }
 
   escutarMudancaSetor(): void {
@@ -475,6 +478,36 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
+  private mesclarAcessosPermitidos(
+    acessosOriginais: any,
+    acessosNovos: any,
+  ): any {
+    const logado = this.auth.usuario;
+
+    if (!logado || logado.perfil === 'admin') {
+      return acessosNovos;
+    }
+
+    const acessosLogado = this.getAcessosLogado();
+    const resultado = JSON.parse(JSON.stringify(acessosOriginais || {}));
+
+    this.todosModulos.forEach((modulo) => {
+      if (!resultado[modulo]) {
+        resultado[modulo] = {};
+      }
+
+      ['read', 'create', 'update', 'delete'].forEach((permissao) => {
+        const podeAlterar = acessosLogado?.[modulo]?.[permissao] === true;
+
+        resultado[modulo][permissao] = podeAlterar
+          ? acessosNovos?.[modulo]?.[permissao] === true
+          : acessosOriginais?.[modulo]?.[permissao] === true;
+      });
+    });
+
+    return resultado;
+  }
+
   prepararDados() {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
@@ -598,10 +631,13 @@ export class UsuariosComponent implements OnInit {
     // const dadosAtualizados = this.dadosForms.value;
     const dadosAtualizados = this.dadosForms.getRawValue();
 
-    dadosAtualizados.acessos = this.limitarAcessosPeloUsuarioLogado(
+    // dadosAtualizados.acessos = this.limitarAcessosPeloUsuarioLogado(
+    //   dadosAtualizados.acessos,
+    // );
+    dadosAtualizados.acessos = this.mesclarAcessosPermitidos(
+      this.dadosParaEditar.acessos,
       dadosAtualizados.acessos,
     );
-
     try {
       await this.auth.updateUsuario(this.dadosParaEditar.uid, dadosAtualizados);
 
@@ -749,18 +785,18 @@ export class UsuariosComponent implements OnInit {
       },
       { emitEvent: false }, // 💥 ISSO resolve tudo
     );
-    const acessosAtuais =
-      select.acessos ?? TIPO_PERFIL[select.perfil as Perfil].acessos;
+    // const acessosAtuais =
+    //   select.acessos ?? TIPO_PERFIL[select.perfil as Perfil].acessos;
 
-    const acessosLimitados =
-      this.limitarAcessosPeloUsuarioLogado(acessosAtuais);
+    // const acessosLimitados =
+    //   this.limitarAcessosPeloUsuarioLogado(acessosAtuais);
 
-    this.dadosForms.patchValue(
-      {
-        acessos: acessosLimitados,
-      },
-      { emitEvent: false },
-    );
+    // this.dadosForms.patchValue(
+    //   {
+    //     acessos: acessosLimitados,
+    //   },
+    //   { emitEvent: false },
+    // );
 
     this.aplicarRegraReadFalse();
     this.bloquearPermissoesNaoPermitidas();

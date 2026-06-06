@@ -70,12 +70,12 @@
               >
                 <button
                   class="buttons-stile"
-                  [title]="acao.descricao || ''"
+                  [title]="isFuncao(acao.descricao) ? acao.descricao(item) : acao.descricao || ''"
                   *ngIf="!acao.visivel || acao.visivel(item)"
                   [ngClass]="acao.classe || ''"
                   (click)="acao.callback(item)"
                 >
-                  {{ acao.label }}
+                  {{ isFuncao(acao.label) ? acao.label(item) : acao.label }}
                 </button>
               </div>
             </ng-container>

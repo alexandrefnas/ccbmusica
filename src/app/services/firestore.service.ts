@@ -91,6 +91,7 @@ export interface Instrumentos {
   familia: string;
   vozAlternativa: string;
   vozPrincipal: string;
+  ativo?: boolean;
 }
 
 export interface Candidatos {
@@ -101,6 +102,7 @@ export interface Candidatos {
   idComum: string;
   idInstrumento: string;
   afinacao: string;
+  desativado?: boolean;
 }
 
 @Injectable({
@@ -285,7 +287,7 @@ export class FirestoreService {
     const docRef = await addDoc(dadosfasRef, dados);
 
     // Atualiza o documento adicionando o ID dentro dele:
-    await setDoc(docRef, { ...dados, id: docRef.id }, { merge: true });
+    await setDoc(docRef, { ...dados, id: docRef.id, desativado: false }, { merge: true });
 
     return docRef;
   }

@@ -201,12 +201,12 @@ export class SetorComponent implements OnInit {
   }
 
   async excluir(dados: Setor): Promise<void> {
-    const confirmacao = confirm(
-      `Tems certeza que deseja excluir "${dados.nomeSetor}"?`,
-    );
-    if (!confirmacao) {
-      return;
-    }
+    const mensagem =`Tems certeza que deseja excluir "${dados.nomeSetor}"?`;
+    // if (!confirmacao) {
+    //   return;
+    // }
+
+  if (!(await this.alertService.confirmar(mensagem))) return;
 
     if (dados.id) {
       try {

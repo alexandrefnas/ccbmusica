@@ -242,12 +242,11 @@ private alertService: AlertService
   }
 
   async excluir(dados: Instrumentos): Promise<void> {
-    const confirmacao = confirm(
-      `Tems certeza que deseja excluir "${dados.nomeInstrumento}"?`,
-    );
-    if (!confirmacao) {
-      return;
-    }
+    const mensagem =`Tems certeza que deseja excluir "${dados.nomeInstrumento}"?`;
+    // if (!confirmacao) {
+    //   return;
+    // }
+  if (!(await this.alertService.confirmar(mensagem))) return;
 
     if (dados.id) {
       try {

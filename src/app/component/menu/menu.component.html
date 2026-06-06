@@ -52,7 +52,7 @@
             [routerLink]="page.rota"
             routerLinkActive="menu-ativo"
             [routerLinkActiveOptions]="{ exact: true }"
-(click)="fecharMenuMobile()"
+            (click)="fecharMenuMobile()"
           >
             <i [class]="page.icon"></i>
             {{ page.label }}
@@ -100,6 +100,34 @@
   </table>
 
   <!-- Manutenção -->
+  <table class="demonstrativo__tabela">
+    <tbody>
+      <tr class="grupo" (click)="menuOutros()" style="cursor: pointer">
+        <td>
+          <div class="grupo__submenu">
+            <strong>Outros</strong>
+            <span>{{ mostrarGrupo3 ? "▼" : "▶" }}</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Submenus com navegação -->
+      <ng-container *ngIf="mostrarGrupo3">
+        <tr *ngFor="let page of outros" @expandCollapse class="submenu">
+          <td
+            [routerLink]="page.rota"
+            routerLinkActive="menu-ativo"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="fecharMenuMobile()"
+          >
+            <i [class]="page.icon"></i>
+            {{ page.label }}
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+  <!-- Manutenção -->
   <table *ngIf="manutencaoFiltrados.length > 0" class="demonstrativo__tabela">
     <tbody>
       <tr class="grupo" (click)="menuManutencao()" style="cursor: pointer">
@@ -126,7 +154,7 @@
             [routerLink]="page.rota"
             routerLinkActive="menu-ativo"
             [routerLinkActiveOptions]="{ exact: true }"
-(click)="fecharMenuMobile()"
+            (click)="fecharMenuMobile()"
           >
             <i [class]="page.icon"></i>
             {{ page.label }}

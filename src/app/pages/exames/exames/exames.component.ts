@@ -858,11 +858,12 @@ export class ExamesComponent implements OnInit {
       : `Deseja realmente solicitar exame para ${nomeAluno}?`;
 
     // if (!confirmarAcao(mensagem)) return;
-    const confirmou = await this.alertService.confirmar(mensagem);
+    // const confirmou = await this.alertService.confirmar(mensagem);
 
-    if (!confirmou) {
-      return;
-    }
+    // if (!confirmou) {
+    //   return;
+    // }
+  if (!(await this.alertService.confirmar(mensagem))) return;
 
     if (this.dadosParaEditar?.id) {
       this.firestoreService

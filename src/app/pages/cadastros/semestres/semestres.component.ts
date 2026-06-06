@@ -72,6 +72,7 @@ export class SemestresComponent {
     });
   }
 
+  //#region Variaveis
   dadosForms: FormGroup;
   dadosParaEditar: GrupoExames | null = null;
   mostrarModal: boolean = false;
@@ -88,8 +89,10 @@ export class SemestresComponent {
   listaSetor: { value: string; label: string }[] = [];
   listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
 
-  // TABELA
   dados: any[] = [];
+  //#endregion
+
+  //#region TABELA
 
   camposColunas = [
     'grupoExame',
@@ -164,7 +167,8 @@ export class SemestresComponent {
       callback: (item: GrupoExames) => this.excluir(item),
     },
   ];
-  // FIM TABELA
+  //#endregion FIM TABELA
+
   usuarioEhAdmin(): boolean {
     return this.auth.usuario?.perfil === 'admin';
   }
@@ -657,7 +661,7 @@ export class SemestresComponent {
     const mensagem = `Deseja realmente concluir ${item.grupoExame}?`;
 
     // if (!confirmarAcao(mensagem)) return;
-      if (!(await this.alertService.confirmar(mensagem))) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     await this.firestoreService.updateSemestres(item.id, {
       concluido: true,
@@ -674,7 +678,7 @@ export class SemestresComponent {
     const mensagem = `Deseja realmente excluir ${item.grupoExame}?`;
 
     // if (!confirmarAcao(mensagem)) return;
-      if (!(await this.alertService.confirmar(mensagem))) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     await this.firestoreService.deleteSemestres(item.id);
 

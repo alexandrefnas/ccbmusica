@@ -35,6 +35,7 @@ export class MenuComponent {
   mostrarGrupo = false;
   mostrarGrupo1 = false;
   mostrarGrupo2 = false;
+  mostrarGrupo3 = false;
 
   cadastros = [
     {
@@ -52,12 +53,6 @@ export class MenuComponent {
   ];
 
   manutencao = [
-    {
-      label: 'Alterar Senha',
-      rota: '/as',
-      tabela: 'usuarios',
-      icon: 'bi bi-key',
-    },
     {
       label: 'Instrumentos',
       rota: '/instrumento',
@@ -84,6 +79,15 @@ export class MenuComponent {
     },
   ];
 
+  outros = [
+    {
+      label: 'Alterar Senha',
+      rota: '/as',
+      tabela: 'usuarios',
+      icon: 'bi bi-key',
+    },
+  ];
+
   avaliacoes = [
     {
       label: 'Solicitações',
@@ -105,10 +109,11 @@ export class MenuComponent {
     private appcomp: AppComponent,
   ) {}
 
-  menuHome(): void {
+ public menuHome(): void {
     this.mostrarGrupo = false;
     this.mostrarGrupo1 = false;
     this.mostrarGrupo2 = false;
+    this.mostrarGrupo3 = false;
     this.abrirRota('/home');
   }
 
@@ -116,18 +121,28 @@ export class MenuComponent {
     this.mostrarGrupo = !this.mostrarGrupo;
     this.mostrarGrupo1 = false;
     this.mostrarGrupo2 = false;
+    this.mostrarGrupo3 = false;
   }
 
   menuManutencao(): void {
     this.mostrarGrupo = false;
     this.mostrarGrupo1 = !this.mostrarGrupo1;
     this.mostrarGrupo2 = false;
+    this.mostrarGrupo3 = false;
+  }
+
+  menuOutros(): void {
+    this.mostrarGrupo = false;
+    this.mostrarGrupo1 = false;
+    this.mostrarGrupo2 = false;
+    this.mostrarGrupo3 = !this.mostrarGrupo3;
   }
 
   menuTestes(): void {
     this.mostrarGrupo = false;
-    this.mostrarGrupo2 = !this.mostrarGrupo2;
     this.mostrarGrupo1 = false;
+    this.mostrarGrupo2 = !this.mostrarGrupo2;
+    this.mostrarGrupo3 = false;
   }
 
   abrirRota(rota: string): void {

@@ -75,6 +75,9 @@ export class AlunosComponent implements OnInit {
   title = '';
   mostrarModal = false;
 
+  filtro = false;
+  filtroStatus = false;
+
   listaIgreja: { value: string; label: string; idSetor: string }[] = [];
   listaSetor: { value: string; label: string }[] = [];
   listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
@@ -88,7 +91,7 @@ export class AlunosComponent implements OnInit {
     { value: 'SIB', label: 'SIB' },
   ];
 
-  // DADOS TABELA
+  //#region DADOS TABELA
   camposColunas = [
     'nomeAluno',
     'dataNascimentoExibicao',
@@ -138,8 +141,16 @@ export class AlunosComponent implements OnInit {
       label: '✏️',
       descricao: 'Editar',
       classe: 'acao-editar',
-      visivel: (item: any) => this.liberaEditar,
+      visivel: (item: any) => this.liberaEditar && !item.desativado,
       callback: (item: any) => this.editar(item),
+    },
+    {
+      label: (item: Candidatos) => (item.desativado ? '✅' : '⛔'),
+      descricao: (item: Candidatos) =>
+        item.desativado ? 'Ativar Candidado.' : 'Desativar Candidato.',
+      classe: 'acao-editar',
+      visivel: (item: Candidatos) => this.liberaEditar,
+      callback: (item: Candidatos) => this.statusCandidato(item),
     },
     {
       label: '🗑️',
@@ -149,8 +160,30 @@ export class AlunosComponent implements OnInit {
       callback: (item: any) => this.excluir(item),
     },
   ];
-  //
+  //#endregion
 
+  async statusCandidato(item: Candidatos): Promise<void> {
+    if (!item.id) return;
+
+    let mensagem = `Deseja realmente desativar ${item.nomeAluno}?`;
+    let aviso = `${item.nomeAluno} desativado com sucesso!`;
+    let status = true;
+    if (item.desativado) {
+      mensagem = `Deseja realmente ativar ${item.nomeAluno}?`;
+      aviso = `${item.nomeAluno} ativado com sucesso!`;
+      status = false;
+    }
+    // if (!confirmarAcao(mensagem)) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
+
+    await this.firestoreService.updateCandidato(item.id, {
+      desativado: status,
+    });
+
+    this.snackBar.open(aviso, 'Fechar', {
+      duration: 4000,
+    });
+  }
   //Fim
 
   dadosForms: FormGroup;
@@ -294,6 +327,14 @@ export class AlunosComponent implements OnInit {
     return control as FormControl;
   }
 
+  get filtroStatusOp(): boolean {
+    return (this.filtro = !this.filtro);
+  }
+
+alterarFiltroStatus(): void {
+  this.carregarDados();
+}
+
   escutarMudancaSetor(): void {
     this.getControl('idSetor').valueChanges.subscribe((idSetor) => {
       if (this.auth.usuario?.perfil !== 'admin') return;
@@ -370,7 +411,20 @@ export class AlunosComponent implements OnInit {
         });
 
       // Ordenar se necessário
-      this.dados = [...dadosCandidatos].sort((a, b) =>
+      // this.dados = [...dadosCandidatos].sort((a, b) =>
+      //   (a.nomeAluno || '').localeCompare(b.nomeAluno || ''),
+      // );
+      let dadosFiltrados = dadosCandidatos;
+
+      if (this.filtroStatus) {
+        // mostra apenas desativados
+        dadosFiltrados = dadosCandidatos.filter((c) => c.desativado === true);
+      } else {
+        // mostra apenas ativos
+        dadosFiltrados = dadosCandidatos.filter((c) => c.desativado !== true);
+      }
+
+      this.dados = [...dadosFiltrados].sort((a, b) =>
         (a.nomeAluno || '').localeCompare(b.nomeAluno || ''),
       );
     });
@@ -380,7 +434,9 @@ export class AlunosComponent implements OnInit {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
       // alert('Formulário inválido. Preencha os campos obrigatórios.');
-      this.alertService.erro('Formulário inválido. Preencha os campos obrigatórios.');
+      this.alertService.erro(
+        'Formulário inválido. Preencha os campos obrigatórios.',
+      );
       return;
     }
 
@@ -397,15 +453,6 @@ export class AlunosComponent implements OnInit {
     const date = formatarDataString(
       new Date(this.dadosForms.value.dataNascimento),
     );
-
-    // const baseData = {
-    //   ...this.dadosForms.value,
-    //   nomeAluno:
-    //     this.dadosForms.value.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
-    //   afinacao:
-    //     this.dadosForms.value.afinacao?.toLocaleUpperCase('pt-BR') || '',
-    //   dataNascimento: date,
-    // };
 
     const baseData = {
       ...this.dadosForms.value,
@@ -508,12 +555,12 @@ export class AlunosComponent implements OnInit {
   }
 
   async excluir(dados: Candidatos): Promise<void> {
-    const confirmacao = confirm(
-      `Tems certeza que deseja excluir "${dados.nomeAluno}"?`,
-    );
-    if (!confirmacao) {
-      return;
-    }
+    const mensagem = `Tems certeza que deseja excluir "${dados.nomeAluno}"?`;
+    // if (!confirmacao) {
+    //   return;
+    // }
+
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     if (dados.id) {
       try {

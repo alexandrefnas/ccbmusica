@@ -51,13 +51,25 @@ export class TableComponent implements OnInit, OnChanges {
     };
   } = {};
 
-  @Input() acoesTabela: {
-    label: string;
-    descricao?: string;
-    classe?: string;
-    callback: (item: any) => void;
-    visivel?: (item: any) => boolean;
-  }[] = [];
+  // @Input() acoesTabela: {
+  //   label: string;
+  //   descricao?: string;
+  //   classe?: string;
+  //   callback: (item: any) => void;
+  //   visivel?: (item: any) => boolean;
+  // }[] = [];
+
+@Input() acoesTabela: {
+  label: string | ((item: any) => string);
+  descricao?: string | ((item: any) => string);
+  classe?: string;
+  callback: (item: any) => void | Promise<void>;
+  visivel?: (item: any) => boolean;
+}[] = [];
+
+isFuncao(valor: any): valor is Function {
+  return typeof valor === 'function';
+}
 
   constructor(public auth: AuthService) {}
 
@@ -142,3 +154,11 @@ export class TableComponent implements OnInit, OnChanges {
       .map((d) => d.estiloClasse);
   }
 }
+
+// export type AcaoTabela = {
+//   label: string | ((item: any) => string);
+//   descricao?: string | ((item: any) => string);
+//   classe?: string;
+//   callback: (item: any) => void | Promise<void>;
+//   visivel?: (item: any) => boolean;
+// };

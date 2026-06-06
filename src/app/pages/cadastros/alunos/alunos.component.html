@@ -8,6 +8,31 @@
       <button class="buttons" (click)="buttonClick()">
         <i class="bi bi-file-earmark-plus"></i> Novo
       </button>
+      <button
+        class="buttons"
+        type="button"
+        title="Filtro Status"
+        (click)="(filtroStatusOp)"
+      >
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </div>
+  <div style="width: 100%; padding-top: 10px" *ngIf="filtro">
+    <!-- <tcx-select
+      [label]="'Filtro Status'"
+      [placeholder]="''"
+      [niveisLimitados]="listaStatusFiltro"
+      [(ngModel)]="statusFiltro"
+      (valorMudou)="aoSelecionarStatusFiltro($event)"
+    />-->
+    <div style="display: flex; flex-direction: row; gap: 10px; padding: 0 10px;">
+      <input
+        type="checkbox"
+        [(ngModel)]="filtroStatus"
+        (change)="alterarFiltroStatus()"
+      />
+      <label>Mostrar desativados</label>
     </div>
   </div>
   <div id="tela__container-tabela">
