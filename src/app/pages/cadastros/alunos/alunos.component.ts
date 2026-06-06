@@ -82,6 +82,9 @@ export class AlunosComponent implements OnInit {
   listaSetor: { value: string; label: string }[] = [];
   listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
   listaInstrumento: { value: string; label: string }[] = [];
+  listaComunsFiltro: { value: string; label: string }[] = [];
+  filtroComum = '';
+
   listaAfinacao = [
     { value: 'DÓ', label: 'DÓ' },
     { value: 'FÁ', label: 'FÁ' },
@@ -92,17 +95,18 @@ export class AlunosComponent implements OnInit {
   ];
 
   //#region DADOS TABELA
-  camposColunas = [
+  camposColunasBase = [
     'nomeAluno',
-    'dataNascimentoExibicao',
+    'idade',
     'nomeComum',
     'nomeInstrumento',
     'afinacao',
   ];
+  camposColunas: string[] = [];
 
   tituloColunas = {
     nomeAluno: 'Aluno',
-    dataNascimentoExibicao: 'Data Nascimento',
+    idade: 'Idade',
     nomeComum: 'Comum',
     nomeInstrumento: 'Instrumento',
     afinacao: 'Afinação',
@@ -113,7 +117,7 @@ export class AlunosComponent implements OnInit {
 
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'center',
-    dataNascimentoExibicao: 'center',
+    idade: 'center',
     nomeComum: 'center',
     nomeInstrumento: 'center',
     afinacao: 'center',
@@ -121,18 +125,18 @@ export class AlunosComponent implements OnInit {
 
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'left',
-    dataNascimentoExibicao: 'center',
+    idade: 'center',
     nomeComum: 'left',
     nomeInstrumento: 'left',
     afinacao: 'center',
   };
 
   tamanhoColunas = {
-    nomeAluno: { width: '45%' },
-    dataNascimentoExibicao: { width: '15%' },
-    nomeComum: { width: '20%' },
+    nomeAluno: { width: '45%', minWidth:'220px' },
+    idade: { width: '15%', minWidth:'50px' },
+    nomeComum: { width: '20%', minWidth:'220px' },
     nomeInstrumento: { width: '20%' },
-    afinacao: { width: '20%' },
+    afinacao: { width: '20%', minWidth:'80px' },
   };
 
   // Buttons
@@ -331,9 +335,9 @@ export class AlunosComponent implements OnInit {
     return (this.filtro = !this.filtro);
   }
 
-alterarFiltroStatus(): void {
-  this.carregarDados();
-}
+  alterarFiltroStatus(): void {
+    this.carregarDados();
+  }
 
   escutarMudancaSetor(): void {
     this.getControl('idSetor').valueChanges.subscribe((idSetor) => {
@@ -387,28 +391,56 @@ alterarFiltroStatus(): void {
       this.firestoreService.getIgrejas(),
       this.firestoreService.getInstrumento(),
     ]).subscribe(([candidato, igrejas, instrumento]) => {
-      const dadosCandidatos = candidato
-        .filter((c) => this.auth.podeVerRegistro(c, 'candidatos'))
-        .map((c) => {
-          const igrejaFiltro = igrejas.find((s) => s.id === c.idComum);
+      const candidatosPermitidos = candidato.filter((c) =>
+        this.auth.podeVerRegistro(c, 'candidatos'),
+      );
 
-          const InstrumentoFiltro = instrumento.find(
-            (i) => i.id === c.idInstrumento,
-          );
+      this.listaComunsFiltro = [
+        { value: '', label: 'TODAS' },
+        ...igrejas
+          .filter((igreja) =>
+            candidatosPermitidos.some((c) => c.idComum === igreja.id),
+          )
+          .map((igreja) => ({
+            value: igreja.id!,
+            label: igreja.nomeCongregacao?.toLocaleUpperCase('pt-BR') || '',
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label)),
+      ];
 
-          return {
-            ...c,
-            nomeAluno: c.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
-            dataNascimento: c.dataNascimento || '',
-            dataNascimentoExibicao: `${converterISOParaBR(c.dataNascimento || '')} (${this.calcularIdade(c.dataNascimento)} anos)`,
-            nomeComum:
-              igrejaFiltro?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
-              'NÃO CADASTRADO',
-            nomeInstrumento:
-              InstrumentoFiltro?.nomeInstrumento?.toLocaleUpperCase('pt-BR') ||
-              'SEM INSTRUMENTO',
-          };
-        });
+      const usuarioTemMaisDeUmaComum = this.listaComunsFiltro.length > 2;
+      // porque tem a opção TODAS + comuns reais
+
+      this.camposColunas = usuarioTemMaisDeUmaComum
+        ? [...this.camposColunasBase]
+        : this.camposColunasBase.filter((c) => c !== 'nomeComum');
+
+      let dadosBase = candidatosPermitidos;
+
+      if (this.filtroComum) {
+        dadosBase = dadosBase.filter((c) => c.idComum === this.filtroComum);
+      }
+
+      const dadosCandidatos = dadosBase.map((c) => {
+        const igrejaFiltro = igrejas.find((s) => s.id === c.idComum);
+
+        const InstrumentoFiltro = instrumento.find(
+          (i) => i.id === c.idInstrumento,
+        );
+
+        return {
+          ...c,
+          nomeAluno: c.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
+          dataNascimento: c.dataNascimento || '',
+          idade: `${this.calcularIdade(c.dataNascimento)}`,
+          nomeComum:
+            igrejaFiltro?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
+            'NÃO CADASTRADO',
+          nomeInstrumento:
+            InstrumentoFiltro?.nomeInstrumento?.toLocaleUpperCase('pt-BR') ||
+            'SEM INSTRUMENTO',
+        };
+      });
 
       // Ordenar se necessário
       // this.dados = [...dadosCandidatos].sort((a, b) =>

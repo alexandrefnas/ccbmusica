@@ -18,15 +18,17 @@
       </button>
     </div>
   </div>
-  <div style="width: 100%; padding-top: 10px" *ngIf="filtro">
-    <!-- <tcx-select
-      [label]="'Filtro Status'"
-      [placeholder]="''"
-      [niveisLimitados]="listaStatusFiltro"
-      [(ngModel)]="statusFiltro"
-      (valorMudou)="aoSelecionarStatusFiltro($event)"
-    />-->
-    <div style="display: flex; flex-direction: row; gap: 10px; padding: 0 10px;">
+  <div style="display: flex; align-items: center; width: 100%; padding-top: 10px; gap: 15px;" *ngIf="filtro">
+    <div *ngIf="listaComunsFiltro.length > 2" style="width: 250px;" >
+      <tcx-select
+        [label]="'Filtrar por comum'"
+        [placeholder]="'Todas'"
+        [niveisLimitados]="listaComunsFiltro"
+        [(ngModel)]="filtroComum"
+        (valorMudou)="carregarDados()"
+      />
+    </div>
+    <div style="display: flex; flex-direction: row; gap: 10px; padding: 0 10px">
       <input
         type="checkbox"
         [(ngModel)]="filtroStatus"

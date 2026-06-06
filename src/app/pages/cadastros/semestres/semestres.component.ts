@@ -135,13 +135,13 @@ export class SemestresComponent {
   };
 
   tamanhoColunas = {
-    grupoExame: { width: '15%' },
-    descricao: { width: '25%' },
-    tipoExameLabel: { width: '10%' },
-    datasLabel: { width: '25%' },
-    comumLabel: { width: '20%' },
+    grupoExame: { width: '15%', minWidth: '150px' },
+    descricao: { width: '25%', minWidth: '200px' },
+    tipoExameLabel: { width: '10%', minWidth: '120px' },
+    datasLabel: { width: '25%', minWidth: '200px' },
+    comumLabel: { width: '20%', minWidth: '200px' },
     // qtdPeriodos: { width: '5%' },
-    concluidoLabel: { width: '5%' },
+    concluidoLabel: { width: '5%', minWidth: '80px' },
   };
 
   acoes = [

@@ -203,11 +203,11 @@ export class ExamesComponent implements OnInit {
   };
 
   tamanhoColunas = {
-    nomeAluno: { width: '24%', minWidth: '160px' },
+    nomeAluno: { width: '24%', minWidth: '200px' },
     idadeAluno: { width: '6%', minWidth: '60px' },
 
     tipoExameLabel: { width: '14%' },
-    categoriaExameLabel: { width: '18%' },
+    categoriaExameLabel: { width: '18%', minWidth: '200px' },
     dataSolicitacao: { width: '11%' },
     dataAgendada: { width: '11%' },
     statusLabel: { width: '11%' },
@@ -575,6 +575,7 @@ export class ExamesComponent implements OnInit {
             idadeAluno: this.calcularIdade(alunoFiltro?.dataNascimento),
             instrumentoAluno: alunoFiltro?.idInstrumento || '',
             afinacaoAluno: alunoFiltro?.afinacao || '',
+            dataSolicitacao: converterISOParaBR(exame.dataSolicitacao),
             dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
@@ -863,7 +864,7 @@ export class ExamesComponent implements OnInit {
     // if (!confirmou) {
     //   return;
     // }
-  if (!(await this.alertService.confirmar(mensagem))) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     if (this.dadosParaEditar?.id) {
       this.firestoreService
@@ -1130,7 +1131,7 @@ export class ExamesComponent implements OnInit {
     const mensagem = `Deseja realmente salvar a nota ${nota} para ${nomeAluno}?`;
 
     // if (!confirmarAcao(mensagem)) return;
-      if (!(await this.alertService.confirmar(mensagem))) return;
+    if (!(await this.alertService.confirmar(mensagem))) return;
 
     const etapasAtualizadas = exame.etapas.map((e) => {
       if (e.ordem !== etapa.ordem) {

@@ -38,38 +38,6 @@ export class SetorComponent implements OnInit {
 
   listaEstados = [{ value: 'MG', label: 'MG' }];
 
-  // listaEstados = [
-  //   { value: 'AC', label: 'AC' },
-  //   { value: 'AL', label: 'AL' },
-  //   { value: 'AP', label: 'AP' },
-  //   { value: 'AM', label: 'AM' },
-  //   { value: 'BA', label: 'BA' },
-  //   { value: 'CE', label: 'CE' },
-  //   { value: 'DF', label: 'DF' },
-  //   { value: 'ES', label: 'ES' },
-  //   { value: 'GO', label: 'GO' },
-  //   { value: 'MA', label: 'MA' },
-  //   { value: 'MS', label: 'MS' },
-  //   { value: 'MT', label: 'MT' },
-  //   { value: 'MG', label: 'MG' },
-  //   { value: 'PA', label: 'PA' },
-  //   { value: 'PB', label: 'PB' },
-  //   { value: 'PR', label: 'PR' },
-  //   { value: 'PE', label: 'PE' },
-  //   { value: 'PI', label: 'PI' },
-  //   { value: 'RJ', label: 'RJ' },
-  //   { value: 'RN', label: 'RN' },
-  //   { value: 'RS', label: 'RS' },
-  //   { value: 'RO', label: 'RO' },
-  //   { value: 'RR', label: 'RR' },
-  //   { value: 'SC', label: 'SC' },
-  //   { value: 'SP', label: 'SP' },
-  //   { value: 'SE', label: 'SE' },
-  //   { value: 'TO', label: 'TO' },
-  // ];
-
-  // Campos TABELA
-
   camposColunas = ['nomeSetor', 'nomeCidade', 'estado'];
   tituloColunas = {
     nomeSetor: 'Setor',
@@ -93,9 +61,9 @@ export class SetorComponent implements OnInit {
   };
 
   tamanhoColunas = {
-    nomeSetor: { width: '45%' },
+    nomeSetor: { width: '45%', minWidth: '200px' },
     nomeCidade: { width: '45%' },
-    estado: { width: '10%' },
+    estado: { width: '10%', minWidth: '50px' },
   };
 
   // Buttons

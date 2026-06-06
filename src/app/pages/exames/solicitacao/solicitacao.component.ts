@@ -154,9 +154,9 @@ export class SolicitacaoComponent {
   };
 
   tamanhoColunas = {
-    nomeAluno: { width: '24%', minWidth: '160px' },
+    nomeAluno: { width: '24%', minWidth: '200px' },
     tipoExameLabel: { width: '14%' },
-    categoriaExameLabel: { width: '18%' },
+    categoriaExameLabel: { width: '18%', minWidth: '200px'  },
     dataSolicitacao: { width: '11%' },
     dataAgendada: { width: '11%' },
     statusLabel: { width: '11%' },
@@ -262,9 +262,22 @@ export class SolicitacaoComponent {
     });
   }
 
+  // carregarAlunos(): void {
+  //   this.firestoreService.getCandidato().subscribe((lista: Candidatos[]) => {
+  //     this.listaAlunos = lista
+  //       .map((a) => ({
+  //         value: a.id!,
+  //         label: a.nomeAluno?.toLocaleUpperCase('pt-BR') || '',
+  //       }))
+  //       .sort((a, b) => a.label.localeCompare(b.label));
+  //   });
+  // }
+
   carregarAlunos(): void {
     this.firestoreService.getCandidato().subscribe((lista: Candidatos[]) => {
       this.listaAlunos = lista
+        .filter((a) => this.auth.podeVerRegistro(a, 'candidatos'))
+        .filter((a) => a.desativado !== true)
         .map((a) => ({
           value: a.id!,
           label: a.nomeAluno?.toLocaleUpperCase('pt-BR') || '',

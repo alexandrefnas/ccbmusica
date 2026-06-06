@@ -95,10 +95,10 @@ export class InstrumentosComponent {
   };
 
   tamanhoColunas = {
-    nomeInstrumento: { width: '45%' },
-    familia: { width: '15%' },
-    vozPrincipal: { width: '20%' },
-    vozAlternativa: { width: '20%' },
+    nomeInstrumento: { width: '45%', minWidth: '200px' },
+    familia: { width: '15%', minWidth: '150px' },
+    vozPrincipal: { width: '20%', minWidth: '180px' },
+    vozAlternativa: { width: '20%', minWidth: '180px' },
   };
 
   // Buttons
