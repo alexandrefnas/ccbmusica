@@ -16,7 +16,6 @@ import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { DataComponent } from '../../../component/inputs/data/data.component';
 import {
-  confirmarAcao,
   converterISOParaBR,
   formatarDataString,
 } from '../../../../shared/shared.service';
@@ -27,7 +26,12 @@ import {
   Igrejas,
   Instrumentos,
 } from '../../../services/firestore.service';
-import { upper } from '../../../services/select.service';
+import {
+  listaPeriodo,
+  listaPeriodoPratico,
+  listaTipoExame,
+  upper,
+} from '../../../services/select.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 import { AlertService } from '../../../services/alert.service';
 
@@ -78,6 +82,11 @@ export class AlunosComponent implements OnInit {
   filtro = false;
   filtroStatus = false;
 
+  modoHistorico = false;
+  alunoHistoricoSelecionado: Candidatos | null = null;
+  historicoAluno: any[] = [];
+  liberaHistorico = false;
+
   listaIgreja: { value: string; label: string; idSetor: string }[] = [];
   listaSetor: { value: string; label: string }[] = [];
   listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
@@ -95,6 +104,7 @@ export class AlunosComponent implements OnInit {
   ];
 
   //#region DADOS TABELA
+
   camposColunasBase = [
     'nomeAluno',
     'idade',
@@ -132,11 +142,11 @@ export class AlunosComponent implements OnInit {
   };
 
   tamanhoColunas = {
-    nomeAluno: { width: '45%', minWidth:'220px' },
-    idade: { width: '15%', minWidth:'50px' },
-    nomeComum: { width: '20%', minWidth:'220px' },
+    nomeAluno: { width: '45%', minWidth: '220px' },
+    idade: { width: '15%', minWidth: '50px' },
+    nomeComum: { width: '20%', minWidth: '220px' },
     nomeInstrumento: { width: '20%' },
-    afinacao: { width: '20%', minWidth:'80px' },
+    afinacao: { width: '20%', minWidth: '80px' },
   };
 
   // Buttons
@@ -157,6 +167,13 @@ export class AlunosComponent implements OnInit {
       callback: (item: Candidatos) => this.statusCandidato(item),
     },
     {
+      label: '📜',
+      descricao: 'Histórico',
+      classe: 'acao-editar',
+      visivel: (item: Candidatos) => this.liberaHistorico && !item.desativado,
+      callback: (item: Candidatos) => this.abrirHistoricoAluno(item),
+    },
+    {
       label: '🗑️',
       descricao: 'Excluir',
       classe: 'acao-excluir',
@@ -164,6 +181,67 @@ export class AlunosComponent implements OnInit {
       callback: (item: any) => this.excluir(item),
     },
   ];
+  //#endregion
+
+  //#region TABELA HISTORICO
+  camposColunasHistorico = [
+    'grupoExameLabel',
+    'tipoExameLabel',
+    'categoriaExameLabel',
+    'etapaLabel',
+    'dataTesteLabel',
+    'notaLabel',
+    'professorLabel',
+    'resultadoLabel',
+  ];
+
+  tituloColunasHistoricos = {
+    grupoExameLabel: 'Grupo',
+    tipoExameLabel: 'Exame',
+    categoriaExameLabel: 'Categoria',
+    etapaLabel: 'Etapa',
+    dataTesteLabel: 'Data Teste',
+    notaLabel: 'Nota',
+    professorLabel: 'Professor',
+    resultadoLabel: 'Resultado',
+  };
+
+  alinhamentoColunaTituloHistorico: {
+    [coluna: string]: 'left' | 'center' | 'right';
+  } = {
+    grupoExameLabel: 'center',
+    tipoExameLabel: 'center',
+    categoriaExameLabel: 'center',
+    etapaLabel: 'center',
+    dataTesteLabel: 'center',
+    notaLabel: 'center',
+    professorLabel: 'center',
+    resultadoLabel: 'center',
+  };
+
+  alinhamentoColunaHistorico: {
+    [coluna: string]: 'left' | 'center' | 'right';
+  } = {
+    grupoExameLabel: 'left',
+    tipoExameLabel: 'center',
+    categoriaExameLabel: 'center',
+    etapaLabel: 'center',
+    dataTesteLabel: 'center',
+    notaLabel: 'center',
+    professorLabel: 'center',
+    resultadoLabel: 'center',
+  };
+
+  tamanhoColunasHistorico = {
+    grupoExameLabel: { width: '12%', minWidth: '120px' },
+    tipoExameLabel: { width: '10%', minWidth: '120px' },
+    categoriaExameLabel: { width: '16%', minWidth: '220px' },
+    etapaLabel: { width: '12%', minWidth: '140px' },
+    dataTesteLabel: { width: '10%', minWidth: '102px' },
+    notaLabel: { width: '6%', minWidth: '65px' },
+    professorLabel: { width: '24%', minWidth: '200px' },
+    resultadoLabel: { width: '10%', minWidth: '100px' },
+  };
   //#endregion
 
   async statusCandidato(item: Candidatos): Promise<void> {
@@ -256,7 +334,7 @@ export class AlunosComponent implements OnInit {
 
   ngOnInit(): void {
     const usuario = this.auth.usuario;
-
+    this.liberaHistorico = this.auth.temPermissao('exames', 'read');
     // SOMENTE ADMIN
     if (usuario?.perfil === 'admin') {
       this.firestoreService.getSetor().subscribe((setores) => {
@@ -462,6 +540,97 @@ export class AlunosComponent implements OnInit {
     });
   }
 
+  abrirHistoricoAluno(aluno: Candidatos): void {
+    this.alunoHistoricoSelecionado = aluno;
+    this.modoHistorico = true;
+
+    combineLatest([
+      this.firestoreService.getExames(),
+      this.firestoreService.getSemestres(),
+    ]).subscribe(([exames, grupos]) => {
+      this.historicoAluno = exames
+        .filter((e) => e.idAluno === aluno.id)
+        .filter((e) =>
+          ['aprovado', 'reprovado', 'cancelado'].includes(e.status),
+        )
+        .flatMap((exame) => {
+          const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
+
+          const periodo = grupo?.periodos?.find(
+            (p: any) =>
+              p.tipo === exame.categoriaExame ||
+              p.categoriaExame === exame.categoriaExame,
+          );
+
+          return (exame.etapas || [])
+            .filter((etapa: any) =>
+              ['aprovado', 'reprovado'].includes(etapa.resultado),
+            )
+            .map((etapa: any) => {
+              const etapaGrupo = periodo?.avaliacao?.find(
+                (a: any) => a.ordem === etapa.ordem,
+              );
+
+              return {
+                idExame: exame.id,
+                grupoExameLabel: grupo?.grupoExame || '-',
+                tipoExameLabel: this.buscarLabel(
+                  listaTipoExame,
+                  exame.tipoExame,
+                ),
+                categoriaExameLabel: this.buscarCategoriaExame(
+                  exame.categoriaExame || '',
+                ),
+                etapaLabel: etapa.nome || etapaGrupo?.nome || '-',
+                dataTeste:
+                  etapaGrupo?.dataAvaliacao || etapa.dataLancamento || '',
+                dataTesteLabel: converterISOParaBR(
+                  etapaGrupo?.dataAvaliacao || etapa.dataLancamento || '',
+                ),
+                notaLabel: etapa.nota ?? '-',
+                notaMinimaLabel:
+                  etapa.notaMinima ?? etapaGrupo?.notaMinima ?? '-',
+                notaMaximaLabel:
+                  etapa.notaMaxima ?? etapaGrupo?.notaMaxima ?? '-',
+                professorLabel: etapa.professorLancamento || '-',
+                resultadoLabel:
+                  etapa.resultado === 'aprovado' ? 'APROVADO' : 'REPROVADO',
+                statusLabel: this.formatarStatus(exame.status),
+              };
+            });
+        })
+        .sort((a, b) => (b.dataTeste || '').localeCompare(a.dataTeste || ''));
+    });
+  }
+
+  buscarLabel(
+    lista: { value: string; label: string }[],
+    value: string,
+  ): string {
+    return lista.find((item) => item.value === value)?.label || value;
+  }
+
+  buscarCategoriaExame(value: string): string {
+    return (
+      listaPeriodo.find((x) => x.value === value)?.label ||
+      listaPeriodoPratico.find((x) => x.value === value)?.label ||
+      value
+    );
+  }
+
+  formatarStatus(status: string): string {
+    const mapa: any = {
+      solicitado: 'SOLICITADO',
+      agendado: 'AGENDADO',
+      emAndamento: 'EM ANDAMENTO',
+      aprovado: 'APROVADO',
+      reprovado: 'REPROVADO',
+      cancelado: 'CANCELADO',
+    };
+
+    return mapa[status] || status;
+  }
+
   async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
@@ -616,5 +785,11 @@ export class AlunosComponent implements OnInit {
   fecharModal() {
     this.mostrarModal = false;
     this.dadosForms.reset();
+  }
+
+  fecharHistoricoAluno(): void {
+    this.modoHistorico = false;
+    this.alunoHistoricoSelecionado = null;
+    this.historicoAluno = [];
   }
 }

@@ -156,7 +156,7 @@ export class SolicitacaoComponent {
   tamanhoColunas = {
     nomeAluno: { width: '24%', minWidth: '200px' },
     tipoExameLabel: { width: '14%' },
-    categoriaExameLabel: { width: '18%', minWidth: '200px'  },
+    categoriaExameLabel: { width: '18%', minWidth: '200px' },
     dataSolicitacao: { width: '11%' },
     dataAgendada: { width: '11%' },
     statusLabel: { width: '11%' },
@@ -485,20 +485,42 @@ export class SolicitacaoComponent {
     // const dataAgendada = this.dadosForms.value.dataAgendada
     //   ? formatarDataString(new Date(this.dadosForms.value.dataAgendada))
     //   : '';
+    const idAluno = this.dadosForms.value.idAluno;
+    const tipoExame = upper(this.dadosForms.value.tipoExame);
+    const categoriaExame = upper(this.dadosForms.value.categoriaExame);
+
+    if (this.alunoJaAprovado(idAluno, tipoExame, categoriaExame)) {
+      this.alertService.aviso(
+        'Este aluno já possui uma solicitação para esse mesmo exame/categoria.',
+      );
+      return;
+    }
+
+    // const baseData: Exames = {
+    //   idAluno: this.dadosForms.value.idAluno,
+    //   tipoExame: upper(this.dadosForms.value.tipoExame),
+    //   categoriaExame: upper(this.dadosForms.value.categoriaExame),
+    //   observacao: upper(this.dadosForms.value.observacao),
+    //   dataSolicitacao:
+    //     this.dadosParaEditar?.dataSolicitacao || formatarDataString(new Date()),
+    //   status: 'solicitado',
+    //   etapaAtual: 0,
+    //   etapas: [],
+    //   // etapas:
+    //   //   this.dadosParaEditar?.etapas ||
+    //   //   this.criarEtapas(upper(this.dadosForms.value.tipoExame)),
+    // };
 
     const baseData: Exames = {
-      idAluno: this.dadosForms.value.idAluno,
-      tipoExame: upper(this.dadosForms.value.tipoExame),
-      categoriaExame: upper(this.dadosForms.value.categoriaExame),
+      idAluno,
+      tipoExame,
+      categoriaExame,
       observacao: upper(this.dadosForms.value.observacao),
       dataSolicitacao:
         this.dadosParaEditar?.dataSolicitacao || formatarDataString(new Date()),
       status: 'solicitado',
       etapaAtual: 0,
       etapas: [],
-      // etapas:
-      //   this.dadosParaEditar?.etapas ||
-      //   this.criarEtapas(upper(this.dadosForms.value.tipoExame)),
     };
 
     // if (baseData.dataAgendada) {
@@ -535,6 +557,21 @@ export class SolicitacaoComponent {
         this.fecharModal();
       });
     }
+  }
+
+  alunoJaAprovado(
+    idAluno: string,
+    tipoExame: string,
+    categoriaExame: string,
+  ): boolean {
+    return this.dadosTodos.some(
+      (exame) =>
+        exame.idAluno === idAluno &&
+        exame.tipoExame === tipoExame &&
+        exame.categoriaExame === categoriaExame &&
+        exame.status !== 'reprovado' &&
+        exame.id !== this.dadosParaEditar?.id,
+    );
   }
 
   onTipoExameChange(): void {

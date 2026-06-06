@@ -1,9 +1,12 @@
 <div class="container__tela">
   <div id="tela__barra-menu">
     <div id="barra-titulo__container">
-      <h2 style="font-weight: normal; color: grey">ALUNOS</h2>
+      <!-- <h2 style="font-weight: normal; color: grey">ALUNOS</h2> -->
+      <h2 style="font-weight: normal; color: grey">
+        {{ modoHistorico ? "HISTÓRICO DO ALUNO" : "ALUNOS" }}
+      </h2>
     </div>
-    <div class="button-container" *ngIf="liberaCriar">
+    <div class="button-container" *ngIf="liberaCriar && !modoHistorico">
       <!-- <tcx-button label="Novo" (click)="buttonClick()"></tcx-button> -->
       <button class="buttons" (click)="buttonClick()">
         <i class="bi bi-file-earmark-plus"></i> Novo
@@ -17,9 +20,23 @@
         <i class="bi bi-search"></i>
       </button>
     </div>
+    <!-- <div class="button-container" *ngIf="modoHistorico">
+      <button class="buttons" type="button" (click)="fecharHistoricoAluno()">
+        <i class="bi bi-arrow-left"></i> Voltar
+      </button>
+    </div> -->
   </div>
-  <div style="display: flex; align-items: center; width: 100%; padding-top: 10px; gap: 15px;" *ngIf="filtro">
-    <div *ngIf="listaComunsFiltro.length > 2" style="width: 250px;" >
+  <div
+    style="
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding-top: 10px;
+      gap: 15px;
+    "
+    *ngIf="filtro && !modoHistorico"
+  >
+    <div *ngIf="listaComunsFiltro.length > 2" style="width: 250px">
       <tcx-select
         [label]="'Filtrar por comum'"
         [placeholder]="'Todas'"
@@ -37,17 +54,77 @@
       <label>Mostrar desativados</label>
     </div>
   </div>
+
+  <div class="historico-header" *ngIf="modoHistorico && liberaHistorico">
+    <div>
+      <!-- <h3>Histórico do aluno</h3> -->
+      <span>{{ alunoHistoricoSelecionado?.nomeAluno }}</span>
+    </div>
+
+    <button class="buttons" type="button" (click)="fecharHistoricoAluno()">
+      <i class="bi bi-arrow-left"></i> Voltar
+    </button>
+  </div>
+
   <div id="tela__container-tabela">
-    <tcx-table
-      [colunas]="camposColunas"
-      [colunasLabels]="tituloColunas"
-      [dados]="dados"
-      [mostrarAcoes]="liberaEditar || liberaDeletar"
-      [acoesTabela]="acoes"
-      [tamanhosColunas]="tamanhoColunas"
-      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
-      [alinhamentosColunas]="alinhamentoColuna"
-    />
+    <ng-container *ngIf="!modoHistorico">
+      <tcx-table
+        [colunas]="camposColunas"
+        [colunasLabels]="tituloColunas"
+        [dados]="dados"
+        [mostrarAcoes]="liberaEditar || liberaDeletar"
+        [acoesTabela]="acoes"
+        [tamanhosColunas]="tamanhoColunas"
+        [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+        [alinhamentosColunas]="alinhamentoColuna"
+      />
+    </ng-container>
+
+    <ng-container *ngIf="modoHistorico && liberaHistorico">
+      <div *ngIf="historicoAluno.length === 0" class="historico-vazio">
+        Nenhum teste finalizado encontrado para este aluno.
+      </div>
+
+      <tcx-table
+        [colunas]="camposColunasHistorico"
+        [colunasLabels]="tituloColunasHistoricos"
+        [dados]="historicoAluno"
+        [tamanhosColunas]="tamanhoColunasHistorico"
+        [alinhamentosColunasTitulo]="alinhamentoColunaTituloHistorico"
+        [alinhamentosColunas]="alinhamentoColunaHistorico"
+      ></tcx-table>
+      <!-- <table class="tabela historico-tabela" *ngIf="historicoAluno.length > 0">
+        <thead>
+          <tr>
+            <th>Grupo</th>
+            <th>Exame</th>
+            <th>Categoria</th>
+            <th>Etapa</th>
+            <th>Data do Teste</th>
+            <th>Nota</th>
+            <th>Mínima</th>
+            <th>Máxima</th>
+            <th>Professor</th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of historicoAluno">
+            <td>{{ item.grupoExameLabel     }}</td>
+            <td>{{ item.tipoExameLabel      }}</td>
+            <td>{{ item.categoriaExameLabel }}</td>
+            <td>{{ item.etapaLabel          }}</td>
+            <td>{{ item.dataTesteLabel      || "-" }}</td>
+            <td>{{ item.notaLabel           }}</td>
+            <td>{{ item.notaMinimaLabel     }}</td>
+            <td>{{ item.notaMaximaLabel     }}</td>
+            <td>{{ item.professorLabel        }}</td>
+            <td>{{ item.resultadoLabel      }}</td>
+          </tr>
+        </tbody>
+      </table> -->
+    </ng-container>
   </div>
 </div>
 
