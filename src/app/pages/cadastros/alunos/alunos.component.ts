@@ -73,6 +73,8 @@ export class AlunosComponent implements OnInit {
     // this.liberaDeletar = this.permissao('delete');
   }
 
+  isMobile = window.innerWidth <= 576;
+
   liberaEditar: boolean = false;
   liberaCriar: boolean = false;
   liberaDeletar: boolean = false;
@@ -163,7 +165,7 @@ export class AlunosComponent implements OnInit {
       descricao: (item: Candidatos) =>
         item.desativado ? 'Ativar Candidado.' : 'Desativar Candidato.',
       classe: 'acao-editar',
-      visivel: (item: Candidatos) => this.liberaEditar,
+      visivel: (item: Candidatos) => !this.isMobile && this.liberaEditar,
       callback: (item: Candidatos) => this.statusCandidato(item),
     },
     {
@@ -177,7 +179,7 @@ export class AlunosComponent implements OnInit {
       label: '🗑️',
       descricao: 'Excluir',
       classe: 'acao-excluir',
-      visivel: (item: any) => this.liberaDeletar,
+      visivel: (item: any) => !this.isMobile && this.liberaDeletar,
       callback: (item: any) => this.excluir(item),
     },
   ];
