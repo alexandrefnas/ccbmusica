@@ -25,6 +25,20 @@
         </div>
       </div>
     </div> -->
+
+<div
+  class="card-alerta"
+  *ngIf="totalSolicitacoesPendentes > 0"
+  [class.card-alerta-click]="liberaAcessoExames"
+  (click)="abrirExames()"
+>
+  ⚠️ Existem {{ totalSolicitacoesPendentes }} solicitações aguardando aceite.
+
+  <span *ngIf="liberaAcessoExames" class="link-alerta">
+    Clique para visualizar
+  </span>
+</div>
+
     <div class="cards-container">
       <div class="container__card" *ngFor="let c of dados">
         <div class="card-titulo">
@@ -49,17 +63,79 @@
             <div class="componente-value-status">
               <div class="status-result aprovado">
                 <span>AP</span>
-                <strong>{{ v.aprovado }}</strong>
+                <span>{{ v.aprovado }}</span>
               </div>
 
               <div class="status-result reprovado">
                 <span>RP</span>
-                <strong>{{ v.reprovado }}</strong>
+                <span>{{ v.reprovado }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+<div class="resumo-igrejas-container">
+  <div class="resumo-igrejas" *ngIf="resumoMSA.length">
+    <h3>Resumo MSA</h3>
+
+    <div class="igreja-card" *ngFor="let item of resumoMSA">
+      <div class="igreja-dados">
+        <div class="igreja-nome">
+          {{ item.igreja }}
+        </div>
+      </div>
+
+      <div class="barra-progresso">
+        <div
+          class="barra-aprovado"
+          [style.width.%]="item.total ? (item.aprovado / item.total) * 100 : 0"
+        ></div>
+
+        <div
+          class="barra-reprovado"
+          [style.width.%]="item.total ? (item.reprovado / item.total) * 100 : 0"
+        ></div>
+      </div>
+
+      <div class="igreja-info">
+        <span>Total: <strong>{{ item.total }}</strong></span>
+        <span>AP: <strong>{{ item.aprovado }}</strong></span>
+        <span>RP: <strong>{{ item.reprovado }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="resumo-igrejas" *ngIf="resumoInstrumento.length">
+    <h3>Resumo Instrumento</h3>
+
+    <div class="igreja-card" *ngFor="let item of resumoInstrumento">
+      <div class="igreja-dados">
+        <div class="igreja-nome">
+          {{ item.igreja }}
+        </div>
+      </div>
+
+      <div class="barra-progresso">
+        <div
+          class="barra-aprovado"
+          [style.width.%]="item.total ? (item.aprovado / item.total) * 100 : 0"
+        ></div>
+
+        <div
+          class="barra-reprovado"
+          [style.width.%]="item.total ? (item.reprovado / item.total) * 100 : 0"
+        ></div>
+      </div>
+
+      <div class="igreja-info">
+        <span>Total: <strong>{{ item.total }}</strong></span>
+        <span>AP: <strong>{{ item.aprovado }}</strong></span>
+        <span>RP: <strong>{{ item.reprovado }}</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 </div>
