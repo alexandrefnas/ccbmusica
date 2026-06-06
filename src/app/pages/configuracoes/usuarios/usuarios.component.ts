@@ -409,6 +409,7 @@ export class UsuariosComponent implements OnInit {
           ...u,
           nome: (u.nome || '').toUpperCase(),
           perfil2: (u.perfil || '').toUpperCase(),
+          email: 'xxxxxxxxxx@xxxxxx.xxx',
         }))
         .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
