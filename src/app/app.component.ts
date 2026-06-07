@@ -41,7 +41,8 @@ export class AppComponent {
   logado: boolean = false;
 
   alternarMenu() {
-    if (this.isMobile()) {
+    // if (this.isMobile()) {
+      if (this.isMobile() || this.isTable()) {
       this.menuMobileAberto = !this.menuMobileAberto;
     } else {
       this.menuOculto = !this.menuOculto;
