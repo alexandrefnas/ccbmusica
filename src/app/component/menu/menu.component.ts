@@ -195,6 +195,14 @@ export class MenuComponent {
     );
   }
 
+  get relatorioFiltrados() {
+    if (!this.auth.usuario) return [];
+
+    return this.manutencao.filter((p) =>
+      this.auth.temPermissao(p.tabela as any, 'read'),
+    );
+  }
+
   get avaliacoesFiltradas() {
     if (!this.auth.usuario) return [];
 

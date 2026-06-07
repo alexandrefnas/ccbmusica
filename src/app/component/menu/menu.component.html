@@ -100,7 +100,7 @@
   </table>
 
   <!-- RELATORIOS -->
-  <table class="demonstrativo__tabela">
+  <table class="demonstrativo__tabela" *ngIf="relatorioFiltrados.length > 0">
     <tbody>
       <tr class="grupo" (click)="menuRelatorios()" style="cursor: pointer">
         <td>
