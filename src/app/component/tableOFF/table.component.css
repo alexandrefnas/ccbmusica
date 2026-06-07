@@ -90,7 +90,9 @@ tr:hover td.sticky-acoes {
 .buttons-stile {
   padding: 3px;
   border: 1px solid #ccc;
-  box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #999;
+  box-shadow:
+    inset 1px 1px 0 #fff,
+    inset -1px -1px 0 #999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,7 +102,9 @@ tr:hover td.sticky-acoes {
 }
 .buttons-stile:active {
   border: 1px solid #ccc;
-  box-shadow: inset -1px -1px 0 #fff, inset 1px 1px 0 #999;
+  box-shadow:
+    inset -1px -1px 0 #fff,
+    inset 1px 1px 0 #999;
   transform: translateY(2px);
 }
 /* // */

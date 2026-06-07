@@ -192,7 +192,7 @@ export class AlunosComponent implements OnInit {
     'categoriaExameLabel',
     'etapaLabel',
     'dataTesteLabel',
-    'notaLabel',
+    'notaLabelPorcentagem',
     'professorLabel',
     'resultadoLabel',
   ];
@@ -203,7 +203,7 @@ export class AlunosComponent implements OnInit {
     categoriaExameLabel: 'Categoria',
     etapaLabel: 'Etapa',
     dataTesteLabel: 'Data Teste',
-    notaLabel: 'Nota',
+    notaLabelPorcentagem: 'Nota',
     professorLabel: 'Professor',
     resultadoLabel: 'Resultado',
   };
@@ -216,7 +216,7 @@ export class AlunosComponent implements OnInit {
     categoriaExameLabel: 'center',
     etapaLabel: 'center',
     dataTesteLabel: 'center',
-    notaLabel: 'center',
+    notaLabelPorcentagem: 'center',
     professorLabel: 'center',
     resultadoLabel: 'center',
   };
@@ -229,7 +229,7 @@ export class AlunosComponent implements OnInit {
     categoriaExameLabel: 'center',
     etapaLabel: 'center',
     dataTesteLabel: 'center',
-    notaLabel: 'center',
+    notaLabelPorcentagem: 'center',
     professorLabel: 'center',
     resultadoLabel: 'center',
   };
@@ -240,7 +240,7 @@ export class AlunosComponent implements OnInit {
     categoriaExameLabel: { width: '16%', minWidth: '220px' },
     etapaLabel: { width: '12%', minWidth: '140px' },
     dataTesteLabel: { width: '10%', minWidth: '102px' },
-    notaLabel: { width: '6%', minWidth: '65px' },
+    notaLabelPorcentagem: { width: '6%', minWidth: '65px' },
     professorLabel: { width: '24%', minWidth: '200px' },
     resultadoLabel: { width: '10%', minWidth: '100px' },
   };
@@ -565,13 +565,14 @@ export class AlunosComponent implements OnInit {
           );
 
           return (exame.etapas || [])
-            .filter((etapa: any) =>
-              ['aprovado', 'reprovado'].includes(etapa.resultado),
-            )
-            .map((etapa: any) => {
-              const etapaGrupo = periodo?.avaliacao?.find(
-                (a: any) => a.ordem === etapa.ordem,
-              );
+          .filter((etapa: any) =>
+            ['aprovado', 'reprovado'].includes(etapa.resultado),
+        )
+        .map((etapa: any) => {
+          const etapaGrupo = periodo?.avaliacao?.find(
+            (a: any) => a.ordem === etapa.ordem,
+          );
+          const notaLabelPorcentagem = (etapa.nota * 100 / etapa.notaMaxima) || '';
 
               return {
                 idExame: exame.id,
@@ -589,7 +590,7 @@ export class AlunosComponent implements OnInit {
                 dataTesteLabel: converterISOParaBR(
                   etapaGrupo?.dataAvaliacao || etapa.dataLancamento || '',
                 ),
-                notaLabel: etapa.nota ?? '-',
+                notaLabelPorcentagem: notaLabelPorcentagem,
                 notaMinimaLabel:
                   etapa.notaMinima ?? etapaGrupo?.notaMinima ?? '-',
                 notaMaximaLabel:

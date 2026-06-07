@@ -28,7 +28,6 @@ import {
 
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 import {
-  confirmarAcao,
   converterISOParaBR,
   formatarDataString,
 } from '../../../../shared/shared.service';
@@ -1328,7 +1327,7 @@ export class ExamesComponent implements OnInit {
   // }
 
   cancelarExame(exame: Exames): void {
-    console.log('CLICOU CANCELAR', exame);
+    // console.log('CLICOU CANCELAR', exame);
 
     this.mostrarModal = false;
     this.mostrarModalNota = false;

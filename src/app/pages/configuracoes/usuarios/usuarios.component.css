@@ -50,6 +50,7 @@
   margin-bottom: 10px;
   overflow: auto;
   min-height: 0;
+  border: 1px solid #ccc;
   /* box-shadow:
     inset -1px -1px 0 #dcdcdc,
     inset 2px 2px 0 #999; */

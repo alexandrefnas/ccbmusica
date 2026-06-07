@@ -1,0 +1,147 @@
+<div class="container__tela">
+  <div id="tela__barra-menu">
+    <div id="barra-titulo__container">
+      <h2>RELATÓRIO GRUPO EXAME</h2>
+    </div>
+    <div class="button-container">
+      <button
+        class="buttons"
+        type="button"
+        title="Gerar PDF"
+        *ngIf="grupoSelecionado"
+        (click)="gerarPdf()"
+      >
+        <i class="bi bi-file-earmark-pdf"></i> PDF
+      </button>
+      <button
+        class="buttons"
+        type="button"
+        title="Filtro Status"
+        (click)="(filtroStatusOp)"
+      >
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="filtros" *ngIf="filtroStatus">
+    <div class="filtro-grupo">
+      <tcx-select
+        [label]="'Grupo de Exame'"
+        [placeholder]="''"
+        [niveisLimitados]="listaGrupos"
+        [(ngModel)]="idGrupoSelecionado"
+        (valorMudou)="aoSelecionarGrupo($event)"
+      />
+    </div>
+  </div>
+  <div id="tela__container-tabela" *ngIf="grupoSelecionado">
+    <ng-container>
+      <div class="grupo-info">
+        <strong>{{ grupoSelecionado.grupoExame }}</strong>
+        <span>{{ grupoSelecionado.descricao }}</span>
+      </div>
+
+      <div class="cards-resumo">
+        <div class="card">
+          <span>Total</span>
+          <strong>{{ resumoGeral.total }}</strong>
+        </div>
+
+        <div class="card aprovado">
+          <span>Aprovados</span>
+          <strong>{{ resumoGeral.aprovado }}</strong>
+        </div>
+
+        <div class="card reprovado">
+          <span>Reprovados</span>
+          <strong>{{ resumoGeral.reprovado }}</strong>
+        </div>
+
+        <div class="card cancelado">
+          <span>Cancelados</span>
+          <strong>{{ resumoGeral.cancelado }}</strong>
+        </div>
+
+        <div class="card">
+          <span>% Aprovação</span>
+          <strong>{{ percentualAprovacao() }}</strong>
+        </div>
+      </div>
+
+      <div class="bloco-relatorio">
+        <h3>Resultado por nível</h3>
+
+        <tcx-table
+          [colunas]="colunasNivel"
+          [colunasLabels]="labels"
+          [dados]="resumoPorNivel"
+          [tamanhosColunas]="tamanhosNivel"
+          [alinhamentosColunasTitulo]="alinhamentoTitulo"
+          [alinhamentosColunas]="alinhamentoColuna"
+          [mostrarAcoes]="false"
+        />
+      </div>
+
+      <div class="bloco-relatorio">
+        <h3>Resultado por comum</h3>
+
+        <tcx-table
+          [colunas]="colunasIgreja"
+          [colunasLabels]="labels"
+          [dados]="resumoPorIgreja"
+          [tamanhosColunas]="tamanhosIgreja"
+          [alinhamentosColunasTitulo]="alinhamentoTitulo"
+          [alinhamentosColunas]="alinhamentoColuna"
+          [mostrarAcoes]="false"
+        />
+      </div>
+
+      <div class="bloco-relatorio">
+        <h3>Detalhamento por comum e nível</h3>
+
+        <div class="accordion">
+          <div class="accordion-item" *ngFor="let igreja of resumoPorIgreja">
+            <div class="accordion-header" (click)="alternarIgreja(igreja)">
+              <div>
+                <strong>{{ igreja.nomeComum }}</strong>
+                <span>
+                  Total: {{ igreja.total }} | Aprovados: {{ igreja.aprovado }} |
+                  Reprovados: {{ igreja.reprovado }} | Cancelados:
+                  {{ igreja.cancelado }}
+                </span>
+              </div>
+
+              <i
+                class="bi"
+                [ngClass]="
+                  igrejaExpandida === igreja.idComum
+                    ? 'bi-chevron-up'
+                    : 'bi-chevron-down'
+                "
+              ></i>
+            </div>
+
+            <div
+              class="accordion-body"
+              *ngIf="igrejaExpandida === igreja.idComum"
+            >
+              <tcx-table
+                [colunas]="colunasNivel"
+                [colunasLabels]="labels"
+                [dados]="igreja.niveis"
+                [tamanhosColunas]="tamanhosNivel"
+                [alinhamentosColunasTitulo]="alinhamentoTitulo"
+                [alinhamentosColunas]="alinhamentoColuna"
+                [mostrarAcoes]="false"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+  <div class="sem-dados" *ngIf="!grupoSelecionado">
+    Selecione um grupo de exame para gerar o relatório.
+  </div>
+</div>

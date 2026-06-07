@@ -122,30 +122,6 @@ export class AuthService {
     return this.auth.currentUser;
   }
 
-  // async login(email: string, senha: string): Promise<void> {
-  //   await setPersistence(this.auth, browserLocalPersistence);
-
-  //   const cred = await signInWithEmailAndPassword(this.auth, email, senha);
-
-  //   const ref = doc(this.firestore, 'usuarios', cred.user.uid);
-  //   const snap = await getDoc(ref);
-
-  //   if (!snap.exists()) {
-  //     await setDoc(ref, {
-  //       uid: cred.user.uid,
-  //       email: cred.user.email,
-  //       nome: '',
-  //       perfil: 'usuario',
-  //     });
-  //   }
-  // }
-
-  // async logout() {
-  //   await signOut(this.auth);
-  //   this.authUserSnapshot = null;
-  //   this.router.navigate(['/login']);
-  // }
-
   async login(email: string, senha: string): Promise<void> {
     await setPersistence(this.auth, browserLocalPersistence);
 
@@ -166,16 +142,6 @@ export class AuthService {
       });
     }
   }
-
-  // async logout() {
-  //   if (typeof window !== 'undefined') {
-  //     localStorage.removeItem('authCache');
-  //   }
-  //   await signOut(this.auth);
-
-  //   this.authUserSnapshot = null;
-  //   this.router.navigate(['/login']);
-  // }
 
   async logout() {
     if (typeof window !== 'undefined') {

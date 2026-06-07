@@ -8,21 +8,20 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { combineLatest } from 'rxjs';
 import { ModalComponent } from '../../../modal/modal/modal.component';
 import { ButtonComponent } from '../../../component/button/button.component';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
+import { TableComponent } from '../../../component/table/table.component';
 import {
   FirestoreService,
   Igrejas,
   Setor,
 } from '../../../services/firestore.service';
-import { confirmarAcao } from '../../../../shared/shared.service';
-import { combineLatest } from 'rxjs';
-import { TableComponent } from '../../../component/table/table.component';
 import { upper } from '../../../services/select.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
-import { CommonModule } from '@angular/common';
 import { AlertService } from '../../../services/alert.service';
 
 @Component({
@@ -406,7 +405,8 @@ export class IgrejasComponent implements OnInit {
         // console.log('Cliente excluído:', dados);
         this.carregarDados();
       } catch (error) {
-        console.error(`Erro ao excluir: "${dados.nomeCongregacao}" `, error);
+        // console.error(`Erro ao excluir: "${dados.nomeCongregacao}" `, error);
+        this.alertService.erro(`Erro ao excluir: "${dados.nomeCongregacao}" `);
       }
     }
   }

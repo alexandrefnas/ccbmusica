@@ -36,6 +36,7 @@ export class MenuComponent {
   mostrarGrupo1 = false;
   mostrarGrupo2 = false;
   mostrarGrupo3 = false;
+  mostrarGrupo4 = false; // relatorios
 
   cadastros = [
     {
@@ -88,6 +89,15 @@ export class MenuComponent {
     },
   ];
 
+  relatorios = [
+    {
+      label: 'Grupo Exames',
+      rota: '/relatorio-grupo-exame',
+      tabela: 'exames',
+      icon: 'bi bi-clipboard-data',
+    },
+  ];
+
   avaliacoes = [
     {
       label: 'Solicitações',
@@ -114,6 +124,7 @@ export class MenuComponent {
     this.mostrarGrupo1 = false;
     this.mostrarGrupo2 = false;
     this.mostrarGrupo3 = false;
+    this.mostrarGrupo4 = false;
     this.abrirRota('/home');
   }
 
@@ -122,6 +133,7 @@ export class MenuComponent {
     this.mostrarGrupo1 = false;
     this.mostrarGrupo2 = false;
     this.mostrarGrupo3 = false;
+    this.mostrarGrupo4 = false;
   }
 
   menuManutencao(): void {
@@ -129,6 +141,7 @@ export class MenuComponent {
     this.mostrarGrupo1 = !this.mostrarGrupo1;
     this.mostrarGrupo2 = false;
     this.mostrarGrupo3 = false;
+    this.mostrarGrupo4 = false;
   }
 
   menuOutros(): void {
@@ -136,6 +149,15 @@ export class MenuComponent {
     this.mostrarGrupo1 = false;
     this.mostrarGrupo2 = false;
     this.mostrarGrupo3 = !this.mostrarGrupo3;
+    this.mostrarGrupo4 = false;
+  }
+
+  menuRelatorios(): void {
+    this.mostrarGrupo = false;
+    this.mostrarGrupo1 = false;
+    this.mostrarGrupo2 = false;
+    this.mostrarGrupo3 = false;
+    this.mostrarGrupo4 = !this.mostrarGrupo4;
   }
 
   menuTestes(): void {
@@ -143,6 +165,7 @@ export class MenuComponent {
     this.mostrarGrupo1 = false;
     this.mostrarGrupo2 = !this.mostrarGrupo2;
     this.mostrarGrupo3 = false;
+    this.mostrarGrupo4 = false;
   }
 
   abrirRota(rota: string): void {

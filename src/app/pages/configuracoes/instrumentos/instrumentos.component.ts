@@ -1,12 +1,5 @@
 import { Component } from '@angular/core';
-import { ModalComponent } from '../../../modal/modal/modal.component';
-import { TextComponent } from '../../../component/inputs/text/text.component';
-import { SelectComponent } from '../../../component/inputs/select/select.component';
-import { ButtonComponent } from '../../../component/button/button.component';
-import {
-  FirestoreService,
-  Instrumentos,
-} from '../../../services/firestore.service';
+import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   FormControl,
@@ -16,11 +9,17 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { confirmarAcao } from '../../../../shared/shared.service';
+import { TextComponent } from '../../../component/inputs/text/text.component';
+import { SelectComponent } from '../../../component/inputs/select/select.component';
+import { ButtonComponent } from '../../../component/button/button.component';
 import { TableComponent } from '../../../component/table/table.component';
+import { ModalComponent } from '../../../modal/modal/modal.component';
+import {
+  FirestoreService,
+  Instrumentos,
+} from '../../../services/firestore.service';
 import { upper } from '../../../services/select.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
-import { CommonModule } from '@angular/common';
 import { AlertService } from '../../../services/alert.service';
 
 @Component({
@@ -206,7 +205,7 @@ private alertService: AlertService
       });
 
       this.dados = [...dadosOrdenados];
-      console.log('Dados carregados: ', this.dados);
+      // console.log('Dados carregados: ', this.dados);
     });
   }
 
@@ -238,7 +237,7 @@ private alertService: AlertService
       vozPrincipal: select.vozPrincipal || '',
       vozAlternativa: select.vozAlternativa || '',
     });
-    console.log(this.dadosParaEditar);
+    // console.log(this.dadosParaEditar);
   }
 
   async excluir(dados: Instrumentos): Promise<void> {
@@ -262,7 +261,7 @@ private alertService: AlertService
         // console.log('Cliente excluído:', dados);
         this.carregarDados();
       } catch (error) {
-        console.error(`Erro ao excluir: "${dados.nomeInstrumento}" `, error);
+        this.alertService.erro(`Erro ao excluir: "${dados.nomeInstrumento}" `);
       }
     }
   }

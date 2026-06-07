@@ -95,6 +95,15 @@ export const routes: Routes = [
         data: { tabela: 'solicitacoes', tipo: 'read' },
       },
       {
+        path: 'relatorio-grupo-exame',
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-grupo-exame/relatorio-grupo-exame.component').then(
+            (m) => m.RelatorioGrupoExameComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'exames', tipo: 'read' },
+      },
+      {
         path: 'as',
         loadComponent: () =>
           import('./pages/configuracoes/alterar-senha/alterar-senha.component').then(

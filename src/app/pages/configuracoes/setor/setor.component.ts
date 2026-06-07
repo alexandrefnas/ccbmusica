@@ -12,7 +12,6 @@ import { ButtonComponent } from '../../../component/button/button.component';
 import { ModalComponent } from '../../../modal/modal/modal.component';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
-import { confirmarAcao } from '../../../../shared/shared.service';
 import { FirestoreService, Setor } from '../../../services/firestore.service';
 import { TableComponent } from '../../../component/table/table.component';
 import { upper } from '../../../services/select.service';
@@ -138,7 +137,7 @@ export class SetorComponent implements OnInit {
       });
 
       this.dados = [...setoresOrdenados]; // 🔁 Cria nova referência
-      console.log('Dados carregados: ', this.dados);
+      // console.log('Dados carregados: ', this.dados);
     });
   }
 
@@ -165,7 +164,7 @@ export class SetorComponent implements OnInit {
       nomeCidade: select.nomeCidade || '',
       estado: select.estado || '',
     });
-    console.log(this.dadosParaEditar);
+    // console.log(this.dadosParaEditar);
   }
 
   async excluir(dados: Setor): Promise<void> {
@@ -190,7 +189,7 @@ export class SetorComponent implements OnInit {
         // console.log('Cliente excluído:', dados);
         this.carregarDados();
       } catch (error) {
-        console.error(`Erro ao excluir: "${dados.nomeSetor}" `, error);
+        this.alertService.erro(`Erro ao excluir: "${dados.nomeSetor}" `);
       }
     }
   }

@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MenuComponent } from './component/menu/menu.component';
 import { AuthService } from './services/auth.service';
-import { TcxAlertComponent } from "./component/tcx-alert/tcx-alert.component";
+import { TcxAlertComponent } from './component/tcx-alert/tcx-alert.component';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +16,6 @@ export class AppComponent {
     public authService: AuthService,
     // private router: Router,
   ) {
-
     this.authService.currentUser$.subscribe((user) => {
       this.logado = !!user;
       // console.log('URL REAL AO INICIAR:', window.location.href);
@@ -43,22 +42,21 @@ export class AppComponent {
   alternarMenu() {
     if (this.isMobile()) {
       // if (this.isMobile() || this.isTable()) {
-        this.menuMobileAberto = !this.menuMobileAberto;
-      } else {
-        this.menuOculto = !this.menuOculto;
-      }
+      this.menuMobileAberto = !this.menuMobileAberto;
+    } else {
+      this.menuOculto = !this.menuOculto;
     }
+  }
 
-    public fecharMenu() {
-      // if (this.isMobile() || this.isTable()) {
-      if (this.isMobile()) {
+  public fecharMenu() {
+    // if (this.isMobile() || this.isTable()) {
+    if (this.isMobile()) {
       this.menuMobileAberto = !this.menuMobileAberto;
     }
   }
 
   fecharMenuMobile() {
     this.menuMobileAberto = false;
-    this.menuOculto = false;
   }
 
   isMobile(): boolean {

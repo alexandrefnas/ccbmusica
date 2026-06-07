@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'tcx-login',
@@ -10,7 +11,6 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-
 export class LoginComponent {
   email = '';
   senha = '';
@@ -20,6 +20,7 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
+    private alertService: AlertService,
   ) {}
 
   async login() {
@@ -33,13 +34,12 @@ export class LoginComponent {
 
       this.router.navigate(['/home']);
     } catch (err) {
-      console.error('❌ Erro ao fazer login', err);
+      this.alertService.erro('❌ Erro ao fazer login');
       this.erro = 'Email ou senha inválidos';
     } finally {
       this.carregando = false;
     }
   }
-
 }
 
 // export class LoginComponent {
