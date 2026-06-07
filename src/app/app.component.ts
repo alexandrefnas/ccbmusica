@@ -41,22 +41,24 @@ export class AppComponent {
   logado: boolean = false;
 
   alternarMenu() {
-    // if (this.isMobile()) {
-      if (this.isMobile() || this.isTable()) {
-      this.menuMobileAberto = !this.menuMobileAberto;
-    } else {
-      this.menuOculto = !this.menuOculto;
+    if (this.isMobile()) {
+      // if (this.isMobile() || this.isTable()) {
+        this.menuMobileAberto = !this.menuMobileAberto;
+      } else {
+        this.menuOculto = !this.menuOculto;
+      }
     }
-  }
 
-  public fecharMenu() {
-    if (this.isMobile() || this.isTable()) {
+    public fecharMenu() {
+      // if (this.isMobile() || this.isTable()) {
+      if (this.isMobile()) {
       this.menuMobileAberto = !this.menuMobileAberto;
     }
   }
 
   fecharMenuMobile() {
     this.menuMobileAberto = false;
+    this.menuOculto = false;
   }
 
   isMobile(): boolean {
