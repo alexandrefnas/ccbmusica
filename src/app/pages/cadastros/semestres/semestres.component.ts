@@ -9,6 +9,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
 import {
   FirestoreService,
   GrupoExames,
@@ -16,7 +17,6 @@ import {
 } from '../../../services/firestore.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 import {
-  confirmarAcao,
   converterISOParaBR,
   formatarDataString,
 } from '../../../../shared/shared.service';
@@ -30,7 +30,6 @@ import { ModalComponent } from '../../../modal/modal/modal.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { ButtonComponent } from '../../../component/button/button.component';
-import { CommonModule } from '@angular/common';
 import { DataComponent } from '../../../component/inputs/data/data.component';
 import { TableComponent } from '../../../component/table/table.component';
 import { AlertService } from '../../../services/alert.service';

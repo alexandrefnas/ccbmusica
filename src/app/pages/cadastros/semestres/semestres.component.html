@@ -94,108 +94,104 @@
           </div>
         </div>
 
-<!-- <div class="linha"></div>
-<div class="linha"></div>
-<div class="linha"></div> -->
-
         <!-- // INICIO // -->
-        <div
-          class="avaliacoes-container"
-          formArrayName="avaliacoes"
-          *ngIf="avaliacoesArray.length > 0"
-        >
+        <div class="container__notas">
           <div
-            class="avaliacao-card"
-            *ngFor="let avaliacao of avaliacoesArray.controls; let i = index"
-            [formGroupName]="i"
+            class="avaliacoes-container"
+            formArrayName="avaliacoes"
+            *ngIf="avaliacoesArray.length > 0"
           >
-            <ng-container *ngIf="getControl('tipoExame').value === '001'">
-              <h4>{{ avaliacao.get("label")?.value }}</h4>
-              <div class="linhaOff container__avaliacao">
-                <div>
-                  <p>Parte Teórica</p>
-                  <div style="display: flex; flex-direction: row; gap: 5px">
-                    <div class="input-text input-mine">
-                      <tcx-text
-                        label="Nota mín"
-                        type="number"
-                        formControlName="teoricaNotaMinima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-                    </div>
+            <div
+              class="avaliacao-card"
+              *ngFor="let avaliacao of avaliacoesArray.controls; let i = index"
+              [formGroupName]="i"
+            >
+              <ng-container *ngIf="getControl('tipoExame').value === '001'">
+                <h4>{{ avaliacao.get("label")?.value }}</h4>
+                <div class="linhaOff container__avaliacao">
+                  <div>
+                    <p>Parte Teórica</p>
+                    <div style="display: flex; flex-direction: row; gap: 5px">
+                      <div class="input-text input-mine">
+                        <tcx-text
+                          label="Nota mín"
+                          type="number"
+                          formControlName="teoricaNotaMinima"
+                          [required]="true"
+                          errorMessage="Campo obrigatório"
+                        />
+                      </div>
 
-                    <div class="input-text input-mine">
-                      <tcx-text
-                        label="Nota máx"
-                        type="number"
-                        formControlName="teoricaNotaMaxima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
+                      <div class="input-text input-mine">
+                        <tcx-text
+                          label="Nota máx"
+                          type="number"
+                          formControlName="teoricaNotaMaxima"
+                          [required]="true"
+                          errorMessage="Campo obrigatório"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <p>Parte Prática</p>
+                    <div style="display: flex; flex-direction: row; gap: 5px">
+                      <div class="input-text input-mine">
+                        <tcx-text
+                          label="Nota mín"
+                          type="number"
+                          formControlName="praticaNotaMinima"
+                          [required]="true"
+                          errorMessage="Campo obrigatório"
+                        />
+                      </div>
+
+                      <div class="input-text input-mine">
+                        <tcx-text
+                          label="Nota máx"
+                          type="number"
+                          formControlName="praticaNotaMaxima"
+                          [required]="true"
+                          errorMessage="Campo obrigatório"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <p>Parte Prática</p>
-                  <div style="display: flex; flex-direction: row; gap: 5px">
-                    <div class="input-text input-mine">
-                      <tcx-text
-                        label="Nota mín"
-                        type="number"
-                        formControlName="praticaNotaMinima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-                    </div>
+              </ng-container>
 
-                    <div class="input-text input-mine">
-                      <tcx-text
-                        label="Nota máx"
-                        type="number"
-                        formControlName="praticaNotaMaxima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-                    </div>
+              <ng-container *ngIf="getControl('tipoExame').value === '002'">
+                <h4>{{ avaliacao.get("label")?.value }}</h4>
+                <!-- <p>Parte Prática</p> -->
+
+                <div class="linhaOff container__avaliacao">
+                  <div class="input-text">
+                    <tcx-text
+                      label="Nota mínima"
+                      type="number"
+                      formControlName="praticaNotaMinima"
+                      [required]="true"
+                      errorMessage="Campo obrigatório"
+                    />
+                  </div>
+
+                  <div class="input-text">
+                    <tcx-text
+                      label="Nota máxima"
+                      type="number"
+                      formControlName="praticaNotaMaxima"
+                      [required]="true"
+                      errorMessage="Campo obrigatório"
+                    />
                   </div>
                 </div>
-              </div>
-            </ng-container>
-
-            <ng-container *ngIf="getControl('tipoExame').value === '002'">
-              <h4>{{ avaliacao.get("label")?.value }}</h4>
-              <!-- <p>Parte Prática</p> -->
-
-              <div class="linhaOff container__avaliacao">
-                <div class="input-text">
-                  <tcx-text
-                    label="Nota mínima"
-                    type="number"
-                    formControlName="praticaNotaMinima"
-                    [required]="true"
-                    errorMessage="Campo obrigatório"
-                  />
-                </div>
-
-                <div class="input-text">
-                  <tcx-text
-                    label="Nota máxima"
-                    type="number"
-                    formControlName="praticaNotaMaxima"
-                    [required]="true"
-                    errorMessage="Campo obrigatório"
-                  />
-                </div>
-              </div>
-            </ng-container>
+              </ng-container>
+            </div>
           </div>
           <!-- // FIM // -->
+          <div class="avaliacoes-container">
             <h4 *ngIf="getLiberaData()">DATA AVALIAÇÃO</h4>
-            <div
-              class="linha"
-              *ngIf="getControl('tipoExame').value === '001'"
-            >
+            <div class="linha" *ngIf="getControl('tipoExame').value === '001'">
               <div class="input-data">
                 <p>Parte Teórica</p>
                 <tcx-data
@@ -226,8 +222,8 @@
                 />
               </div>
             </div>
+          </div>
         </div>
-  
         <div class="linhaButton">
           <div class="form__button">
             <tcx-button label="Salvar" type="submit"></tcx-button>
