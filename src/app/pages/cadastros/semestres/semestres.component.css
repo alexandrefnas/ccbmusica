@@ -83,15 +83,17 @@ p {
   display: flex;
   flex-direction: column;
   align-items: center;
-
   width: 100%;
+  /* height: auto; */
   max-width: 600px;
-
+  /* min-height: 300px; */
+  /* max-height: 80vh; */
   box-sizing: border-box;
 
-  height: auto;
-  max-height: none;
-  overflow: visible;
+  /* height: auto; */
+  /* max-height: none; */
+  /* overflow-y: auto;
+  overflow-x: hidden; */
 }
 
 .linha {
@@ -101,7 +103,7 @@ p {
 
   gap: 8px;
   width: 100%;
-  min-width: 450px;
+  min-width: 400px;
 
   margin-bottom: 10px;
 }
@@ -128,8 +130,17 @@ p {
   width: 100%;
 }
 
-.avaliacoes-container {
+/* .avaliacoes-container {
   padding-top: 10px;
+} */
+
+.avaliacoes-container {
+  max-height: 300px;
+  overflow-y: auto;
+
+  padding: 10px 5px;
+  padding-right: 5px;
+  border: 2px solid #ccc;
 }
 
 .container__avaliacao {
@@ -145,6 +156,7 @@ p {
 
 .input-mine {
   flex: 1;
+max-width: 100px;
 }
 
 .linhaOff {

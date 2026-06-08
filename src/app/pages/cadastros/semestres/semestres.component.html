@@ -93,20 +93,10 @@
             />
           </div>
         </div>
-        <!--
-        <div class="linha" *ngIf="getListaCategoriaExame().length > 0">
-  <div class="input-select">
-            <tcx-select
-              [label]="'Categoria'"
-              [placeholder]="''"
-              [niveisLimitados]="getListaCategoriaExame()"
-              [formControl]="getControl('categoriaExame')"
-              [required]="true"
-              errorMessage="Campo obrigatório"
-            />
-          </div>
-        </div>
-        -->
+
+<!-- <div class="linha"></div>
+<div class="linha"></div>
+<div class="linha"></div> -->
 
         <!-- // INICIO // -->
         <div
@@ -200,43 +190,44 @@
               </div>
             </ng-container>
           </div>
+          <!-- // FIM // -->
+            <h4 *ngIf="getLiberaData()">DATA AVALIAÇÃO</h4>
+            <div
+              class="linha"
+              *ngIf="getControl('tipoExame').value === '001'"
+            >
+              <div class="input-data">
+                <p>Parte Teórica</p>
+                <tcx-data
+                  label="Data da Etapa"
+                  type="data"
+                  formControlName="dataTeorica"
+                  [required]="true"
+                />
+              </div>
+              <div class="input-data">
+                <p>Parte Prática</p>
+                <tcx-data
+                  label="Data da Etapa"
+                  type="data"
+                  formControlName="dataPratica"
+                  [required]="true"
+                />
+              </div>
+            </div>
+            <div class="linha" *ngIf="getControl('tipoExame').value === '002'">
+              <div class="input-data">
+                <!-- <p>Parte Prática</p> -->
+                <tcx-data
+                  label="Data da Etapa"
+                  type="data"
+                  formControlName="dataPratica"
+                  [required]="true"
+                />
+              </div>
+            </div>
         </div>
-        <!-- // FIM // -->
-        <h4 *ngIf="getLiberaData()">DATA AVALIAÇÃO</h4>
-        <div
-          class="linha container__avaliacao"
-          *ngIf="getControl('tipoExame').value === '001'"
-        >
-          <div class="input-data">
-            <p>Parte Teórica</p>
-            <tcx-data
-              label="Data da Etapa"
-              type="data"
-              formControlName="dataTeorica"
-              [required]="true"
-            />
-          </div>
-          <div class="input-data">
-            <p>Parte Prática</p>
-            <tcx-data
-              label="Data da Etapa"
-              type="data"
-              formControlName="dataPratica"
-              [required]="true"
-            />
-          </div>
-        </div>
-        <div class="linha" *ngIf="getControl('tipoExame').value === '002'">
-          <div class="input-data">
-            <!-- <p>Parte Prática</p> -->
-            <tcx-data
-              label="Data da Etapa"
-              type="data"
-              formControlName="dataPratica"
-              [required]="true"
-            />
-          </div>
-        </div>
+  
         <div class="linhaButton">
           <div class="form__button">
             <tcx-button label="Salvar" type="submit"></tcx-button>

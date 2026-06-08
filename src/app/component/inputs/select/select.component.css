@@ -80,10 +80,13 @@ option.list-format {
 
 .dropdown {
   position: absolute;
+  top: 40px;
+  left: 0;
   width: 100%;
+
   /* background: #ccc; */
   border: 1px solid #ccc;
-  z-index: 9999;
+  z-index: 99999;
 
   max-height: 200px; /* 👈 controla quantidade visível */
   overflow-y: auto;
