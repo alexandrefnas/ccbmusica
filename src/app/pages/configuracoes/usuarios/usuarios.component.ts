@@ -50,7 +50,7 @@ import { AlertService } from '../../../services/alert.service';
   styleUrl: './usuarios.component.css',
 })
 export class UsuariosComponent implements OnInit {
-// #region Variaveis
+  // #region Variaveis
   liberaEditar: boolean = false;
   liberaCriar: boolean = false;
   liberaDeletar: boolean = false;
@@ -148,7 +148,7 @@ export class UsuariosComponent implements OnInit {
   ////Fim
 
   dadosForms: FormGroup;
-// #endregion
+  // #endregion
 
   constructor(
     private fb: FormBuilder,
@@ -294,6 +294,27 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
+  private nivelPerfil(perfil: Perfil | string): number {
+    const niveis: Record<string, number> = {
+      admin: 5,
+      regional: 4,
+      secretario: 3,
+      encarregado: 2,
+      instrutor: 1,
+    };
+
+    return niveis[perfil] ?? 0;
+  }
+
+  private podeGerenciarPerfil(perfilAlvo: Perfil | string): boolean {
+    const logado = this.auth.usuario;
+    if (!logado) return false;
+
+    if (logado.perfil === 'admin') return true;
+
+    return this.nivelPerfil(perfilAlvo) <= this.nivelPerfil(logado.perfil);
+  }
+
   private escutarMudancaPerfil() {
     this.getControl('perfil')?.valueChanges.subscribe(
       async (perfil: Perfil) => {
@@ -412,7 +433,7 @@ export class UsuariosComponent implements OnInit {
           ...u,
           nome: (u.nome || '').toUpperCase(),
           perfil2: (u.perfil || '').toUpperCase(),
-          email: 'xxxxxxxxxx@xxxxxx.xxx',
+          // email: 'xxxxxxxxxx@xxxxxx.xxx',
         }))
         .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
@@ -435,6 +456,27 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
+  // carregarPerfisPermitidos(): void {
+  //   const logado = this.auth.usuario;
+
+  //   if (!logado) {
+  //     this.listaTipoUsuarioPermitida = [];
+  //     return;
+  //   }
+
+  //   if (logado.perfil === 'admin') {
+  //     this.listaTipoUsuarioPermitida = this.listaTipoUsuario;
+  //     return;
+  //   }
+
+  //   this.listaTipoUsuarioPermitida = this.listaTipoUsuario.filter(
+  //     (perfil) =>
+  //       perfil.value !== 'admin' &&
+  //       perfil.value !== 'regional' &&
+  //       perfil.value !== 'secretario',
+  //   );
+  // }
+
   carregarPerfisPermitidos(): void {
     const logado = this.auth.usuario;
 
@@ -448,11 +490,8 @@ export class UsuariosComponent implements OnInit {
       return;
     }
 
-    this.listaTipoUsuarioPermitida = this.listaTipoUsuario.filter(
-      (perfil) =>
-        perfil.value !== 'admin' &&
-        perfil.value !== 'regional' &&
-        perfil.value !== 'secretario',
+    this.listaTipoUsuarioPermitida = this.listaTipoUsuario.filter((perfil) =>
+      this.podeGerenciarPerfil(perfil.value),
     );
   }
 
@@ -541,23 +580,36 @@ export class UsuariosComponent implements OnInit {
     return usuario.idSetor === logado.idSetor;
   }
 
+  // podeEditarUsuario(usuario: any): boolean {
+  //   const logado = this.auth.usuario;
+
+  //   if (!logado) return false;
+
+  //   if (!this.liberaEditar) return false;
+
+  //   // Só admin edita admin, regional e secretário
+  //   if (
+  //     usuario.perfil === 'admin' ||
+  //     usuario.perfil === 'regional' ||
+  //     usuario.perfil === 'secretario'
+  //   ) {
+  //     return logado.perfil === 'admin';
+  //   }
+
+  //   // Demais usuários seguem acesso por setor/comum
+  //   return this.auth.temAcessoAoRegistro(usuario);
+  // }
+
   podeEditarUsuario(usuario: any): boolean {
     const logado = this.auth.usuario;
 
     if (!logado) return false;
-
     if (!this.liberaEditar) return false;
 
-    // Só admin edita admin, regional e secretário
-    if (
-      usuario.perfil === 'admin' ||
-      usuario.perfil === 'regional' ||
-      usuario.perfil === 'secretario'
-    ) {
-      return logado.perfil === 'admin';
-    }
+    if (logado.perfil === 'admin') return true;
 
-    // Demais usuários seguem acesso por setor/comum
+    if (!this.podeGerenciarPerfil(usuario.perfil)) return false;
+
     return this.auth.temAcessoAoRegistro(usuario);
   }
 
@@ -583,13 +635,20 @@ export class UsuariosComponent implements OnInit {
       }
     }
     // só admin pode criar admin
-    if (this.perfil === 'admin' && usuarioLogado?.perfil !== 'admin') {
+    // if (this.perfil === 'admin' && usuarioLogado?.perfil !== 'admin') {
+    //   this.alertService.aviso(
+    //     'Você não tem permissão para criar administradores.',
+    //   );
+    //   return;
+    // }
+
+    if (!this.podeGerenciarPerfil(this.perfil)) {
       this.alertService.aviso(
-        'Você não tem permissão para criar administradores.',
+        'Você não tem permissão para criar usuário com este perfil.',
       );
+      this.carregando = false;
       return;
     }
-
     try {
       // const perfilConfig = this.tipoPerfil[this.perfil];
       const perfilConfig = TIPO_PERFIL[this.perfil];

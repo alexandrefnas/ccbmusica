@@ -8,7 +8,8 @@
         </button>
       </div>
       <div class="menu-topo-right">
-        <button (click)="logout()" class="toggle-btn">
+        <div class="usuario-log" [title]="email" ><i class="bi bi-person-circle"></i></div>
+        <button (click)="logout()" class="toggle-btn" title="Fazer Logoff" >
           <i class="bi bi-power"></i>
         </button>
       </div>

@@ -18,6 +18,8 @@ export class AppComponent {
   ) {
     this.authService.currentUser$.subscribe((user) => {
       this.logado = !!user;
+      this.email = user.email;
+      console.log('usuaro', user)
       // console.log('URL REAL AO INICIAR:', window.location.href);
     });
 
@@ -38,7 +40,7 @@ export class AppComponent {
   menuMobileAberto = false; // mobile
 
   logado: boolean = false;
-
+  email: string = '';
   alternarMenu() {
     if (this.isMobile()) {
       // if (this.isMobile() || this.isTable()) {
