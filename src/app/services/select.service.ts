@@ -114,7 +114,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
 
   instrutor: {
     acessos: {
-      candidatos: { read: true, create: true, update: true, delete: false },
+      candidatos: { read: true, create: false, update: false, delete: false },
       grupoExames: {
         read: false,
         create: false,
