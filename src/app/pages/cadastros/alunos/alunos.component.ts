@@ -415,6 +415,12 @@ export class AlunosComponent implements OnInit {
     return (this.filtro = !this.filtro);
   }
 
+  deveMostrarCampoComum(): boolean {
+    if (this.auth.usuario?.perfil === 'admin') return true;
+
+    return this.listaIgreja.length > 1;
+  }
+
   alterarFiltroStatus(): void {
     this.carregarDados();
   }
@@ -565,14 +571,15 @@ export class AlunosComponent implements OnInit {
           );
 
           return (exame.etapas || [])
-          .filter((etapa: any) =>
-            ['aprovado', 'reprovado'].includes(etapa.resultado),
-        )
-        .map((etapa: any) => {
-          const etapaGrupo = periodo?.avaliacao?.find(
-            (a: any) => a.ordem === etapa.ordem,
-          );
-          const notaLabelPorcentagem = (etapa.nota * 100 / etapa.notaMaxima) || '';
+            .filter((etapa: any) =>
+              ['aprovado', 'reprovado'].includes(etapa.resultado),
+            )
+            .map((etapa: any) => {
+              const etapaGrupo = periodo?.avaliacao?.find(
+                (a: any) => a.ordem === etapa.ordem,
+              );
+              const notaLabelPorcentagem =
+                (etapa.nota * 100) / etapa.notaMaxima || '';
 
               return {
                 idExame: exame.id,
@@ -635,6 +642,17 @@ export class AlunosComponent implements OnInit {
   }
 
   async onSalvar(): Promise<void> {
+    if (!this.deveMostrarCampoComum()) {
+      const igrejaUnica = this.listaIgreja[0];
+
+      if (igrejaUnica) {
+        this.dadosForms.patchValue({
+          idComum: igrejaUnica.value,
+          idSetor: igrejaUnica.idSetor,
+        });
+      }
+    }
+
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
       // alert('Formulário inválido. Preencha os campos obrigatórios.');
