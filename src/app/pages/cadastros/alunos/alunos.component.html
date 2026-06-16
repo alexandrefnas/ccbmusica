@@ -121,7 +121,7 @@
           />
         </div>
       </div>
-      <div class="linha">
+      <div class="linha" *ngIf="deveMostrarCampoComum()">
         <div class="input-select" id="input-congregacao">
           <tcx-select
             [label]="'Comum Congregação'"
