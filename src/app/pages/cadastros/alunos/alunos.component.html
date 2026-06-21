@@ -45,6 +45,14 @@
         (valorMudou)="carregarDados()"
       />
     </div>
+    <div style="width: 250px">
+      <tcx-text
+        label="Pesquisa..."
+        type="text"
+        [(value)]="pesquisa"
+        (valueChange)="buscarPesquisa()"
+      />
+    </div>
     <div style="display: flex; flex-direction: row; gap: 10px; padding: 0 10px">
       <input
         type="checkbox"

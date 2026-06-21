@@ -42,10 +42,25 @@ import {
 import { TableComponentSelect } from '../../../component/table-select/table.component';
 import { AlertService } from '../../../services/alert.service';
 
+// type ExameTabela = Exames & {
+//   idadeAluno?: string;
+//   instrumentoAluno?: string;
+//   afinacaoAluno?: string;
+// };
+
 type ExameTabela = Exames & {
+  nomeAluno?: string;
   idadeAluno?: string;
   instrumentoAluno?: string;
   afinacaoAluno?: string;
+
+  tipoExameLabel?: string;
+  categoriaExameLabel?: string;
+  statusLabel?: string;
+  etapaAtualLabel?: string;
+
+  dataSolicitacao?: string;
+  dataAgendada?: string;
 };
 
 @Component({
@@ -113,6 +128,7 @@ export class ExamesComponent implements OnInit {
   dadosParaEditar: Exames | null = null;
   exameAceite: Exames | null = null;
   filtroStatus = false;
+  pesquisa = '';
 
   liberaCriar = false;
   liberaEditar = false;
@@ -626,6 +642,11 @@ export class ExamesComponent implements OnInit {
     });
   }
 
+  buscarPesquisa(): void {
+    this.aplicarFiltroStatus();
+    this.limparSelecaoExames();
+  }
+
   aoSelecionarStatusFiltro(status: string): void {
     this.statusFiltro = status || 'TODOS';
     this.aplicarFiltroStatus();
@@ -633,15 +654,48 @@ export class ExamesComponent implements OnInit {
     this.filtroStatusOp;
   }
 
+  // aplicarFiltroStatus(): void {
+  //   if (this.statusFiltro === 'TODOS') {
+  //     this.dados = [...this.dadosTodos];
+  //     return;
+  //   }
+
+  //   this.dados = this.dadosTodos.filter(
+  //     (item) => item.status === this.statusFiltro,
+  //   );
+  //   this.paginaAtual = 1;
+  // }
+
   aplicarFiltroStatus(): void {
-    if (this.statusFiltro === 'TODOS') {
-      this.dados = [...this.dadosTodos];
-      return;
+    let dadosFiltrados = [...this.dadosTodos];
+
+    // Filtro por status
+    if (this.statusFiltro !== 'TODOS') {
+      dadosFiltrados = dadosFiltrados.filter(
+        (item) => item.status === this.statusFiltro,
+      );
     }
 
-    this.dados = this.dadosTodos.filter(
-      (item) => item.status === this.statusFiltro,
-    );
+    // Filtro por pesquisa
+    if (this.pesquisa.trim()) {
+      const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
+
+      dadosFiltrados = dadosFiltrados.filter(
+        (item) =>
+          item.nomeAluno?.includes(termo) ||
+          item.idadeAluno?.includes(termo) ||
+          item.tipoExameLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+          item.categoriaExameLabel
+            ?.toLocaleUpperCase('pt-BR')
+            .includes(termo) ||
+          item.statusLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+          item.etapaAtualLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+          item.dataSolicitacao?.includes(termo) ||
+          item.dataAgendada?.includes(termo),
+      );
+    }
+
+    this.dados = dadosFiltrados;
     this.paginaAtual = 1;
   }
 

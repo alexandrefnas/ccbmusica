@@ -83,6 +83,7 @@ export class AlunosComponent implements OnInit {
 
   filtro = false;
   filtroStatus = false;
+  pesquisa = '';
 
   modoHistorico = false;
   alunoHistoricoSelecionado: Candidatos | null = null;
@@ -533,19 +534,37 @@ export class AlunosComponent implements OnInit {
       //   (a.nomeAluno || '').localeCompare(b.nomeAluno || ''),
       // );
       let dadosFiltrados = dadosCandidatos;
+      // Filtro de pesquisa
+      if (this.pesquisa.trim()) {
+        const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
 
+        dadosFiltrados = dadosFiltrados.filter(
+          (c) =>
+            c.nomeAluno?.includes(termo) ||
+            c.idade?.includes(termo) ||
+            c.nomeComum?.includes(termo) ||
+            c.afinacao?.includes(termo) ||
+            c.nomeInstrumento?.includes(termo),
+        );
+      }
+
+      // Filtro de status
       if (this.filtroStatus) {
         // mostra apenas desativados
-        dadosFiltrados = dadosCandidatos.filter((c) => c.desativado === true);
+        dadosFiltrados = dadosFiltrados.filter((c) => c.desativado === true);
       } else {
         // mostra apenas ativos
-        dadosFiltrados = dadosCandidatos.filter((c) => c.desativado !== true);
+        dadosFiltrados = dadosFiltrados.filter((c) => c.desativado !== true);
       }
 
       this.dados = [...dadosFiltrados].sort((a, b) =>
         (a.nomeAluno || '').localeCompare(b.nomeAluno || ''),
       );
     });
+  }
+
+  buscarPesquisa(): void {
+    this.carregarDados();
   }
 
   abrirHistoricoAluno(aluno: Candidatos): void {

@@ -92,6 +92,7 @@ export class SolicitacaoComponent {
   paginaAtual = 1;
   itensPorPagina = 20;
   filtroStatus = false;
+  pesquisa = '';
 
   dadosForms: FormGroup;
   dadosParaEditar: Exames | null = null;
@@ -384,6 +385,7 @@ export class SolicitacaoComponent {
           return {
             ...exame,
             dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
+            dataSolicitacao: converterISOParaBR(exame.dataSolicitacao || ''),
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
               'ALUNO NÃO CADASTRADO',
@@ -461,16 +463,50 @@ export class SolicitacaoComponent {
     this.filtroStatusOp;
   }
 
+  // aplicarFiltroStatus(): void {
+  //   if (this.statusFiltro === 'TODOS') {
+  //     this.dados = [...this.dadosTodos];
+  //     return;
+  //   }
+
+  //   this.dados = this.dadosTodos.filter(
+  //     (item) => item.status === this.statusFiltro,
+  //   );
+  //   this.paginaAtual = 1;
+  // }
+
   aplicarFiltroStatus(): void {
-    if (this.statusFiltro === 'TODOS') {
-      this.dados = [...this.dadosTodos];
-      return;
+    let dadosFiltrados = [...this.dadosTodos];
+
+    if (this.statusFiltro !== 'TODOS') {
+      dadosFiltrados = dadosFiltrados.filter(
+        (item) => item.status === this.statusFiltro,
+      );
     }
 
-    this.dados = this.dadosTodos.filter(
-      (item) => item.status === this.statusFiltro,
-    );
+    if (this.pesquisa.trim()) {
+      const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
+
+      dadosFiltrados = dadosFiltrados.filter(
+        (item) =>
+          item.nomeAluno?.includes(termo) ||
+          item.tipoExameLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+          item.categoriaExameLabel
+            ?.toLocaleUpperCase('pt-BR')
+            .includes(termo) ||
+          item.statusLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+          item.etapaAtualLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+          item.dataSolicitacao?.includes(termo) ||
+          item.dataAgendada?.includes(termo),
+      );
+    }
+
+    this.dados = dadosFiltrados;
     this.paginaAtual = 1;
+  }
+
+  buscarPesquisa(): void {
+    this.aplicarFiltroStatus();
   }
 
   async onSalvar(): Promise<void> {

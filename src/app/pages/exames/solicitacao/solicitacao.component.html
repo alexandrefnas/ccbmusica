@@ -1,8 +1,9 @@
 <div class="container__tela">
   <div id="tela__barra-menu">
     <div id="barra-titulo__container">
-      <h2>SOLICITAÇÕE </h2> -
-      <p style="font-style: normal;" >({{ primeiraMaiuscula(statusFiltro) }})</p>
+      <h2>SOLICITAÇÕE</h2>
+      -
+      <p style="font-style: normal">({{ primeiraMaiuscula(statusFiltro) }})</p>
     </div>
 
     <div class="button-container">
@@ -21,14 +22,25 @@
       </button>
     </div>
   </div>
-  <div style="width: 180px; padding-top: 10px" *ngIf="filtroStatus">
-    <tcx-select
-      [label]="'Filtro Status'"
-      [placeholder]="''"
-      [niveisLimitados]="listaStatusFiltro"
-      [(ngModel)]="statusFiltro"
-      (valorMudou)="aoSelecionarStatusFiltro($event)"
-    />
+  <div style="display: flex; gap: 15px; width: 100%; padding-top: 10px" *ngIf="filtroStatus">
+    <div style="width: 250px">
+      <tcx-select
+        [label]="'Filtro Status'"
+        [placeholder]="''"
+        [niveisLimitados]="listaStatusFiltro"
+        [(ngModel)]="statusFiltro"
+        (valorMudou)="aoSelecionarStatusFiltro($event)"
+      />
+    </div>
+
+    <div style="width: 250px">
+      <tcx-text
+        label="Pesquisa..."
+        type="text"
+        [(value)]="pesquisa"
+        (valueChange)="buscarPesquisa()"
+      />
+    </div>
   </div>
 
   <div id="tela__container-tabela">
