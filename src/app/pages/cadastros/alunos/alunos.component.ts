@@ -97,6 +97,9 @@ export class AlunosComponent implements OnInit {
   listaComunsFiltro: { value: string; label: string }[] = [];
   filtroComum = '';
 
+  paginaAtual = 1;
+  itensPorPagina = 20;
+
   listaAfinacao = [
     { value: 'DÓ', label: 'DÓ' },
     { value: 'FÁ', label: 'FÁ' },
@@ -416,6 +419,29 @@ export class AlunosComponent implements OnInit {
     return (this.filtro = !this.filtro);
   }
 
+  get dadosPaginados(): any[] {
+    const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
+
+    return this.dados.slice(inicio, fim);
+  }
+
+  get totalPaginas(): number {
+    return Math.max(1, Math.ceil(this.dados.length / this.itensPorPagina));
+  }
+
+  proximaPagina(): void {
+    if (this.paginaAtual < this.totalPaginas) {
+      this.paginaAtual++;
+    }
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaAtual > 1) {
+      this.paginaAtual--;
+    }
+  }
+
   deveMostrarCampoComum(): boolean {
     if (this.auth.usuario?.perfil === 'admin') return true;
 
@@ -560,12 +586,79 @@ export class AlunosComponent implements OnInit {
       this.dados = [...dadosFiltrados].sort((a, b) =>
         (a.nomeAluno || '').localeCompare(b.nomeAluno || ''),
       );
+
+      this.paginaAtual = 1;
     });
   }
 
   buscarPesquisa(): void {
     this.carregarDados();
   }
+
+  // abrirHistoricoAluno(aluno: Candidatos): void {
+  //   this.alunoHistoricoSelecionado = aluno;
+  //   this.modoHistorico = true;
+
+  //   combineLatest([
+  //     this.firestoreService.getExames(),
+  //     this.firestoreService.getSemestres(),
+  //   ]).subscribe(([exames, grupos]) => {
+  //     this.historicoAluno = exames
+  //       .filter((e) => e.idAluno === aluno.id)
+  //       .filter((e) =>
+  //         ['aprovado', 'reprovado', 'cancelado'].includes(e.status),
+  //       )
+  //       .flatMap((exame) => {
+  //         const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
+
+  //         const periodo = grupo?.periodos?.find(
+  //           (p: any) =>
+  //             p.tipo === exame.categoriaExame ||
+  //             p.categoriaExame === exame.categoriaExame,
+  //         );
+
+  //         return (exame.etapas || [])
+  //           .filter((etapa: any) =>
+  //             ['aprovado', 'reprovado'].includes(etapa.resultado),
+  //           )
+  //           .map((etapa: any) => {
+  //             const etapaGrupo = periodo?.avaliacao?.find(
+  //               (a: any) => a.ordem === etapa.ordem,
+  //             );
+  //             const notaLabelPorcentagem =
+  //               (etapa.nota * 100) / etapa.notaMaxima || '';
+
+  //             return {
+  //               idExame: exame.id,
+  //               grupoExameLabel: grupo?.grupoExame || '-',
+  //               tipoExameLabel: this.buscarLabel(
+  //                 listaTipoExame,
+  //                 exame.tipoExame,
+  //               ),
+  //               categoriaExameLabel: this.buscarCategoriaExame(
+  //                 exame.categoriaExame || '',
+  //               ),
+  //               etapaLabel: etapa.nome || etapaGrupo?.nome || '-',
+  //               dataTeste:
+  //                 etapaGrupo?.dataAvaliacao || etapa.dataLancamento || '',
+  //               dataTesteLabel: converterISOParaBR(
+  //                 etapaGrupo?.dataAvaliacao || etapa.dataLancamento || '',
+  //               ),
+  //               notaLabelPorcentagem: notaLabelPorcentagem,
+  //               notaMinimaLabel:
+  //                 etapa.notaMinima ?? etapaGrupo?.notaMinima ?? '-',
+  //               notaMaximaLabel:
+  //                 etapa.notaMaxima ?? etapaGrupo?.notaMaxima ?? '-',
+  //               professorLabel: etapa.professorLancamento || '-',
+  //               resultadoLabel:
+  //                 etapa.resultado === 'aprovado' ? 'APROVADO' : 'REPROVADO',
+  //               statusLabel: this.formatarStatus(exame.status),
+  //             };
+  //           });
+  //       })
+  //       .sort((a, b) => (b.dataTeste || '').localeCompare(a.dataTeste || ''));
+  //   });
+  // }
 
   abrirHistoricoAluno(aluno: Candidatos): void {
     this.alunoHistoricoSelecionado = aluno;
@@ -584,9 +677,11 @@ export class AlunosComponent implements OnInit {
           const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
 
           const periodo = grupo?.periodos?.find(
-            (p: any) =>
-              p.tipo === exame.categoriaExame ||
-              p.categoriaExame === exame.categoriaExame,
+            (p: any) => p.categoriaExame === exame.tipoExame,
+          );
+
+          const etapaGrupo = periodo?.etapas?.find(
+            (e: any) => e.tipo === exame.categoriaExame,
           );
 
           return (exame.etapas || [])
@@ -594,11 +689,16 @@ export class AlunosComponent implements OnInit {
               ['aprovado', 'reprovado'].includes(etapa.resultado),
             )
             .map((etapa: any) => {
-              const etapaGrupo = periodo?.avaliacao?.find(
+              const avaliacaoGrupo = etapaGrupo?.avaliacao?.find(
                 (a: any) => a.ordem === etapa.ordem,
               );
+
+              const notaMaxima = avaliacaoGrupo?.notaMaxima ?? 0;
+
               const notaLabelPorcentagem =
-                (etapa.nota * 100) / etapa.notaMaxima || '';
+                etapa.nota !== null && notaMaxima > 0
+                  ? `${((etapa.nota * 100) / notaMaxima).toFixed(1)}%`
+                  : '-';
 
               return {
                 idExame: exame.id,
@@ -610,17 +710,15 @@ export class AlunosComponent implements OnInit {
                 categoriaExameLabel: this.buscarCategoriaExame(
                   exame.categoriaExame || '',
                 ),
-                etapaLabel: etapa.nome || etapaGrupo?.nome || '-',
+                etapaLabel: avaliacaoGrupo?.nome || '-',
                 dataTeste:
-                  etapaGrupo?.dataAvaliacao || etapa.dataLancamento || '',
+                  avaliacaoGrupo?.dataAvaliacao || etapa.dataLancamento || '',
                 dataTesteLabel: converterISOParaBR(
-                  etapaGrupo?.dataAvaliacao || etapa.dataLancamento || '',
+                  avaliacaoGrupo?.dataAvaliacao || etapa.dataLancamento || '',
                 ),
-                notaLabelPorcentagem: notaLabelPorcentagem,
-                notaMinimaLabel:
-                  etapa.notaMinima ?? etapaGrupo?.notaMinima ?? '-',
-                notaMaximaLabel:
-                  etapa.notaMaxima ?? etapaGrupo?.notaMaxima ?? '-',
+                notaLabelPorcentagem,
+                notaMinimaLabel: avaliacaoGrupo?.notaMinima ?? '-',
+                notaMaximaLabel: avaliacaoGrupo?.notaMaxima ?? '-',
                 professorLabel: etapa.professorLancamento || '-',
                 resultadoLabel:
                   etapa.resultado === 'aprovado' ? 'APROVADO' : 'REPROVADO',

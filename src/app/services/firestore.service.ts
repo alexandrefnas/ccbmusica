@@ -40,14 +40,22 @@ export type ResultadoEtapa =
   | 'aprovado'
   | 'reprovado';
 
+// export interface EtapaExame {
+//   nome: string;
+//   ordem: number;
+//   nota: number | null;
+//   notaMinima: number;
+//   notaMaxima: number;
+//   resultado: ResultadoEtapa;
+//   dataAgendada: string;
+//   dataLancamento: string;
+//   professorLancamento: string;
+// }
+
 export interface EtapaExame {
-  nome: string;
   ordem: number;
   nota: number | null;
-  notaMinima: number;
-  notaMaxima: number;
   resultado: ResultadoEtapa;
-  dataAgendada: string;
   dataLancamento: string;
   professorLancamento: string;
 }

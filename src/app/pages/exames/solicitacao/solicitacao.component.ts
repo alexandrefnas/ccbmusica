@@ -17,6 +17,7 @@ import {
   Candidatos,
   Exames,
   FirestoreService,
+  GrupoExames,
 } from '../../../services/firestore.service';
 import { AuthService, PermissoesCRUD } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -113,6 +114,7 @@ export class SolicitacaoComponent {
 
   statusFiltro = 'TODOS';
   dadosTodos: any[] = [];
+  gruposExames: GrupoExames[] = [];
 
   camposColunas = [
     'nomeAluno',
@@ -259,10 +261,16 @@ export class SolicitacaoComponent {
       this.liberaDeletar = this.permissao('delete');
 
       this.carregarAlunos();
+      this.carregarGrupoExames();
       this.carregarDados();
     });
   }
 
+  carregarGrupoExames(): void {
+    this.firestoreService.getSemestres().subscribe((lista: GrupoExames[]) => {
+      this.gruposExames = lista;
+    });
+  }
   // carregarAlunos(): void {
   //   this.firestoreService.getCandidato().subscribe((lista: Candidatos[]) => {
   //     this.listaAlunos = lista
@@ -381,10 +389,16 @@ export class SolicitacaoComponent {
           const etapaAtual = exame.etapas?.find(
             (e) => e.ordem === exame.etapaAtual,
           );
-
+          const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
+            exame,
+            exame.etapaAtual,
+          );
           return {
             ...exame,
-            dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
+            // dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
+            dataAgendada: converterISOParaBR(
+              avaliacaoGrupo?.dataAvaliacao || '',
+            ),
             dataSolicitacao: converterISOParaBR(exame.dataSolicitacao || ''),
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
@@ -407,7 +421,8 @@ export class SolicitacaoComponent {
                 ? 'CONCLUÍDO'
                 : exame.status === 'reprovado'
                   ? 'REPROVADO'
-                  : etapaAtual?.nome || 'AGUARDANDO',
+                  : // : etapaAtual?.nome || 'AGUARDANDO',
+                    avaliacaoGrupo?.nome || 'AGUARDANDO',
           };
         });
 
@@ -439,6 +454,22 @@ export class SolicitacaoComponent {
       });
       this.aplicarFiltroStatus();
     });
+  }
+
+  buscarAvaliacaoDoGrupo(exame: Exames, ordem: number): any | null {
+    const grupo = this.gruposExames.find((g) => g.id === exame.idGrupoExame);
+
+    if (!grupo) return null;
+
+    const periodo = grupo.periodos?.find(
+      (p: any) => p.categoriaExame === exame.tipoExame,
+    );
+
+    const etapa = periodo?.etapas?.find(
+      (e: any) => e.tipo === exame.categoriaExame,
+    );
+
+    return etapa?.avaliacao?.find((a: any) => a.ordem === ordem) || null;
   }
 
   buscarLabel(

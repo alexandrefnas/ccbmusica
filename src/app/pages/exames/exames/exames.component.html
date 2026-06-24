@@ -114,28 +114,6 @@
     />
     <!-- /* [podeSelecionar]="podeSelecionarExame" */ -->
   </div>
-  <!-- <div class="paginacao">
-  <button
-    class="buttons"
-    (click)="paginaAnterior()"
-    [disabled]="paginaAtual === 1"
-  >
-    ◀
-  </button>
-
-  <span>
-    Página {{ paginaAtual }} de {{ totalPaginas }}
-  </span>
-
-  <button
-    class="buttons"
-    (click)="proximaPagina()"
-    [disabled]="paginaAtual >= totalPaginas"
-  >
-    ▶
-  </button>
-</div>
-</div> -->
   <div class="paginacao">
     <button
       class="buttons"
@@ -330,10 +308,19 @@
           </p>
         </div>
 
-        <div class="dados-exame-modal">
+        <!-- <div class="dados-exame-modal">
           <p><strong>Etapa:</strong> {{ etapaSelecionada?.nome }}</p>
           <p><strong>Nota mín.:</strong> {{ etapaSelecionada?.notaMinima }}</p>
           <p><strong>Nota máx.:</strong> {{ etapaSelecionada?.notaMaxima }}</p>
+        </div> -->
+        <div class="dados-exame-modal">
+          <p><strong>Etapa:</strong> {{ configEtapaSelecionada?.nome }}</p>
+          <p>
+            <strong>Nota mín.:</strong> {{ configEtapaSelecionada?.notaMinima }}
+          </p>
+          <p>
+            <strong>Nota máx.:</strong> {{ configEtapaSelecionada?.notaMaxima }}
+          </p>
         </div>
 
         <!-- MOSTRAR PROFESSOR -->
@@ -354,7 +341,7 @@
               type="number"
               formControlName="nota"
               [min]="0"
-              [max]="etapaSelecionada?.notaMaxima"
+              [max]="configEtapaSelecionada?.notaMaxima"
               [required]="etapaSelecionada?.nota === null"
               errorMessage="Campo obrigatório"
             />

@@ -79,7 +79,7 @@
       <tcx-table
         [colunas]="camposColunas"
         [colunasLabels]="tituloColunas"
-        [dados]="dados"
+        [dados]="dadosPaginados"
         [mostrarAcoes]="liberaEditar || liberaDeletar"
         [acoesTabela]="acoes"
         [tamanhosColunas]="tamanhoColunas"
@@ -102,6 +102,28 @@
         [alinhamentosColunas]="alinhamentoColunaHistorico"
       ></tcx-table>
     </ng-container>
+  </div>
+  <div class="paginacao" *ngIf="!modoHistorico">
+    <button
+      class="buttons"
+      (click)="paginaAnterior()"
+      [disabled]="paginaAtual === 1"
+    >
+      <i class="bi bi-chevron-left"></i>
+    </button>
+
+    <span>
+      Página {{ paginaAtual }} de {{ totalPaginas }} ({{ dados.length }}
+      registros)
+    </span>
+
+    <button
+      class="buttons"
+      (click)="proximaPagina()"
+      [disabled]="paginaAtual >= totalPaginas"
+    >
+      <i class="bi bi-chevron-right"></i>
+    </button>
   </div>
 </div>
 
