@@ -9,13 +9,14 @@
       class="form-input"
       [value]="selectedValue"
       [ngStyle]="{ 'font-size.px': fontSize }"
-      (input)="selecionarValor(getInputValue($event))"
+      (input)="onInputChange($event)"
       (focus)="onFocus()"
       (keydown)="onKeyDown($event)"
       (blur)="onBlur()"
       [placeholder]="placeholder"
       [disabled]="disabled"
     />
+      <!-- /* (input)="selecionarValor(getInputValue($event))" */ -->
     <!-- (click)="toggleOptions()" -->
 
     <div

@@ -50,7 +50,7 @@ export class TextSelectComponent implements ControlValueAccessor {
 
   constructor(
     private elementRef: ElementRef,
-    @Self() @Optional() public ngControl: NgControl
+    @Self() @Optional() public ngControl: NgControl,
   ) {
     if (this.ngControl) {
       this.ngControl.valueAccessor = this;
@@ -62,14 +62,31 @@ export class TextSelectComponent implements ControlValueAccessor {
   }
 
   // Quando digita no input
+  // onInputChange(event: Event): void {
+  //   const valor = (event.target as HTMLInputElement).value;
+  //   this.selectedValue = valor;
+  //   this.valorMudou.emit(valor);
+
+  //   this.filteredOptions = this.niveis.filter((option) =>
+  //     option.label.toLowerCase().includes(valor.toLowerCase())
+  //   );
+  //   this.showOptions = true;
+  // }
+
   onInputChange(event: Event): void {
     const valor = (event.target as HTMLInputElement).value;
+
     this.selectedValue = valor;
+    this.value = valor;
+
+    this.onChange(valor);
+    this.onTouched();
     this.valorMudou.emit(valor);
 
     this.filteredOptions = this.niveis.filter((option) =>
-      option.label.toLowerCase().includes(valor.toLowerCase())
+      option.label.toLowerCase().includes(valor.toLowerCase()),
     );
+
     this.showOptions = true;
   }
 
@@ -82,11 +99,21 @@ export class TextSelectComponent implements ControlValueAccessor {
     this.showOptions = true;
   }
 
+  // selectOption(option: { value: string; label: string }): void {
+  //   this.selectedValue = option.value;
+  //   this.onChange(this.selectedValue);
+  //   this.showOptions = false;
+  //   this.valorMudou.emit(this.selectedValue);
+  // }
   selectOption(option: { value: string; label: string }): void {
-    this.selectedValue = option.value;
-    this.onChange(this.selectedValue);
+    this.selectedValue = option.label;
+    this.value = option.value;
+
+    this.onChange(option.value);
+    this.onTouched();
+
     this.showOptions = false;
-    this.valorMudou.emit(this.selectedValue);
+    this.valorMudou.emit(option.value);
   }
 
   @HostListener('document:click', ['$event'])
@@ -115,8 +142,8 @@ export class TextSelectComponent implements ControlValueAccessor {
 
       const formElements = Array.from(
         document.querySelectorAll<HTMLElement>(
-          'input, select, textarea, button, [tabindex]:not([tabindex="-1"])'
-        )
+          'input, select, textarea, button, [tabindex]:not([tabindex="-1"])',
+        ),
       ).filter((el) => !el.hasAttribute('disabled'));
 
       const index = formElements.indexOf(event.target as HTMLElement);

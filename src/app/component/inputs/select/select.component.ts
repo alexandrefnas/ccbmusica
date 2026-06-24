@@ -29,6 +29,9 @@ export class SelectComponent {
   @Input() selectedValue: string = '';
   @Input() disabled: boolean = false;
   @Input() fontSize: number = 12;
+  indiceDestacado: number = -1;
+  textoBusca: string = '';
+  timerBusca: any;
 
   @Output() valorMudou = new EventEmitter<string>();
   open = false;
@@ -102,6 +105,41 @@ export class SelectComponent {
 
   setDisabledState?(isDisabled: boolean): void {
     this.disabled = isDisabled;
+  }
+
+  buscarPorTecla(event: KeyboardEvent): void {
+    const tecla = event.key;
+
+    if (tecla.length !== 1) return;
+
+    event.preventDefault();
+
+    clearTimeout(this.timerBusca);
+
+    this.textoBusca += tecla.toLowerCase();
+
+    const index = this.niveisLimitados.findIndex((nivel) =>
+      nivel.label.toLowerCase().startsWith(this.textoBusca),
+    );
+
+    if (index >= 0) {
+      this.open = true;
+      this.indiceDestacado = index;
+
+      setTimeout(() => {
+        const item = this.elementRef.nativeElement.querySelector(
+          `.option[data-index="${index}"]`,
+        );
+
+        item?.scrollIntoView({
+          block: 'nearest',
+        });
+      });
+    }
+
+    this.timerBusca = setTimeout(() => {
+      this.textoBusca = '';
+    }, 1000);
   }
 
   onBlur() {

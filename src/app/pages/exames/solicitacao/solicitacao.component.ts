@@ -36,6 +36,7 @@ import {
 import { combineLatest } from 'rxjs';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { AlertService } from '../../../services/alert.service';
+import { TextSelectComponent } from '../../../component/inputs/text-select/text-select.component';
 
 @Component({
   selector: 'tcx-solicitacao',
@@ -48,6 +49,7 @@ import { AlertService } from '../../../services/alert.service';
     SelectComponent,
     TextComponent,
     TableComponent,
+TextSelectComponent
   ],
   templateUrl: './solicitacao.component.html',
   styleUrl: './solicitacao.component.css',

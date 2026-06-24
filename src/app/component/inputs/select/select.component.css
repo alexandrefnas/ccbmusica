@@ -73,9 +73,13 @@
   transition: all 0.3s ease;
 }
 
-option.list-format {
+.option.list-format {
   background-color: #e9e7eb;
   height: 200px !important;
+}
+
+.option.destacado {
+  background-color: #e9ecef;
 }
 
 .dropdown {

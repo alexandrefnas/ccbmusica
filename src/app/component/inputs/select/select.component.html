@@ -12,19 +12,19 @@
       tabindex="0"
       (focus)="isFocused = true"
       (blur)="onBlur()"
-      (keydown)="onKeyDownCustom($event)"
+      (keydown)="onKeyDownCustom($event); buscarPorTecla($event)"
       [class.open]="open"
     >
       {{ getSelectedLabel() }}
+      <!-- (keydown)="onKeyDownCustom($event)" -->
     </div>
 
-    <div
-      class="dropdown"
-      *ngIf="open"
-    >
+    <div class="dropdown" *ngIf="open">
       <div
         class="option"
-        *ngFor="let nivel of niveisLimitados"
+        *ngFor="let nivel of niveisLimitados; let i = index"
+        [attr.data-index]="i"
+        [class.destacado]="i === indiceDestacado"
         (click)="selectOption(nivel)"
       >
         {{ nivel.label }}
