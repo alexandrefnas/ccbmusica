@@ -85,6 +85,7 @@ export class UsuariosComponent implements OnInit {
     'instrumentos',
     'setores',
     'usuarios',
+    'logs',
   ];
 
   modulos: Modulo[] = [];
@@ -824,6 +825,12 @@ export class UsuariosComponent implements OnInit {
           delete: [false],
         }),
         usuarios: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        logs: this.fb.group({
           read: [false],
           create: [false],
           update: [false],

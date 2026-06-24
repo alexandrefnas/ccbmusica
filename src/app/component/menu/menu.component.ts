@@ -78,13 +78,19 @@ export class MenuComponent {
       tabela: 'usuarios',
       icon: 'bi bi-people',
     },
+    {
+      label: 'Logs',
+      rota: '/logs-sistema',
+      tabela: 'logs',
+      icon: 'bi bi-key',
+    },
   ];
 
   outros = [
     {
       label: 'Alterar Senha',
       rota: '/as',
-      tabela: 'usuarios',
+      tabela: '',
       icon: 'bi bi-key',
     },
   ];
@@ -207,6 +213,14 @@ export class MenuComponent {
     if (!this.auth.usuario) return [];
 
     return this.avaliacoes.filter((p) =>
+      this.auth.temPermissao(p.tabela as any, 'read'),
+    );
+  }
+
+  get outrosGrupos() {
+    if (!this.auth.usuario) return [];
+
+    return this.outros.filter((p) =>
       this.auth.temPermissao(p.tabela as any, 'read'),
     );
   }

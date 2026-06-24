@@ -112,6 +112,18 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
+        path: 'logs-sistema',
+        loadComponent: () =>
+          import('./pages/logs-sistema/logs-sistema.component').then(
+            (m) => m.LogsSistemaComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: {
+          tabela: 'logs',
+          tipo: 'read',
+        },
+      },
+      {
         path: 'sem-permissao',
         loadComponent: () =>
           import('./pages/sem-permissao/sem-permissao.component').then(

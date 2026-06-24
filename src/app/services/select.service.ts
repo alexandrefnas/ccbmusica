@@ -23,7 +23,8 @@ export type Modulo =
   | 'igrejas'
   | 'instrumentos'
   | 'setores'
-  | 'usuarios';
+  | 'usuarios'
+  | 'logs';
 
 export const LISTA_TIPO_USUARIO = [
   { value: 'admin', label: 'Admin' },
@@ -60,6 +61,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       instrumentos: { read: true, create: true, update: true, delete: true },
       setores: { read: true, create: true, update: true, delete: true },
       usuarios: { read: true, create: true, update: true, delete: true },
+      logs: { read: true, create: true, update: true, delete: true },
     },
   },
 
@@ -73,6 +75,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       instrumentos: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: true, create: true, update: true, delete: false },
+      logs: { read: true, create: true, update: true, delete: true },
     },
   },
 
@@ -86,6 +89,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       instrumentos: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: true, create: true, update: true, delete: false },
+      logs: { read: true, create: true, update: true, delete: true },
     },
   },
 
@@ -109,6 +113,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: false, create: false, update: false, delete: false },
+      logs: { read: true, create: true, update: true, delete: true },
     },
   },
 
@@ -132,6 +137,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: false, create: false, update: false, delete: false },
+      logs: { read: true, create: true, update: true, delete: true },
     },
   },
 };

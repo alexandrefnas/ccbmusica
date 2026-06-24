@@ -1,0 +1,73 @@
+<div class="container__tela">
+  <div id="tela__barra-menu">
+    <div id="barra-titulo__container">
+      <h2 style="font-weight: normal; color: grey">LOGS DO SISTEMA</h2>
+    </div>
+  </div>
+
+  <div class="logs-container">
+    <p *ngIf="carregando">Carregando logs...</p>
+
+    <tcx-table
+      *ngIf="!carregando"
+      [colunas]="colunas"
+      [colunasLabels]="colunasLabels"
+      [dados]="logsFiltrados"
+      [tamanhosColunas]="tamanhosColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+      [mostrarAcoes]="true"
+      [acoesTabela]="acoesTabela"
+      mensagemVazio="Nenhum log encontrado"
+    ></tcx-table>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="mostrarDetalhes">
+  <div class="modal-log">
+    <div class="modal-header">
+      <h3>Detalhes do Log</h3>
+
+      <button class="btn-fechar" type="button" (click)="fecharDetalhes()">
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="logSelecionado">
+      <div class="linha-info">
+        <strong>Data/Hora:</strong>
+        <span>{{ logSelecionado.dataHoraFormatada }}</span>
+      </div>
+
+      <div class="linha-info">
+        <strong>Usuário:</strong>
+        <span>{{ logSelecionado.usuarioEmail }}</span>
+      </div>
+
+      <div class="linha-info">
+        <strong>Ação:</strong>
+        <span>{{ logSelecionado.acaoFormatada }}</span>
+      </div>
+
+      <div class="linha-info">
+        <strong>Coleção:</strong>
+        <span>{{ logSelecionado.colecao }}</span>
+      </div>
+
+      <div class="linha-info">
+        <strong>Documento:</strong>
+        <span>{{ logSelecionado.documentoId }}</span>
+      </div>
+
+      <div class="bloco-json">
+        <h4>Dados Antes</h4>
+        <pre>{{ formatarJson(logSelecionado.dadosAntes) }}</pre>
+      </div>
+
+      <div class="bloco-json">
+        <h4>Dados Depois</h4>
+        <pre>{{ formatarJson(logSelecionado.dadosDepois) }}</pre>
+      </div>
+    </div>
+  </div>
+</div>
