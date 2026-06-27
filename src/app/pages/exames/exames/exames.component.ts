@@ -366,7 +366,7 @@ export class ExamesComponent implements OnInit {
       this.liberaDeletar = this.permissao('delete');
 
       this.carregarAlunos();
-      this.carregarGrupoExames();
+      // this.carregarGrupoExames();
       this.carregarDados();
     });
   }
