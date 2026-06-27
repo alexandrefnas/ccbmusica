@@ -58,6 +58,7 @@ export interface Acessos {
   grupoExames?: PermissoesCRUD;
   exames?: PermissoesCRUD;
   solicitacoes?: PermissoesCRUD;
+  logs: PermissoesCRUD;
 }
 
 export interface Usuarios {

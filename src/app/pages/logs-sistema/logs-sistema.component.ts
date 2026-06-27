@@ -16,6 +16,9 @@ export class LogsSistemaComponent implements OnInit {
   logs: any[] = [];
   logsFiltrados: any[] = [];
 
+  paginaAtual = 1;
+  itensPorPagina = 20;
+
   carregando = false;
 
   colunas = [
@@ -79,26 +82,93 @@ export class LogsSistemaComponent implements OnInit {
     this.carregarLogs();
   }
 
+  // carregarLogs() {
+  //   this.carregando = true;
+
+  //   combineLatest([
+  //     this.firestoreService.getLogs(),
+  //     this.authService.usuarioLogado$,
+  //     this.firestoreService.getAcessos(),
+  //   ]).subscribe({
+  //     next: ([logs, usuarioLogado, usuarios]) => {
+  //       if (!usuarioLogado) {
+  //         this.logs = [];
+  //         this.logsFiltrados = [];
+  //         this.carregando = false;
+  //         return;
+  //       }
+
+  //       const logsPermitidos = this.filtrarLogsPorNivelUsuario(
+  //         logs,
+  //         usuarioLogado,
+  //         usuarios,
+  //       );
+
+  //       this.logs = logsPermitidos.map((log) => ({
+  //         ...log,
+  //         dataHoraFormatada: this.formatarTimestamp(log.dataHora),
+  //         acaoFormatada: this.formatarAcao(log.acao),
+  //         colecao: (log.colecao || '').toUpperCase(),
+  //       }));
+
+  //       this.logsFiltrados = [...this.logs];
+  //       this.carregando = false;
+  //     },
+  //     error: (erro) => {
+  //       console.error('Erro ao carregar logs:', erro);
+  //       this.carregando = false;
+  //     },
+  //   });
+  // }
+  get logsPaginados(): any[] {
+    const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
+    const fim = inicio + this.itensPorPagina;
+
+    return this.logsFiltrados.slice(inicio, fim);
+  }
+
+  get totalPaginas(): number {
+    return Math.max(
+      1,
+      Math.ceil(this.logsFiltrados.length / this.itensPorPagina),
+    );
+  }
+
+  proximaPagina(): void {
+    if (this.paginaAtual < this.totalPaginas) {
+      this.paginaAtual++;
+    }
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaAtual > 1) {
+      this.paginaAtual--;
+    }
+  }
+
   carregarLogs() {
     this.carregando = true;
 
     combineLatest([
       this.firestoreService.getLogs(),
-      this.authService.usuarioLogado$,
       this.firestoreService.getAcessos(),
     ]).subscribe({
-      next: ([logs, usuarioLogado, usuarios]) => {
-        if (!usuarioLogado) {
+      next: ([logs, usuarios]) => {
+        if (!this.authService.temPermissao('logs', 'read')) {
           this.logs = [];
           this.logsFiltrados = [];
           this.carregando = false;
           return;
         }
 
-        const logsPermitidos = this.filtrarLogsPorNivelUsuario(
-          logs,
-          usuarioLogado,
-          usuarios,
+        const usuariosPermitidos = usuarios.filter((u: any) =>
+          this.authService.temAcessoAoRegistro(u),
+        );
+
+        const idsUsuariosPermitidos = usuariosPermitidos.map((u: any) => u.uid);
+
+        const logsPermitidos = logs.filter((log) =>
+          idsUsuariosPermitidos.includes(log.usuarioUid),
         );
 
         this.logs = logsPermitidos.map((log) => ({
@@ -109,6 +179,7 @@ export class LogsSistemaComponent implements OnInit {
         }));
 
         this.logsFiltrados = [...this.logs];
+        this.paginaAtual = 1;
         this.carregando = false;
       },
       error: (erro) => {
@@ -118,48 +189,49 @@ export class LogsSistemaComponent implements OnInit {
     });
   }
 
-  filtrarLogsPorNivelUsuario(
-    logs: LogSistema[],
-    usuarioLogado: any,
-    usuarios: any[],
-  ): LogSistema[] {
-    const perfil = usuarioLogado?.perfil;
+  // filtrarLogsPorNivelUsuario(
+  //   logs: LogSistema[],
+  //   usuarioLogado: any,
+  //   usuarios: any[],
+  // ): LogSistema[] {
+  //   const perfil = usuarioLogado?.perfil;
 
-    if (perfil === 'admin' || perfil === 'zeus') {
-      return logs;
-    }
+  //   if (perfil === 'admin' || perfil === 'zeus') {
+  //     return logs;
+  //   }
 
-    return logs.filter((log) => {
-      const mesmoUsuario =
-        log.usuarioUid === usuarioLogado.uid ||
-        log.usuarioEmail === usuarioLogado.email;
+  //   return logs.filter((log) => {
+  //     const mesmoUsuario =
+  //       log.usuarioUid === usuarioLogado.uid ||
+  //       log.usuarioEmail === usuarioLogado.email;
 
-      if (mesmoUsuario) {
-        return true;
-      }
+  //     if (mesmoUsuario) {
+  //       return true;
+  //     }
 
-      const usuarioLog = usuarios.find(
-        (u) =>
-          u.uid === log.usuarioUid ||
-          u.id === log.usuarioUid ||
-          u.email === log.usuarioEmail,
-      );
+  //     const usuarioLog = usuarios.find(
+  //       (u) =>
+  //         u.uid === log.usuarioUid ||
+  //         u.id === log.usuarioUid ||
+  //         u.email === log.usuarioEmail,
+  //     );
 
-      if (!usuarioLog) {
-        return false;
-      }
+  //     if (!usuarioLog) {
+  //       return false;
+  //     }
 
-      if (perfil === 'regional' || perfil === 'secretario') {
-        return usuarioLog.idSetor === usuarioLogado.idSetor;
-      }
+  //     if (perfil === 'regional' || perfil === 'secretario') {
+  //       return usuarioLog.idSetor === usuarioLogado.idSetor;
+  //     }
 
-      if (perfil === 'encarregado' || perfil === 'instrutor') {
-        return usuarioLog.idComum === usuarioLogado.idComum;
-      }
+  //     if (perfil === 'encarregado' || perfil === 'instrutor') {
+  //       return usuarioLog.idComum === usuarioLogado.idComum;
+  //     }
 
-      return false;
-    });
-  }
+  //     return false;
+  //   });
+  // }
+
   visualizarLog(log: any) {
     this.logSelecionado = log;
     this.mostrarDetalhes = true;
