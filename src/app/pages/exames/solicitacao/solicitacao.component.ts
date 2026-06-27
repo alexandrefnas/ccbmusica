@@ -49,7 +49,7 @@ import { TextSelectComponent } from '../../../component/inputs/text-select/text-
     SelectComponent,
     TextComponent,
     TableComponent,
-TextSelectComponent
+    TextSelectComponent,
   ],
   templateUrl: './solicitacao.component.html',
   styleUrl: './solicitacao.component.css',
@@ -263,7 +263,7 @@ export class SolicitacaoComponent {
       this.liberaDeletar = this.permissao('delete');
 
       this.carregarAlunos();
-      this.carregarGrupoExames();
+      // this.carregarGrupoExames();
       this.carregarDados();
     });
   }
@@ -370,11 +370,102 @@ export class SolicitacaoComponent {
   //   });
   // }
 
+  // carregarDados(): void {
+  //   combineLatest([
+  //     this.firestoreService.getExames(),
+  //     this.firestoreService.getCandidato(),
+  //   ]).subscribe(([exames, alunos]) => {
+  //     const alunosPermitidos = alunos.filter((a) =>
+  //       this.auth.podeVerRegistro(a, 'candidatos'),
+  //     );
+
+  //     const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
+
+  //     const dadosExames = exames
+  //       .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
+  //       .map((exame) => {
+  //         const alunoFiltro = alunosPermitidos.find(
+  //           (a) => a.id === exame.idAluno,
+  //         );
+
+  //         const etapaAtual = exame.etapas?.find(
+  //           (e) => e.ordem === exame.etapaAtual,
+  //         );
+  //         const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
+  //           exame,
+  //           exame.etapaAtual,
+  //         );
+  //         return {
+  //           ...exame,
+  //           // dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
+  //           dataAgendada: converterISOParaBR(
+  //             avaliacaoGrupo?.dataAvaliacao || '',
+  //           ),
+  //           dataSolicitacao: converterISOParaBR(exame.dataSolicitacao || ''),
+  //           nomeAluno:
+  //             alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+  //             'ALUNO NÃO CADASTRADO',
+  //           // tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
+  //           // tipoExame: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
+  //           // categoriaExame: this.buscarCategoriaExame(
+  //           //   exame.categoriaExame || '',
+  //           // ),
+  //           tipoExameLabel: this.buscarLabel(
+  //             this.listaTipoExame,
+  //             exame.tipoExame,
+  //           ),
+  //           categoriaExameLabel: this.buscarCategoriaExame(
+  //             exame.categoriaExame || '',
+  //           ),
+  //           statusLabel: this.formatarStatus(exame.status),
+  //           etapaAtualLabel:
+  //             exame.status === 'aprovado'
+  //               ? 'CONCLUÍDO'
+  //               : exame.status === 'reprovado'
+  //                 ? 'REPROVADO'
+  //                 : // : etapaAtual?.nome || 'AGUARDANDO',
+  //                   avaliacaoGrupo?.nome || 'AGUARDANDO',
+  //         };
+  //       });
+
+  //     const ordemStatus: Record<string, number> = {
+  //       solicitado: 1,
+  //       agendado: 2,
+  //       emAndamento: 3,
+  //       aprovado: 4,
+  //       reprovado: 5,
+  //       cancelado: 6,
+  //     };
+
+  //     // this.dados = [...dadosExames].sort((a, b) => {
+  //     this.dadosTodos = [...dadosExames].sort((a, b) => {
+  //       const statusA = ordemStatus[a.status] || 999;
+  //       const statusB = ordemStatus[b.status] || 999;
+
+  //       if (statusA !== statusB) return statusA - statusB;
+
+  //       const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
+  //       if (tipo !== 0) return tipo;
+
+  //       const categoria = (a.categoriaExame || '').localeCompare(
+  //         b.categoriaExame || '',
+  //       );
+  //       if (categoria !== 0) return categoria;
+
+  //       return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
+  //     });
+  //     this.aplicarFiltroStatus();
+  //   });
+  // }
+
   carregarDados(): void {
     combineLatest([
       this.firestoreService.getExames(),
       this.firestoreService.getCandidato(),
-    ]).subscribe(([exames, alunos]) => {
+      this.firestoreService.getSemestres(),
+    ]).subscribe(([exames, alunos, grupos]) => {
+      this.gruposExames = grupos;
+
       const alunosPermitidos = alunos.filter((a) =>
         this.auth.podeVerRegistro(a, 'candidatos'),
       );
@@ -388,16 +479,13 @@ export class SolicitacaoComponent {
             (a) => a.id === exame.idAluno,
           );
 
-          const etapaAtual = exame.etapas?.find(
-            (e) => e.ordem === exame.etapaAtual,
-          );
           const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
             exame,
             exame.etapaAtual,
           );
+
           return {
             ...exame,
-            // dataAgendada: converterISOParaBR(etapaAtual?.dataAgendada || ''),
             dataAgendada: converterISOParaBR(
               avaliacaoGrupo?.dataAvaliacao || '',
             ),
@@ -405,11 +493,6 @@ export class SolicitacaoComponent {
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
               'ALUNO NÃO CADASTRADO',
-            // tipoExame: exame.tipoExame?.toLocaleUpperCase('pt-BR') || '',
-            // tipoExame: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
-            // categoriaExame: this.buscarCategoriaExame(
-            //   exame.categoriaExame || '',
-            // ),
             tipoExameLabel: this.buscarLabel(
               this.listaTipoExame,
               exame.tipoExame,
@@ -423,8 +506,7 @@ export class SolicitacaoComponent {
                 ? 'CONCLUÍDO'
                 : exame.status === 'reprovado'
                   ? 'REPROVADO'
-                  : // : etapaAtual?.nome || 'AGUARDANDO',
-                    avaliacaoGrupo?.nome || 'AGUARDANDO',
+                  : avaliacaoGrupo?.nome || 'AGUARDANDO',
           };
         });
 
@@ -437,7 +519,6 @@ export class SolicitacaoComponent {
         cancelado: 6,
       };
 
-      // this.dados = [...dadosExames].sort((a, b) => {
       this.dadosTodos = [...dadosExames].sort((a, b) => {
         const statusA = ordemStatus[a.status] || 999;
         const statusB = ordemStatus[b.status] || 999;
@@ -454,6 +535,7 @@ export class SolicitacaoComponent {
 
         return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
       });
+
       this.aplicarFiltroStatus();
     });
   }
