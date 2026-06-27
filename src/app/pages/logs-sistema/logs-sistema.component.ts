@@ -63,7 +63,8 @@ export class LogsSistemaComponent implements OnInit {
 
   acoesTabela = [
     {
-      label: '<i class="bi bi-eye"></i>',
+      // label: '<i class="bi bi-eye"></i>',
+      label: 'Resumo Log',
       descricao: 'Visualizar detalhes do log',
       classe: 'buttons-stile',
       callback: (item: any) => this.visualizarLog(item),
