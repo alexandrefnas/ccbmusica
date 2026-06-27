@@ -644,11 +644,106 @@ export class ExamesComponent implements OnInit {
   //   });
   // }
 
+  // carregarDados(): void {
+  //   combineLatest([
+  //     this.firestoreService.getExames(),
+  //     this.firestoreService.getCandidato(),
+  //   ]).subscribe(([exames, alunos]) => {
+  //     if (!this.auth.temPermissao('exames', 'read')) {
+  //       this.dados = [];
+  //       this.dadosTodos = [];
+  //       return;
+  //     }
+
+  //     const alunosPermitidos = alunos.filter((a) =>
+  //       this.auth.temAcessoAoRegistro(a),
+  //     );
+
+  //     const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
+
+  //     const dadosExames = exames
+  //       .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
+  //       .map((exame) => {
+  //         const alunoFiltro = alunosPermitidos.find(
+  //           (a) => a.id === exame.idAluno,
+  //         );
+
+  //         const etapaAtual = exame.etapas?.find(
+  //           (e) => e.ordem === exame.etapaAtual,
+  //         );
+
+  //         const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
+  //           exame,
+  //           exame.etapaAtual,
+  //         );
+
+  //         return {
+  //           ...exame,
+  //           idadeAluno: this.calcularIdade(alunoFiltro?.dataNascimento),
+  //           instrumentoAluno: alunoFiltro?.idInstrumento || '',
+  //           afinacaoAluno: alunoFiltro?.afinacao || '',
+  //           dataSolicitacao: converterISOParaBR(exame.dataSolicitacao),
+  //           dataAgendada: converterISOParaBR(
+  //             avaliacaoGrupo?.dataAvaliacao || '',
+  //           ),
+  //           nomeAluno:
+  //             alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+  //             'ALUNO NÃO CADASTRADO',
+  //           tipoExameLabel: this.buscarLabel(
+  //             this.listaTipoExame,
+  //             exame.tipoExame,
+  //           ),
+  //           categoriaExameLabel: this.buscarCategoriaExame(
+  //             exame.categoriaExame || '',
+  //           ),
+  //           statusLabel: this.formatarStatus(exame.status),
+  //           etapaAtualLabel:
+  //             exame.status === 'aprovado'
+  //               ? 'CONCLUÍDO'
+  //               : exame.status === 'reprovado'
+  //                 ? 'REPROVADO'
+  //                 : avaliacaoGrupo?.nome || 'AGUARDANDO',
+  //         };
+  //       });
+
+  //     const ordemStatus: Record<string, number> = {
+  //       solicitado: 1,
+  //       agendado: 2,
+  //       emAndamento: 3,
+  //       aprovado: 4,
+  //       reprovado: 5,
+  //       cancelado: 6,
+  //     };
+
+  //     this.dadosTodos = [...dadosExames].sort((a, b) => {
+  //       const statusA = ordemStatus[a.status] || 999;
+  //       const statusB = ordemStatus[b.status] || 999;
+
+  //       if (statusA !== statusB) return statusA - statusB;
+
+  //       const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
+  //       if (tipo !== 0) return tipo;
+
+  //       const categoria = (a.categoriaExame || '').localeCompare(
+  //         b.categoriaExame || '',
+  //       );
+  //       if (categoria !== 0) return categoria;
+
+  //       return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
+  //     });
+
+  //     this.aplicarFiltroStatus();
+  //   });
+  // }
+
   carregarDados(): void {
     combineLatest([
       this.firestoreService.getExames(),
       this.firestoreService.getCandidato(),
-    ]).subscribe(([exames, alunos]) => {
+      this.firestoreService.getSemestres(),
+    ]).subscribe(([exames, alunos, grupos]) => {
+      this.gruposExames = grupos;
+
       if (!this.auth.temPermissao('exames', 'read')) {
         this.dados = [];
         this.dadosTodos = [];
@@ -668,10 +763,6 @@ export class ExamesComponent implements OnInit {
             (a) => a.id === exame.idAluno,
           );
 
-          const etapaAtual = exame.etapas?.find(
-            (e) => e.ordem === exame.etapaAtual,
-          );
-
           const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
             exame,
             exame.etapaAtual,
@@ -682,7 +773,7 @@ export class ExamesComponent implements OnInit {
             idadeAluno: this.calcularIdade(alunoFiltro?.dataNascimento),
             instrumentoAluno: alunoFiltro?.idInstrumento || '',
             afinacaoAluno: alunoFiltro?.afinacao || '',
-            dataSolicitacao: converterISOParaBR(exame.dataSolicitacao),
+            dataSolicitacao: converterISOParaBR(exame.dataSolicitacao || ''),
             dataAgendada: converterISOParaBR(
               avaliacaoGrupo?.dataAvaliacao || '',
             ),
@@ -1248,49 +1339,53 @@ export class ExamesComponent implements OnInit {
   //   this.mostrarModalNota = true;
   // }
 
-lancarNota(exame: ExameTabela): void {
-  const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
+  lancarNota(exame: ExameTabela): void {
+    const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
 
-  if (!etapa) {
-    this.snackBar.open('Nenhuma etapa disponível.', 'Fechar', {
-      duration: 3000,
+    if (!etapa) {
+      this.snackBar.open('Nenhuma etapa disponível.', 'Fechar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const configEtapa = this.buscarAvaliacaoDoGrupo(exame, etapa.ordem);
+
+    if (!configEtapa) {
+      this.snackBar.open(
+        'Configuração da etapa não encontrada no grupo.',
+        'Fechar',
+        {
+          duration: 3000,
+        },
+      );
+      return;
+    }
+
+    this.exameSelecionado = exame;
+    this.etapaSelecionada = etapa;
+    this.configEtapaSelecionada = configEtapa;
+
+    const notaControl = this.notaForm.get('nota');
+
+    notaControl?.setValidators([
+      Validators.required,
+      Validators.min(0),
+      Validators.max(configEtapa.notaMaxima ?? 0),
+    ]);
+
+    notaControl?.updateValueAndValidity();
+
+    this.notaForm.reset();
+
+    this.notaForm.patchValue({
+      nota: etapa.nota ?? '',
+      professorLancamento:
+        etapa.professorLancamento || this.auth.usuario?.nome || '',
     });
-    return;
+
+    this.mostrarModalNota = true;
   }
-
-  const configEtapa = this.buscarAvaliacaoDoGrupo(exame, etapa.ordem);
-
-  if (!configEtapa) {
-    this.snackBar.open('Configuração da etapa não encontrada no grupo.', 'Fechar', {
-      duration: 3000,
-    });
-    return;
-  }
-
-  this.exameSelecionado = exame;
-  this.etapaSelecionada = etapa;
-  this.configEtapaSelecionada = configEtapa;
-
-  const notaControl = this.notaForm.get('nota');
-
-  notaControl?.setValidators([
-    Validators.required,
-    Validators.min(0),
-    Validators.max(configEtapa.notaMaxima ?? 0),
-  ]);
-
-  notaControl?.updateValueAndValidity();
-
-  this.notaForm.reset();
-
-  this.notaForm.patchValue({
-    nota: etapa.nota ?? '',
-    professorLancamento:
-      etapa.professorLancamento || this.auth.usuario?.nome || '',
-  });
-
-  this.mostrarModalNota = true;
-}
 
   // async salvarNota(): Promise<void> {
   //   // if (
@@ -2313,13 +2408,13 @@ lancarNota(exame: ExameTabela): void {
   //   this.notaForm.reset();
   // }
 
-fecharModalNota(): void {
-  this.mostrarModalNota = false;
-  this.exameSelecionado = null;
-  this.etapaSelecionada = null;
-  this.configEtapaSelecionada = null;
-  this.notaForm.reset();
-}
+  fecharModalNota(): void {
+    this.mostrarModalNota = false;
+    this.exameSelecionado = null;
+    this.etapaSelecionada = null;
+    this.configEtapaSelecionada = null;
+    this.notaForm.reset();
+  }
 
   fecharModalCancelamento(): void {
     this.mostrarModalCancelamento = false;
