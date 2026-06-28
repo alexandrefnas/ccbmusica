@@ -123,7 +123,7 @@
     />
     <!-- /* [podeSelecionar]="podeSelecionarExame" */ -->
   </div>
-  <div class="paginacao">
+  <div class="paginacao" *ngIf="dados.length > itensPorPagina">
     <button
       class="buttons"
       (click)="paginaAnterior()"
