@@ -4,17 +4,28 @@ import { FirestoreService, LogSistema } from '../../services/firestore.service';
 import { TableComponent } from '../../component/table/table.component';
 import { AuthService } from '../../services/auth.service';
 import { combineLatest } from 'rxjs';
+import { DataComponent } from '../../component/inputs/data/data.component';
+import { TextComponent } from '../../component/inputs/text/text.component';
 
 @Component({
   selector: 'tcx-logs-sistema',
   standalone: true,
-  imports: [CommonModule, TableComponent],
+  imports: [CommonModule, TableComponent, DataComponent, TextComponent],
   templateUrl: './logs-sistema.component.html',
   styleUrl: './logs-sistema.component.css',
 })
 export class LogsSistemaComponent implements OnInit {
+  constructor(
+    private firestoreService: FirestoreService,
+    private authService: AuthService,
+  ) {}
+
   logs: any[] = [];
   logsFiltrados: any[] = [];
+  filtroStatus = false;
+  pesquisa = '';
+  dataInicio: Date | null = null;
+  dataFim: Date | null = null;
 
   paginaAtual = 1;
   itensPorPagina = 20;
@@ -64,7 +75,7 @@ export class LogsSistemaComponent implements OnInit {
   acoesTabela = [
     {
       // label: '<i class="bi bi-eye"></i>',
-      label: 'Resumo Log',
+      label: 'Detalhe Log',
       descricao: 'Visualizar detalhes do log',
       classe: 'buttons-stile',
       callback: (item: any) => this.visualizarLog(item),
@@ -74,13 +85,19 @@ export class LogsSistemaComponent implements OnInit {
   logSelecionado: any = null;
   mostrarDetalhes = false;
 
-  constructor(
-    private firestoreService: FirestoreService,
-    private authService: AuthService,
-  ) {}
-
   ngOnInit() {
+    this.definirPeriodoPadrao();
     this.carregarLogs();
+  }
+
+  definirPeriodoPadrao(): void {
+    const hoje = new Date();
+
+    const inicio = new Date();
+    inicio.setDate(hoje.getDate() - 15);
+
+    this.dataInicio = inicio;
+    this.dataFim = hoje;
   }
 
   // carregarLogs() {
@@ -121,6 +138,7 @@ export class LogsSistemaComponent implements OnInit {
   //     },
   //   });
   // }
+
   get logsPaginados(): any[] {
     const inicio = (this.paginaAtual - 1) * this.itensPorPagina;
     const fim = inicio + this.itensPorPagina;
@@ -133,6 +151,10 @@ export class LogsSistemaComponent implements OnInit {
       1,
       Math.ceil(this.logsFiltrados.length / this.itensPorPagina),
     );
+  }
+
+  get filtroStatusOp(): boolean {
+    return (this.filtroStatus = !this.filtroStatus);
   }
 
   proximaPagina(): void {
@@ -179,8 +201,10 @@ export class LogsSistemaComponent implements OnInit {
           colecao: (log.colecao || '').toUpperCase(),
         }));
 
-        this.logsFiltrados = [...this.logs];
-        this.paginaAtual = 1;
+        // this.logsFiltrados = [...this.logs];
+        // this.paginaAtual = 1;
+        // this.carregando = false;
+        this.aplicarFiltros();
         this.carregando = false;
       },
       error: (erro) => {
@@ -188,6 +212,74 @@ export class LogsSistemaComponent implements OnInit {
         this.carregando = false;
       },
     });
+  }
+
+  aplicarFiltros(): void {
+    let dadosFiltrados = [...this.logs];
+
+    if (this.pesquisa.trim()) {
+      const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
+
+      dadosFiltrados = dadosFiltrados.filter((item) =>
+        [
+          item.dataHoraFormatada,
+          item.usuarioEmail,
+          item.acaoFormatada,
+          item.colecao,
+          item.documentoId,
+        ]
+          .join(' ')
+          .toLocaleUpperCase('pt-BR')
+          .includes(termo),
+      );
+    }
+
+    if (this.dataInicio) {
+      const inicio = this.inicioDoDia(this.dataInicio);
+
+      dadosFiltrados = dadosFiltrados.filter((item) => {
+        const dataLog = this.converterTimestampParaDate(item.dataHora);
+        return dataLog && dataLog >= inicio;
+      });
+    }
+
+    if (this.dataFim) {
+      const fim = this.fimDoDia(this.dataFim);
+
+      dadosFiltrados = dadosFiltrados.filter((item) => {
+        const dataLog = this.converterTimestampParaDate(item.dataHora);
+        return dataLog && dataLog <= fim;
+      });
+    }
+
+    this.logsFiltrados = dadosFiltrados;
+    this.paginaAtual = 1;
+  }
+
+  converterTimestampParaDate(data: any): Date | null {
+    if (!data) return null;
+
+    if (data.toDate) {
+      return data.toDate();
+    }
+
+    return new Date(data);
+  }
+
+  inicioDoDia(data: Date): Date {
+    const d = new Date(data);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  fimDoDia(data: Date): Date {
+    const d = new Date(data);
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }
+
+  buscarPesquisa(): void {
+    this.aplicarFiltros();
   }
 
   // filtrarLogsPorNivelUsuario(
