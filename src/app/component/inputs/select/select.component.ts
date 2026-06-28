@@ -30,8 +30,10 @@ export class SelectComponent {
   @Input() disabled: boolean = false;
   @Input() fontSize: number = 12;
   indiceDestacado: number = -1;
-  textoBusca: string = '';
   timerBusca: any;
+  textoBusca: string = '';
+
+    textoFiltro: string = '';
 
   @Output() valorMudou = new EventEmitter<string>();
   open = false;
@@ -166,6 +168,18 @@ export class SelectComponent {
     }
   }
 
+  get opcoesFiltradas() {
+    const texto = this.textoFiltro.toLowerCase().trim();
+
+    if (!texto) {
+      return this.niveisLimitados;
+    }
+
+    return this.niveisLimitados.filter((nivel) =>
+      nivel.label.toLowerCase().includes(texto),
+    );
+  }
+
   toggleDropdown(event: MouseEvent) {
     event.stopPropagation();
     if (this.disabled) return;
@@ -173,6 +187,7 @@ export class SelectComponent {
     this.open = !this.open;
 
     if (this.open) {
+      this.textoFiltro = '';
       this.selectService.notifyOpen(this);
     }
   }

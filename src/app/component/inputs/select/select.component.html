@@ -19,7 +19,7 @@
       <!-- (keydown)="onKeyDownCustom($event)" -->
     </div>
 
-    <div class="dropdown" *ngIf="open">
+    <!-- <div class="dropdown" *ngIf="open">
       <div
         class="option"
         *ngFor="let nivel of niveisLimitados; let i = index"
@@ -29,7 +29,38 @@
       >
         {{ nivel.label }}
       </div>
+    </div> -->
+<div class="dropdown" *ngIf="open" (click)="$event.stopPropagation()">
+
+  <div class="busca-container">
+    <input
+      class="input-busca"
+      type="text"
+      placeholder="Pesquisar..."
+      [(ngModel)]="textoFiltro"
+      (keydown)="$event.stopPropagation()"
+      autofocus
+    />
+    <i class="bi bi-search"></i>
+  </div>
+
+  <div class="lista-opcoes">
+    <div
+      class="option"
+      *ngFor="let nivel of opcoesFiltradas; let i = index"
+      [attr.data-index]="i"
+      [class.destacado]="i === indiceDestacado"
+      (click)="selectOption(nivel)"
+    >
+      {{ nivel.label }}
     </div>
+
+    <div class="option vazio" *ngIf="opcoesFiltradas.length === 0">
+      Nenhum resultado encontrado
+    </div>
+  </div>
+
+</div>
   </div>
 
   <div class="form-error" *ngIf="hasError() && !isFocused">

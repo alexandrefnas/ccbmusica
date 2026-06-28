@@ -83,16 +83,24 @@
 }
 
 .dropdown {
+  display: flex;
+  flex-direction: column;
   position: absolute;
   top: 40px;
   left: 0;
   width: 100%;
-
+  padding: 3px;
   /* background: #ccc; */
   border: 1px solid #ccc;
   z-index: 99999;
 
   max-height: 200px; /* 👈 controla quantidade visível */
+  /* overflow-y: auto; */
+  overflow: hidden;
+}
+
+.lista-opcoes {
+  max-height: 180px;
   overflow-y: auto;
 }
 
@@ -100,6 +108,51 @@
   padding: 10px;
   cursor: pointer;
   font-size: 14px;
+}
+
+.busca-container {
+  position: relative;
+  width: 100%;
+}
+
+.busca-container i {
+  position: absolute;
+  /* right: 10px; */
+  top: 50%;
+  left: 10px;
+  right: auto;
+  transform: translateY(-50%);
+  color: #777;
+  pointer-events: none; /* não impede clicar no input */
+  font-size: 14px;
+}
+
+.input-busca {
+  width: 100%;
+  box-sizing: border-box;
+  /*padding: 8px 35px 8px 10px; /* espaço para o ícone */
+  padding: 8px 10px 8px 32px;
+
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  outline: none;
+  font-size: 13px;
+}
+
+/* .input-busca {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: none;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 13px;
+border-radius: 3px;
+} */
+
+.vazio {
+  color: #888;
+  cursor: default;
 }
 
 .option:hover {
