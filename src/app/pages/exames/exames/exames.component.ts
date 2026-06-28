@@ -32,6 +32,7 @@ import {
   formatarDataString,
 } from '../../../../shared/shared.service';
 import {
+  listaCategorias,
   listaPeriodo,
   listaPeriodoPratico,
   listaStatusFiltro,
@@ -162,9 +163,10 @@ export class ExamesComponent implements OnInit {
   itensPorPagina = 20;
 
   statusFiltro = 'TODOS';
+  statusCategorias = 'TODOS';
 
   listaStatusFiltro = listaStatusFiltro;
-
+  listaCategorias = listaCategorias;
   // dadosTodos: any[] = [];
 
   dadosTodos: ExameTabela[] = [];
@@ -855,6 +857,11 @@ export class ExamesComponent implements OnInit {
     this.filtroStatusOp;
   }
 
+  aoSelecionarCategoriaFiltro(categoria: string): void {
+    this.statusCategorias = categoria || 'TODOS';
+    this.aplicarFiltroStatus();
+    this.limparSelecaoExames();
+  }
   // aplicarFiltroStatus(): void {
   //   if (this.statusFiltro === 'TODOS') {
   //     this.dados = [...this.dadosTodos];
@@ -867,6 +874,39 @@ export class ExamesComponent implements OnInit {
   //   this.paginaAtual = 1;
   // }
 
+  // aplicarFiltroStatus(): void {
+  //   let dadosFiltrados = [...this.dadosTodos];
+
+  //   // Filtro por status
+  //   if (this.statusFiltro !== 'TODOS') {
+  //     dadosFiltrados = dadosFiltrados.filter(
+  //       (item) => item.status === this.statusFiltro,
+  //     );
+  //   }
+
+  //   // Filtro por pesquisa
+  //   if (this.pesquisa.trim()) {
+  //     const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
+
+  //     dadosFiltrados = dadosFiltrados.filter(
+  //       (item) =>
+  //         item.nomeAluno?.includes(termo) ||
+  //         item.idadeAluno?.includes(termo) ||
+  //         item.tipoExameLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.categoriaExameLabel
+  //           ?.toLocaleUpperCase('pt-BR')
+  //           .includes(termo) ||
+  //         item.statusLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.etapaAtualLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.dataSolicitacao?.includes(termo) ||
+  //         item.dataAgendada?.includes(termo),
+  //     );
+  //   }
+
+  //   this.dados = dadosFiltrados;
+  //   this.paginaAtual = 1;
+  // }
+
   aplicarFiltroStatus(): void {
     let dadosFiltrados = [...this.dadosTodos];
 
@@ -874,6 +914,13 @@ export class ExamesComponent implements OnInit {
     if (this.statusFiltro !== 'TODOS') {
       dadosFiltrados = dadosFiltrados.filter(
         (item) => item.status === this.statusFiltro,
+      );
+    }
+
+    // Filtro por categoria
+    if (this.statusCategorias !== 'TODOS') {
+      dadosFiltrados = dadosFiltrados.filter(
+        (item) => item.categoriaExame === this.statusCategorias,
       );
     }
 

@@ -160,6 +160,12 @@ export const listaPeriodoPratico = [
   { value: '1003', label: 'OFICIALIZAÇÃO' },
 ];
 
+export const listaCategorias = [
+  { value: 'TODOS', label: 'TODOS' },
+  ...listaPeriodo,
+  ...listaPeriodoPratico,
+];
+
 const grupoExames1 = [
   {
     grupoExame: '2026/2',
@@ -323,13 +329,12 @@ const grupoExames2 = [
   },
 ];
 
-
-  export const listaStatusFiltro = [
-    { value: 'TODOS', label: 'TODOS' },
-    { value: 'solicitado', label: 'SOLICITADO' },
-    { value: 'agendado', label: 'AGENDADO' },
-    { value: 'emAndamento', label: 'EM ANDAMENTO' },
-    { value: 'aprovado', label: 'APROVADO' },
-    { value: 'reprovado', label: 'REPROVADO' },
-    { value: 'cancelado', label: 'CANCELADO' },
-  ];
+export const listaStatusFiltro = [
+  { value: 'TODOS', label: 'TODOS' },
+  { value: 'solicitado', label: 'SOLICITADO' },
+  { value: 'agendado', label: 'AGENDADO' },
+  { value: 'emAndamento', label: 'EM ANDAMENTO' },
+  { value: 'aprovado', label: 'APROVADO' },
+  { value: 'reprovado', label: 'REPROVADO' },
+  { value: 'cancelado', label: 'CANCELADO' },
+];

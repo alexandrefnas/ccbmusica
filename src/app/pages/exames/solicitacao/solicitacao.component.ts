@@ -27,6 +27,7 @@ import {
   formatarDataString,
 } from '../../../../shared/shared.service';
 import {
+  listaCategorias,
   listaPeriodo,
   listaPeriodoPratico,
   listaStatusFiltro,
@@ -113,8 +114,10 @@ export class SolicitacaoComponent {
   listaPeriodo = listaPeriodo;
   listaPratico = listaPeriodoPratico;
   listaStatusFiltro = listaStatusFiltro;
+  listaCategorias = listaCategorias;
 
   statusFiltro = 'TODOS';
+  statusCategorias = 'TODOS';
   dadosTodos: any[] = [];
   gruposExames: GrupoExames[] = [];
 
@@ -578,6 +581,10 @@ export class SolicitacaoComponent {
     this.filtroStatusOp;
   }
 
+  aoSelecionarCategoriaFiltro(categoria: string): void {
+    this.statusCategorias = categoria || 'TODOS';
+    this.aplicarFiltroStatus();
+  }
   // aplicarFiltroStatus(): void {
   //   if (this.statusFiltro === 'TODOS') {
   //     this.dados = [...this.dadosTodos];
@@ -590,12 +597,48 @@ export class SolicitacaoComponent {
   //   this.paginaAtual = 1;
   // }
 
+  // aplicarFiltroStatus(): void {
+  //   let dadosFiltrados = [...this.dadosTodos];
+
+  //   if (this.statusFiltro !== 'TODOS') {
+  //     dadosFiltrados = dadosFiltrados.filter(
+  //       (item) => item.status === this.statusFiltro,
+  //     );
+  //   }
+
+  //   if (this.pesquisa.trim()) {
+  //     const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
+
+  //     dadosFiltrados = dadosFiltrados.filter(
+  //       (item) =>
+  //         item.nomeAluno?.includes(termo) ||
+  //         item.tipoExameLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.categoriaExameLabel
+  //           ?.toLocaleUpperCase('pt-BR')
+  //           .includes(termo) ||
+  //         item.statusLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.etapaAtualLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.dataSolicitacao?.includes(termo) ||
+  //         item.dataAgendada?.includes(termo),
+  //     );
+  //   }
+
+  //   this.dados = dadosFiltrados;
+  //   this.paginaAtual = 1;
+  // }
+
   aplicarFiltroStatus(): void {
     let dadosFiltrados = [...this.dadosTodos];
 
     if (this.statusFiltro !== 'TODOS') {
       dadosFiltrados = dadosFiltrados.filter(
         (item) => item.status === this.statusFiltro,
+      );
+    }
+
+    if (this.statusCategorias !== 'TODOS') {
+      dadosFiltrados = dadosFiltrados.filter(
+        (item) => item.categoriaExame === this.statusCategorias,
       );
     }
 

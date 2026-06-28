@@ -89,6 +89,15 @@
       />
     </div>
     <div style="width: 250px">
+      <tcx-select
+        [label]="'Categorias'"
+        [placeholder]="''"
+        [niveisLimitados]="listaCategorias"
+        [(ngModel)]="statusCategorias"
+        (valorMudou)="aoSelecionarCategoriaFiltro($event)"
+      />
+    </div>
+    <div style="width: 250px">
       <tcx-text
         label="Pesquisa..."
         type="text"
