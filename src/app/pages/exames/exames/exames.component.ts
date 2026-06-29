@@ -250,6 +250,10 @@ export class ExamesComponent implements OnInit {
       condicao: (item: any) => item.status === 'solicitado',
       estiloClasse: 'linha-aviso',
     },
+    {
+      condicao: (item: any) => item.status === 'emAndamento',
+      estiloClasse: 'linha-andamento',
+    },
   ];
 
   // dados: any[] = [];

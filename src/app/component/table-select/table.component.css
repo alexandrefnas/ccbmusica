@@ -76,6 +76,11 @@
   background-color: #fff9c4 !important;
   color: #8a6d3b;
 }
+
+.tabela tbody tr.linha-andamento td {
+  background-color: #e3f2fd !important;
+  color: #1565c0;
+}
 /* // */
 
 /* ===== ÚLTIMA LINHA SEM BORDA ===== */
