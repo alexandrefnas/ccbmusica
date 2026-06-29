@@ -2234,29 +2234,29 @@ export class ExamesComponent implements OnInit {
     }
   }
 
-  alterarNota(exame: Exames): void {
-    const etapasComNota = exame.etapas.filter((e) => e.nota !== null);
+  // alterarNota(exame: Exames): void {
+  //   const etapasComNota = exame.etapas.filter((e) => e.nota !== null);
 
-    if (!etapasComNota.length) {
-      this.snackBar.open('Nenhuma nota lançada para alterar.', 'Fechar', {
-        duration: 3000,
-      });
-      return;
-    }
+  //   if (!etapasComNota.length) {
+  //     this.snackBar.open('Nenhuma nota lançada para alterar.', 'Fechar', {
+  //       duration: 3000,
+  //     });
+  //     return;
+  //   }
 
-    const ultimaEtapaLancada = etapasComNota[etapasComNota.length - 1];
+  //   const ultimaEtapaLancada = etapasComNota[etapasComNota.length - 1];
 
-    this.exameSelecionado = exame;
-    this.etapaSelecionada = ultimaEtapaLancada;
+  //   this.exameSelecionado = exame;
+  //   this.etapaSelecionada = ultimaEtapaLancada;
 
-    this.notaForm.patchValue({
-      nota: ultimaEtapaLancada.nota,
-      professorLancamento:
-        ultimaEtapaLancada.professorLancamento || this.auth.usuario?.nome || '',
-    });
+  //   this.notaForm.patchValue({
+  //     nota: ultimaEtapaLancada.nota,
+  //     professorLancamento:
+  //       ultimaEtapaLancada.professorLancamento || this.auth.usuario?.nome || '',
+  //   });
 
-    this.mostrarModalNota = true;
-  }
+  //   this.mostrarModalNota = true;
+  // }
 
   // async excluirNota(): Promise<void> {
   //   if (!this.exameSelecionado || !this.etapaSelecionada) return;
@@ -2326,6 +2326,47 @@ export class ExamesComponent implements OnInit {
 
   //   this.fecharModalNota();
   // }
+
+  alterarNota(exame: ExameTabela): void {
+    const etapasComNota = exame.etapas.filter((e) => e.nota !== null);
+
+    if (!etapasComNota.length) {
+      this.snackBar.open('Nenhuma nota lançada para alterar.', 'Fechar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const ultimaEtapaLancada = etapasComNota[etapasComNota.length - 1];
+
+    const configEtapa = this.buscarAvaliacaoDoGrupo(
+      exame,
+      ultimaEtapaLancada.ordem,
+    );
+
+    if (!configEtapa) {
+      this.snackBar.open(
+        'Configuração da etapa não encontrada no grupo.',
+        'Fechar',
+        {
+          duration: 3000,
+        },
+      );
+      return;
+    }
+
+    this.exameSelecionado = exame;
+    this.etapaSelecionada = ultimaEtapaLancada;
+    this.configEtapaSelecionada = configEtapa;
+
+    this.notaForm.patchValue({
+      nota: ultimaEtapaLancada.nota,
+      professorLancamento:
+        ultimaEtapaLancada.professorLancamento || this.auth.usuario?.nome || '',
+    });
+
+    this.mostrarModalNota = true;
+  }
 
   async excluirNota(): Promise<void> {
     if (!this.exameSelecionado || !this.etapaSelecionada) return;
