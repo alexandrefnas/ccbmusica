@@ -762,8 +762,19 @@ export class ExamesComponent implements OnInit {
 
       const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
 
+      // const dadosExames = exames
+      //   .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
+      //   .map((exame) => {
       const dadosExames = exames
-        .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
+        .filter((exame) => {
+          const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
+
+          return (
+            idsAlunosPermitidos.includes(exame.idAluno) &&
+            !!grupo &&
+            grupo.concluido !== true
+          );
+        })
         .map((exame) => {
           const alunoFiltro = alunosPermitidos.find(
             (a) => a.id === exame.idAluno,
