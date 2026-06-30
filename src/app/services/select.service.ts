@@ -113,7 +113,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: false, create: false, update: false, delete: false },
-      logs: { read: true, create: true, update: true, delete: true },
+      logs: { read: false, create: true, update: true, delete: true },
     },
   },
 
@@ -137,7 +137,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: false, create: false, update: false, delete: false },
-      logs: { read: true, create: true, update: true, delete: true },
+      logs: { read: false, create: true, update: true, delete: true },
     },
   },
 };

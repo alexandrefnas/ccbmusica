@@ -868,8 +868,21 @@ export class AlunosComponent implements OnInit {
     return idade;
   }
 
+  // buttonClick(): void {
+  //   this.title = 'Cadastro Alunos';
+  //   this.mostrarModal = true;
+  // }
+
   buttonClick(): void {
     this.title = 'Cadastro Alunos';
+
+    this.dadosParaEditar = null;
+    this.dadosForms.reset();
+
+    if (this.auth.usuario?.perfil === 'admin') {
+      this.listaIgreja = [];
+    }
+
     this.mostrarModal = true;
   }
 
@@ -920,9 +933,22 @@ export class AlunosComponent implements OnInit {
     }
   }
 
+  // fecharModal() {
+  //   this.mostrarModal = false;
+  //   this.dadosForms.reset();
+  // }
+
   fecharModal() {
     this.mostrarModal = false;
     this.dadosForms.reset();
+
+    // Limpa o registro que estava sendo editado
+    this.dadosParaEditar = null;
+
+    // (opcional) restaura a lista de comuns do admin
+    if (this.auth.usuario?.perfil === 'admin') {
+      this.listaIgreja = [];
+    }
   }
 
   fecharHistoricoAluno(): void {
