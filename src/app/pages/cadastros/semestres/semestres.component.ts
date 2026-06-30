@@ -228,9 +228,64 @@ export class SemestresComponent {
     this.escutarMudancaIgreja();
   }
 
+  // carregarDados(): void {
+  //   this.firestoreService.getSemestres().subscribe((lista: GrupoExames[]) => {
+  //     this.dados = lista.map((item) => {
+  //       const comum =
+  //         this.listaIgrejaTodas.find((i) => i.value === item.idComum) ||
+  //         this.listaIgreja.find((i) => i.value === item.idComum);
+
+  //       const tipoExame = this.listaTipoExame.find(
+  //         (t) => t.value === (item as any).tipoExame,
+  //       );
+
+  //       const qtdPeriodos =
+  //         item.periodos?.reduce((total: number, periodo: any) => {
+  //           return total + (periodo.etapas?.length || 0);
+  //         }, 0) || 0;
+
+  //       const primeiraEtapa = item.periodos?.[0]?.etapas?.[0];
+
+  //       const dataTeorica =
+  //         primeiraEtapa?.avaliacao?.find((a: any) => a.nome === 'PARTE TEÓRICA')
+  //           ?.dataAvaliacao || '';
+
+  //       const dataPratica =
+  //         primeiraEtapa?.avaliacao?.find((a: any) => a.nome === 'PARTE PRÁTICA')
+  //           ?.dataAvaliacao || '';
+
+  //       const datas: string[] = [];
+
+  //       if (dataTeorica) {
+  //         datas.push(`${converterISOParaBR(dataTeorica)}`);
+  //       }
+
+  //       if (dataPratica) {
+  //         datas.push(`${converterISOParaBR(dataPratica)}`);
+  //       }
+
+  //       return {
+  //         ...item,
+  //         tipoExameLabel: tipoExame?.label || item.tipoExame || '',
+  //         comumLabel: comum?.label || '',
+  //         qtdPeriodos,
+  //         datasLabel: datas.join(' | '),
+  //         concluidoLabel: item.concluido ? 'CONCLUÍDO' : 'ABERTO',
+  //       };
+  //     });
+  //   });
+  // }
+
   carregarDados(): void {
     this.firestoreService.getSemestres().subscribe((lista: GrupoExames[]) => {
-      this.dados = lista.map((item) => {
+      const usuario = this.auth.usuario;
+
+      const listaPermitida =
+        usuario?.perfil === 'admin'
+          ? lista
+          : lista.filter((item) => item.idSetor === usuario?.idSetor);
+
+      this.dados = listaPermitida.map((item) => {
         const comum =
           this.listaIgrejaTodas.find((i) => i.value === item.idComum) ||
           this.listaIgreja.find((i) => i.value === item.idComum);
@@ -238,11 +293,6 @@ export class SemestresComponent {
         const tipoExame = this.listaTipoExame.find(
           (t) => t.value === (item as any).tipoExame,
         );
-
-        const qtdPeriodos =
-          item.periodos?.reduce((total: number, periodo: any) => {
-            return total + (periodo.etapas?.length || 0);
-          }, 0) || 0;
 
         const primeiraEtapa = item.periodos?.[0]?.etapas?.[0];
 
@@ -256,19 +306,13 @@ export class SemestresComponent {
 
         const datas: string[] = [];
 
-        if (dataTeorica) {
-          datas.push(`${converterISOParaBR(dataTeorica)}`);
-        }
-
-        if (dataPratica) {
-          datas.push(`${converterISOParaBR(dataPratica)}`);
-        }
+        if (dataTeorica) datas.push(converterISOParaBR(dataTeorica));
+        if (dataPratica) datas.push(converterISOParaBR(dataPratica));
 
         return {
           ...item,
           tipoExameLabel: tipoExame?.label || item.tipoExame || '',
           comumLabel: comum?.label || '',
-          qtdPeriodos,
           datasLabel: datas.join(' | '),
           concluidoLabel: item.concluido ? 'CONCLUÍDO' : 'ABERTO',
         };
