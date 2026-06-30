@@ -103,7 +103,7 @@
       ></tcx-table>
     </ng-container>
   </div>
-  <div class="paginacao" *ngIf="!modoHistorico">
+  <div class="paginacao" *ngIf="!modoHistorico && dados.length > itensPorPagina">
     <button
       class="buttons"
       (click)="paginaAnterior()"
