@@ -212,10 +212,12 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
             return;
           }
 
-          const percentual =
-            (Number(etapa.nota) / Number(configEtapa.notaMaxima)) * 100;
+          const nota = Number(etapa.nota);
+          const notaMaxima = Number(configEtapa.notaMaxima);
 
-          linha[campo] = `${percentual.toFixed(1)}%`;
+          const percentual = (nota / notaMaxima) * 100;
+
+          linha[campo] = `${nota.toFixed(0)} (${percentual.toFixed(1)}%)`;
         });
 
         return linha;
