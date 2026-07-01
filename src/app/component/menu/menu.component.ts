@@ -102,6 +102,12 @@ export class MenuComponent {
       tabela: 'exames',
       icon: 'bi bi-clipboard-data',
     },
+    {
+      label: 'Notas Exames',
+      rota: '/relatorio-notas-grupo-exame',
+      tabela: 'exames',
+      icon: 'bi bi-clipboard-data',
+    },
   ];
 
   avaliacoes = [

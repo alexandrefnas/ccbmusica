@@ -104,6 +104,15 @@ export const routes: Routes = [
         data: { tabela: 'exames', tipo: 'read' },
       },
       {
+        path: 'relatorio-notas-grupo-exame',
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-notas-grupo-exame/relatorio-notas-grupo-exame.component').then(
+            (m) => m.RelatorioNotasGrupoExameComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'exames', tipo: 'read' },
+      },
+      {
         path: 'as',
         loadComponent: () =>
           import('./pages/configuracoes/alterar-senha/alterar-senha.component').then(

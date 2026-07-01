@@ -1,0 +1,65 @@
+<div class="container__tela">
+  <div id="tela__barra-menu">
+    <div id="barra-titulo__container">
+      <h2>RELATÓRIO NOTAS GRUPO EXAME</h2>
+    </div>
+
+    <div class="button-container">
+      <button
+        class="buttons"
+        type="button"
+        title="Gerar PDF"
+        *ngIf="grupoSelecionado && dados.length"
+        (click)="gerarPdf()"
+      >
+        <i class="bi bi-file-earmark-pdf"></i> PDF
+      </button>
+
+      <button
+        class="buttons"
+        type="button"
+        title="Filtro"
+        (click)="(filtroStatusOp)"
+      >
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="filtros" *ngIf="filtroStatus">
+    <div class="filtro-grupo">
+      <tcx-select
+        [label]="'Grupo de Exame'"
+        [placeholder]="''"
+        [niveisLimitados]="listaGrupos"
+        [(ngModel)]="idGrupoSelecionado"
+        (valorMudou)="aoSelecionarGrupo($event)"
+      />
+    </div>
+  </div>
+
+  <div id="tela__container-tabela" *ngIf="grupoSelecionado">
+    <div class="grupo-info">
+      <strong>{{ grupoSelecionado.grupoExame }}</strong>
+      <span>{{ grupoSelecionado.descricao }}</span>
+    </div>
+
+    <div class="bloco-relatorio">
+      <h3>Notas percentuais por aluno</h3>
+
+      <tcx-table
+        [colunas]="colunas"
+        [colunasLabels]="labels"
+        [dados]="dados"
+        [tamanhosColunas]="tamanhosColunas"
+        [alinhamentosColunasTitulo]="alinhamentoTitulo"
+        [alinhamentosColunas]="alinhamentoColuna"
+        [mostrarAcoes]="false"
+      />
+    </div>
+  </div>
+
+  <div class="sem-dados" *ngIf="!grupoSelecionado">
+    Selecione um grupo de exame para gerar o relatório.
+  </div>
+</div>
