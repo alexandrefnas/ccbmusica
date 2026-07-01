@@ -51,6 +51,8 @@ import { AlertService } from '../../../services/alert.service';
 
 type ExameTabela = Exames & {
   nomeAluno?: string;
+  comum?: string;
+
   idadeAluno?: string;
   instrumentoAluno?: string;
   afinacaoAluno?: string;
@@ -179,6 +181,7 @@ export class ExamesComponent implements OnInit {
   camposColunas = [
     'nomeAluno',
     'idadeAluno',
+    'comum',
     'tipoExameLabel',
     'categoriaExameLabel',
     'dataSolicitacao',
@@ -190,6 +193,7 @@ export class ExamesComponent implements OnInit {
   tituloColunas = {
     nomeAluno: 'Aluno',
     idadeAluno: 'Idade',
+    comum: 'Comum',
     tipoExameLabel: 'Exame',
     categoriaExameLabel: 'Categoria',
     dataSolicitacao: 'Solicitação',
@@ -201,6 +205,7 @@ export class ExamesComponent implements OnInit {
   alinhamentoColunaTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'center',
     idadeAluno: 'center',
+    comum: 'center',
     tipoExameLabel: 'center',
     categoriaExameLabel: 'center',
     dataSolicitacao: 'center',
@@ -212,6 +217,7 @@ export class ExamesComponent implements OnInit {
   alinhamentoColuna: { [coluna: string]: 'left' | 'center' | 'right' } = {
     nomeAluno: 'left',
     idadeAluno: 'center',
+    comum: 'left',
     tipoExameLabel: 'center',
     categoriaExameLabel: 'center',
     dataSolicitacao: 'center',
@@ -223,7 +229,7 @@ export class ExamesComponent implements OnInit {
   tamanhoColunas = {
     nomeAluno: { width: '24%', minWidth: '200px' },
     idadeAluno: { width: '6%', minWidth: '60px' },
-
+    comum: { width: '18%', minWidth: '180px' },
     tipoExameLabel: { width: '14%' },
     categoriaExameLabel: { width: '18%', minWidth: '200px' },
     dataSolicitacao: { width: '11%' },
@@ -746,8 +752,9 @@ export class ExamesComponent implements OnInit {
     combineLatest([
       this.firestoreService.getExames(),
       this.firestoreService.getCandidato(),
+      this.firestoreService.getIgrejas(),
       this.firestoreService.getSemestres(),
-    ]).subscribe(([exames, alunos, grupos]) => {
+    ]).subscribe(([exames, alunos, igrejas, grupos]) => {
       this.gruposExames = grupos;
 
       if (!this.auth.temPermissao('exames', 'read')) {
@@ -771,8 +778,8 @@ export class ExamesComponent implements OnInit {
 
           return (
             idsAlunosPermitidos.includes(exame.idAluno) &&
-            !!grupo &&
-            grupo.concluido !== true
+            (exame.status === 'solicitado' ||
+              (!!grupo && grupo.concluido !== true))
           );
         })
         .map((exame) => {
@@ -780,6 +787,7 @@ export class ExamesComponent implements OnInit {
             (a) => a.id === exame.idAluno,
           );
 
+          const comum = igrejas.find((i) => i.id === alunoFiltro?.idComum);
           const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
             exame,
             exame.etapaAtual,
@@ -797,6 +805,7 @@ export class ExamesComponent implements OnInit {
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
               'ALUNO NÃO CADASTRADO',
+            comum: comum?.nomeCongregacao?.toLocaleUpperCase('pt-BR') || '',
             tipoExameLabel: this.buscarLabel(
               this.listaTipoExame,
               exame.tipoExame,
@@ -947,6 +956,7 @@ export class ExamesComponent implements OnInit {
         (item) =>
           item.nomeAluno?.includes(termo) ||
           item.idadeAluno?.includes(termo) ||
+          item.comum?.includes(termo) ||
           item.tipoExameLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
           item.categoriaExameLabel
             ?.toLocaleUpperCase('pt-BR')
