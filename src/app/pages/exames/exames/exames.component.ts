@@ -2022,18 +2022,22 @@ export class ExamesComponent implements OnInit {
 
     this.aceiteForm.reset();
 
-    this.listaGrupoExamesFiltrada = this.gruposExames
-      .filter(
-        (grupo) =>
-          !grupo.concluido &&
-          this.examesSelecionados.every((exame) =>
-            this.grupoCompativelComExame(grupo, exame),
-          ),
-      )
-      .map((g) => ({
-        value: g.id!,
-        label: `${g.grupoExame} - ${g.descricao}`,
-      }));
+this.listaGrupoExamesFiltrada = this.gruposExames
+  .filter(
+    (grupo) =>
+      !grupo.concluido &&
+      this.auth.temAcessoAoRegistro({
+        idSetor: grupo.idSetor,
+        idComum: grupo.idComum,
+      }) &&
+      this.examesSelecionados.every((exame) =>
+        this.grupoCompativelComExame(grupo, exame),
+      ),
+  )
+  .map((g) => ({
+    value: g.id!,
+    label: `${g.grupoExame} - ${g.descricao}`,
+  }));
 
     if (!this.listaGrupoExamesFiltrada.length) {
       this.snackBar.open(
