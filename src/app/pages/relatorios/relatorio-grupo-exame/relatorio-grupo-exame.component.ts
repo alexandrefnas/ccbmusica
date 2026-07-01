@@ -15,6 +15,7 @@ import {
 } from '../../../services/select.service';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { TableComponent } from '../../../component/table/table.component';
+import { AuthService } from '../../../services/auth.service';
 
 type Resumo = {
   total: number;
@@ -41,7 +42,10 @@ type ResumoIgreja = Resumo & {
   styleUrl: './relatorio-grupo-exame.component.css',
 })
 export class RelatorioGrupoExameComponent implements OnInit {
-  constructor(private firestoreService: FirestoreService) {}
+  constructor(
+    private firestoreService: FirestoreService,
+    private auth: AuthService,
+  ) {}
   filtroStatus = true;
   listaGrupos: { value: string; label: string }[] = [];
   grupos: GrupoExames[] = [];
@@ -124,9 +128,17 @@ export class RelatorioGrupoExameComponent implements OnInit {
 
   carregarGrupos(): void {
     this.firestoreService.getSemestres().subscribe((grupos) => {
-      this.grupos = grupos;
+      this.grupos =
+        this.auth.usuario?.perfil === 'admin'
+          ? grupos
+          : grupos.filter((grupo) =>
+              this.auth.temAcessoAoRegistro({
+                idSetor: grupo.idSetor,
+                idComum: grupo.idComum,
+              }),
+            );
 
-      this.listaGrupos = grupos
+      this.listaGrupos = this.grupos
         .map((g) => ({
           value: g.id!,
           label: `${g.grupoExame} - ${g.descricao}`,
@@ -157,15 +169,24 @@ export class RelatorioGrupoExameComponent implements OnInit {
       this.firestoreService.getCandidato(),
       this.firestoreService.getIgrejas(),
     ]).subscribe(([exames, alunos, igrejas]) => {
+      const alunosPermitidos =
+        this.auth.usuario?.perfil === 'admin'
+          ? alunos
+          : alunos.filter((aluno) => this.auth.temAcessoAoRegistro(aluno));
+
+      const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
+
       const examesGrupo = exames.filter(
-        (e) => e.idGrupoExame === this.idGrupoSelecionado,
+        (e) =>
+          e.idGrupoExame === this.idGrupoSelecionado &&
+          idsAlunosPermitidos.includes(e.idAluno),
       );
 
       this.resumoGeral = this.contarResumo(examesGrupo);
       this.resumoPorNivel = this.montarResumoPorNivel(examesGrupo);
       this.resumoPorIgreja = this.montarResumoPorIgreja(
         examesGrupo,
-        alunos,
+        alunosPermitidos,
         igrejas,
       );
     });
@@ -311,129 +332,76 @@ export class RelatorioGrupoExameComponent implements OnInit {
     this.resumoPorIgreja = [];
   }
 
-async gerarPdf(): Promise<void> {
-  if (!this.grupoSelecionado) return;
+  async gerarPdf(): Promise<void> {
+    if (!this.grupoSelecionado) return;
 
-  const { default: jsPDF } = await import('jspdf');
-  const autoTableModule = await import('jspdf-autotable');
-  const autoTable = autoTableModule.default;
+    const { default: jsPDF } = await import('jspdf');
+    const autoTableModule = await import('jspdf-autotable');
+    const autoTable = autoTableModule.default;
 
-  const doc = new jsPDF('p', 'mm', 'a4');
-  if (!this.grupoSelecionado) return;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    if (!this.grupoSelecionado) return;
 
-  const margem = 12;
-  let y = 14;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text('RELATÓRIO GRUPO EXAME', margem, y);
-
-  y += 8;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.text(`Grupo: ${this.grupoSelecionado.grupoExame}`, margem, y);
-
-  y += 5;
-  doc.text(`Descrição: ${this.grupoSelecionado.descricao}`, margem, y);
-
-  y += 8;
-
-  autoTable(doc, {
-    startY: y,
-    head: [['Total', 'Aprovados', 'Reprovados', 'Cancelados', '% Aprovação']],
-    body: [[
-      this.resumoGeral.total,
-      this.resumoGeral.aprovado,
-      this.resumoGeral.reprovado,
-      this.resumoGeral.cancelado,
-      this.percentualAprovacao(),
-    ]],
-    theme: 'grid',
-    styles: {
-      fontSize: 9,
-      halign: 'center',
-    },
-    headStyles: {
-      fillColor: [244, 246, 249],
-      textColor: [40, 40, 40],
-    },
-  });
-
-  y = (doc as any).lastAutoTable.finalY + 10;
-
-  autoTable(doc, {
-    startY: y,
-    head: [['Resultado por nível', 'Total', 'Aprovados', 'Reprovados', 'Cancelados']],
-    body: this.resumoPorNivel.map((item) => [
-      item.categoriaExameLabel,
-      item.total,
-      item.aprovado,
-      item.reprovado,
-      item.cancelado,
-    ]),
-    theme: 'grid',
-    styles: {
-      fontSize: 8,
-    },
-    headStyles: {
-      fillColor: [244, 246, 249],
-      textColor: [40, 40, 40],
-    },
-    columnStyles: {
-      0: { halign: 'left' },
-      1: { halign: 'center' },
-      2: { halign: 'center' },
-      3: { halign: 'center' },
-      4: { halign: 'center' },
-    },
-  });
-
-  y = (doc as any).lastAutoTable.finalY + 10;
-
-  autoTable(doc, {
-    startY: y,
-    head: [['Resultado por comum', 'Total', 'Aprovados', 'Reprovados', 'Cancelados']],
-    body: this.resumoPorIgreja.map((item) => [
-      item.nomeComum,
-      item.total,
-      item.aprovado,
-      item.reprovado,
-      item.cancelado,
-    ]),
-    theme: 'grid',
-    styles: {
-      fontSize: 8,
-    },
-    headStyles: {
-      fillColor: [244, 246, 249],
-      textColor: [40, 40, 40],
-    },
-    columnStyles: {
-      0: { halign: 'left' },
-      1: { halign: 'center' },
-      2: { halign: 'center' },
-      3: { halign: 'center' },
-      4: { halign: 'center' },
-    },
-  });
-
-  this.resumoPorIgreja.forEach((igreja) => {
-    doc.addPage();
+    const margem = 12;
+    let y = 14;
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text(`Detalhamento - ${igreja.nomeComum}`, margem, 14);
+    doc.setFontSize(14);
+    doc.text('RELATÓRIO GRUPO EXAME', margem, y);
+
+    y += 8;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Grupo: ${this.grupoSelecionado.grupoExame}`, margem, y);
+
+    y += 5;
+    doc.text(`Descrição: ${this.grupoSelecionado.descricao}`, margem, y);
+
+    y += 8;
 
     autoTable(doc, {
-      startY: 22,
-      head: [['Nível', 'Total', 'Aprovados', 'Reprovados', 'Cancelados']],
-      body: igreja.niveis.map((nivel) => [
-        nivel.categoriaExameLabel,
-        nivel.total,
-        nivel.aprovado,
-        nivel.reprovado,
-        nivel.cancelado,
+      startY: y,
+      head: [['Total', 'Aprovados', 'Reprovados', 'Cancelados', '% Aprovação']],
+      body: [
+        [
+          this.resumoGeral.total,
+          this.resumoGeral.aprovado,
+          this.resumoGeral.reprovado,
+          this.resumoGeral.cancelado,
+          this.percentualAprovacao(),
+        ],
+      ],
+      theme: 'grid',
+      styles: {
+        fontSize: 9,
+        halign: 'center',
+      },
+      headStyles: {
+        fillColor: [244, 246, 249],
+        textColor: [40, 40, 40],
+      },
+    });
+
+    y = (doc as any).lastAutoTable.finalY + 10;
+
+    autoTable(doc, {
+      startY: y,
+      head: [
+        [
+          'Resultado por nível',
+          'Total',
+          'Aprovados',
+          'Reprovados',
+          'Cancelados',
+        ],
+      ],
+      body: this.resumoPorNivel.map((item) => [
+        item.categoriaExameLabel,
+        item.total,
+        item.aprovado,
+        item.reprovado,
+        item.cancelado,
       ]),
       theme: 'grid',
       styles: {
@@ -451,13 +419,85 @@ async gerarPdf(): Promise<void> {
         4: { halign: 'center' },
       },
     });
-  });
 
-  const nomeArquivo = `relatorio-grupo-exame-${this.grupoSelecionado.grupoExame}`
-    .toLowerCase()
-    .replaceAll('/', '-')
-    .replaceAll(' ', '-');
+    y = (doc as any).lastAutoTable.finalY + 10;
 
-  doc.save(`${nomeArquivo}.pdf`);
-}
+    autoTable(doc, {
+      startY: y,
+      head: [
+        [
+          'Resultado por comum',
+          'Total',
+          'Aprovados',
+          'Reprovados',
+          'Cancelados',
+        ],
+      ],
+      body: this.resumoPorIgreja.map((item) => [
+        item.nomeComum,
+        item.total,
+        item.aprovado,
+        item.reprovado,
+        item.cancelado,
+      ]),
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+      },
+      headStyles: {
+        fillColor: [244, 246, 249],
+        textColor: [40, 40, 40],
+      },
+      columnStyles: {
+        0: { halign: 'left' },
+        1: { halign: 'center' },
+        2: { halign: 'center' },
+        3: { halign: 'center' },
+        4: { halign: 'center' },
+      },
+    });
+
+    this.resumoPorIgreja.forEach((igreja) => {
+      doc.addPage();
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text(`Detalhamento - ${igreja.nomeComum}`, margem, 14);
+
+      autoTable(doc, {
+        startY: 22,
+        head: [['Nível', 'Total', 'Aprovados', 'Reprovados', 'Cancelados']],
+        body: igreja.niveis.map((nivel) => [
+          nivel.categoriaExameLabel,
+          nivel.total,
+          nivel.aprovado,
+          nivel.reprovado,
+          nivel.cancelado,
+        ]),
+        theme: 'grid',
+        styles: {
+          fontSize: 8,
+        },
+        headStyles: {
+          fillColor: [244, 246, 249],
+          textColor: [40, 40, 40],
+        },
+        columnStyles: {
+          0: { halign: 'left' },
+          1: { halign: 'center' },
+          2: { halign: 'center' },
+          3: { halign: 'center' },
+          4: { halign: 'center' },
+        },
+      });
+    });
+
+    const nomeArquivo =
+      `relatorio-grupo-exame-${this.grupoSelecionado.grupoExame}`
+        .toLowerCase()
+        .replaceAll('/', '-')
+        .replaceAll(' ', '-');
+
+    doc.save(`${nomeArquivo}.pdf`);
+  }
 }
