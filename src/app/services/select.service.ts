@@ -71,7 +71,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       grupoExames: { read: true, create: true, update: true, delete: false },
       solicitacoes: { read: true, create: true, update: true, delete: true },
       exames: { read: true, create: true, update: true, delete: false },
-      igrejas: { read: true, create: false, update: false, delete: false },
+      igrejas: { read: true, create: true, update: true, delete: false },
       instrumentos: { read: true, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: true, create: true, update: true, delete: false },

@@ -1,151 +1,535 @@
 <div class="container__tela">
-  <div id="tela__barra-menu">
-    <div id="barra-titulo__container">
-      <h2 style="font-weight: normal; color: grey">
-        EXAMES - ({{ primeiraMaiuscula(statusFiltro) }})
-      </h2>
+  @if (tabelaVisivel) {
+    <div id="tela__barra-menu">
+      <div id="barra-titulo__container">
+        <h2 style="font-weight: normal; color: grey">
+          EXAMES - ({{ primeiraMaiuscula(statusFiltro) }})
+        </h2>
+      </div>
+
+      <div class="button-container" *ngIf="liberaCriar">
+        <!-- <div class="button-container" *ngIf="liberaEditar"> -->
+        <button
+          class="buttons"
+          type="button"
+          title="Editar Solicitação."
+          *ngIf="podeEditar"
+          (click)="editarSelecionado()"
+        >
+          <i class="bi bi-pencil"></i>
+        </button>
+
+        <button
+          class="buttons"
+          type="button"
+          title="Alterar Nota."
+          *ngIf="podeAlterarNota"
+          (click)="alterarNotaSelecionado()"
+        >
+          <i class="bi bi-repeat"></i>
+        </button>
+
+        <button
+          class="buttons"
+          type="button"
+          title="Aceitar Selecionados."
+          *ngIf="podeAceitarSelecionados"
+          (click)="abrirAceiteEmLote()"
+        >
+          <i class="bi bi-calendar-check"></i>
+        </button>
+        <button
+          class="buttons"
+          type="button"
+          title="Nova Solicitação."
+          (click)="buttonClick()"
+        >
+          <i class="bi bi-file-earmark-plus"></i> Novo
+        </button>
+        <button
+          class="buttons"
+          type="button"
+          title="Cancelar Solicitação."
+          *ngIf="podeCancelar"
+          (click)="cancelarSelecionado()"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+
+        <button
+          class="buttons"
+          type="button"
+          title="Excluir Solicitação."
+          *ngIf="podeExcluir"
+          (click)="excluirSelecionado()"
+        >
+          <i class="bi bi-trash"></i>
+        </button>
+        <button
+          class="buttons"
+          type="button"
+          title="Filtro Status"
+          (click)="(filtroStatusOp)"
+        >
+          <i class="bi bi-search"></i>
+        </button>
+        <!-- </div> -->
+      </div>
+    </div>
+    <div
+      style="display: flex; gap: 15px; width: 100%; padding-top: 10px"
+      *ngIf="filtroStatus"
+    >
+      <div style="width: 250px">
+        <tcx-select
+          [label]="'Filtro Status'"
+          [placeholder]="''"
+          [niveisLimitados]="listaStatusFiltro"
+          [(ngModel)]="statusFiltro"
+          (valorMudou)="aoSelecionarStatusFiltro($event)"
+        />
+      </div>
+      <div style="width: 250px">
+        <tcx-select
+          [label]="'Categorias'"
+          [placeholder]="''"
+          [niveisLimitados]="listaCategorias"
+          [(ngModel)]="statusCategorias"
+          (valorMudou)="aoSelecionarCategoriaFiltro($event)"
+        />
+      </div>
+      <div style="width: 250px">
+        <tcx-text
+          label="Pesquisa..."
+          type="text"
+          [(value)]="pesquisa"
+          (valueChange)="buscarPesquisa()"
+        />
+      </div>
     </div>
 
-    <div class="button-container" *ngIf="liberaCriar">
-      <!-- <div class="button-container" *ngIf="liberaEditar"> -->
-      <button
-        class="buttons"
-        type="button"
-        title="Editar Solicitação."
-        *ngIf="podeEditar"
-        (click)="editarSelecionado()"
-      >
-        <i class="bi bi-pencil"></i>
-      </button>
-
-      <button
-        class="buttons"
-        type="button"
-        title="Alterar Nota."
-        *ngIf="podeAlterarNota"
-        (click)="alterarNotaSelecionado()"
-      >
-        <i class="bi bi-repeat"></i>
-      </button>
-
-      <button
-        class="buttons"
-        type="button"
-        title="Aceitar Selecionados."
-        *ngIf="podeAceitarSelecionados"
-        (click)="abrirAceiteEmLote()"
-      >
-        <i class="bi bi-calendar-check"></i>
-      </button>
-      <button
-        class="buttons"
-        type="button"
-        title="Nova Solicitação."
-        (click)="buttonClick()"
-      >
-        <i class="bi bi-file-earmark-plus"></i> Novo
-      </button>
-      <button
-        class="buttons"
-        type="button"
-        title="Cancelar Solicitação."
-        *ngIf="podeCancelar"
-        (click)="cancelarSelecionado()"
-      >
-        <i class="bi bi-x-lg"></i>
-      </button>
-
-      <button
-        class="buttons"
-        type="button"
-        title="Excluir Solicitação."
-        *ngIf="podeExcluir"
-        (click)="excluirSelecionado()"
-      >
-        <i class="bi bi-trash"></i>
-      </button>
-      <button
-        class="buttons"
-        type="button"
-        title="Filtro Status"
-        (click)="(filtroStatusOp)"
-      >
-        <i class="bi bi-search"></i>
-      </button>
-      <!-- </div> -->
-    </div>
-  </div>
-  <div
-    style="display: flex; gap: 15px; width: 100%; padding-top: 10px"
-    *ngIf="filtroStatus"
-  >
-    <div style="width: 250px">
-      <tcx-select
-        [label]="'Filtro Status'"
-        [placeholder]="''"
-        [niveisLimitados]="listaStatusFiltro"
-        [(ngModel)]="statusFiltro"
-        (valorMudou)="aoSelecionarStatusFiltro($event)"
+    <div id="tela__container-tabela">
+      <tcx-table-select
+        [colunas]="camposColunas"
+        [colunasLabels]="tituloColunas"
+        [dados]="dadosPaginados"
+        [mostrarAcoes]="liberaAcoes"
+        [acoesTabela]="acoes"
+        [tamanhosColunas]="tamanhoColunas"
+        [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+        [alinhamentosColunas]="alinhamentoColuna"
+        [destacarLinhas]="regrasDestaque"
+        [permitirSelecao]="true"
+        (selecionadosChange)="aoSelecionarExames($event)"
       />
     </div>
-    <div style="width: 250px">
-      <tcx-select
-        [label]="'Categorias'"
-        [placeholder]="''"
-        [niveisLimitados]="listaCategorias"
-        [(ngModel)]="statusCategorias"
-        (valorMudou)="aoSelecionarCategoriaFiltro($event)"
-      />
-    </div>
-    <div style="width: 250px">
-      <tcx-text
-        label="Pesquisa..."
-        type="text"
-        [(value)]="pesquisa"
-        (valueChange)="buscarPesquisa()"
-      />
-    </div>
-  </div>
 
-  <div id="tela__container-tabela">
-    <tcx-table-select
-      [colunas]="camposColunas"
-      [colunasLabels]="tituloColunas"
-      [dados]="dadosPaginados"
-      [mostrarAcoes]="liberaAcoes"
-      [acoesTabela]="acoes"
-      [tamanhosColunas]="tamanhoColunas"
-      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
-      [alinhamentosColunas]="alinhamentoColuna"
-      [destacarLinhas]="regrasDestaque"
-      [permitirSelecao]="true"
-      (selecionadosChange)="aoSelecionarExames($event)"
-    />
     <!-- /* [podeSelecionar]="podeSelecionarExame" */ -->
-  </div>
-  <div class="paginacao" *ngIf="dados.length > itensPorPagina">
-    <button
-      class="buttons"
-      (click)="paginaAnterior()"
-      [disabled]="paginaAtual === 1"
-    >
-      <i class="bi bi-chevron-left"></i>
-    </button>
 
-    <span>
-      Página {{ paginaAtual }} de {{ totalPaginas }} ({{ dados.length }}
-      registros)
-    </span>
+    <div class="paginacao" *ngIf="dados.length > itensPorPagina">
+      <button
+        class="buttons"
+        (click)="paginaAnterior()"
+        [disabled]="paginaAtual === 1"
+      >
+        <i class="bi bi-chevron-left"></i>
+      </button>
 
-    <button
-      class="buttons"
-      (click)="proximaPagina()"
-      [disabled]="paginaAtual >= totalPaginas"
-    >
-      <i class="bi bi-chevron-right"></i>
-    </button>
-  </div>
+      <span>
+        Página {{ paginaAtual }} de {{ totalPaginas }} ({{ dados.length }}
+        registros)
+      </span>
 
+      <button
+        class="buttons"
+        (click)="proximaPagina()"
+        [disabled]="paginaAtual >= totalPaginas"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  } @else {
+    <div class="container__ficha-avaliacao">
+      <div id="tela__barra-menu">
+        <div id="barra-titulo__container">
+          <h2 style="font-weight: normal; color: grey">
+            Avaliação Prática
+          </h2>
+        </div>
+      </div>
+      <form [formGroup]="notaForm" class="ficha-avaliacao">
+        <table class="ficha-tabela">
+          <tr>
+            <th colspan="2" class="titulo-verde">
+              FICHA DE AVALIAÇÃO – PRÁTICA DE SOLFEJO
+            </th>
+          </tr>
+          <tr>
+            <td class="label">Nome do Candidato</td>
+            <td>{{ exameSelecionado?.nomeAluno }}</td>
+          </tr>
+          <tr>
+            <td class="label">Comum / Congregação</td>
+            <td>{{ exameSelecionado?.comum }}</td>
+          </tr>
+          <tr>
+            <td class="label">Período</td>
+            <td>{{ exameSelecionado?.categoriaExameLabel }}</td>
+          </tr>
+          <tr>
+            <td class="label">Data</td>
+            <td>
+              {{
+                exameSelecionado?.dataAgendada ||
+                  exameSelecionado?.dataSolicitacao
+              }}
+            </td>
+          </tr>
+        </table>
+
+        <table class="ficha-tabela">
+          <tr>
+            <th colspan="8" class="titulo-cinza">Preenchido pelo Avaliador</th>
+          </tr>
+          <tr class="titulo-verde">
+            <th>Critério</th>
+            <th>(0)</th>
+            <th>(5)</th>
+            <th>(6)</th>
+            <th>(7)</th>
+            <th>(8)</th>
+            <th>(9)</th>
+            <th>(10)</th>
+          </tr>
+
+          <tr>
+            <td>Pulsação</td>
+            <td>
+              <input
+                type="radio"
+                name="pulsacao"
+                [value]="0"
+                [(ngModel)]="avaliacaoFicha.pulsacao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="pulsacao"
+                [value]="5"
+                [(ngModel)]="avaliacaoFicha.pulsacao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="pulsacao"
+                [value]="6"
+                [(ngModel)]="avaliacaoFicha.pulsacao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="pulsacao"
+                [value]="7"
+                [(ngModel)]="avaliacaoFicha.pulsacao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="pulsacao"
+                [value]="8"
+                [(ngModel)]="avaliacaoFicha.pulsacao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="pulsacao"
+                [value]="9"
+                [(ngModel)]="avaliacaoFicha.pulsacao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="pulsacao"
+                [value]="10"
+                [(ngModel)]="avaliacaoFicha.pulsacao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td>Leitura Musical</td>
+            <td>
+              <input
+                type="radio"
+                name="leituraMusical"
+                [value]="0"
+                [(ngModel)]="avaliacaoFicha.leituraMusical"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="leituraMusical"
+                [value]="5"
+                [(ngModel)]="avaliacaoFicha.leituraMusical"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="leituraMusical"
+                [value]="6"
+                [(ngModel)]="avaliacaoFicha.leituraMusical"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="leituraMusical"
+                [value]="7"
+                [(ngModel)]="avaliacaoFicha.leituraMusical"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="leituraMusical"
+                [value]="8"
+                [(ngModel)]="avaliacaoFicha.leituraMusical"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="leituraMusical"
+                [value]="9"
+                [(ngModel)]="avaliacaoFicha.leituraMusical"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="leituraMusical"
+                [value]="10"
+                [(ngModel)]="avaliacaoFicha.leituraMusical"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td>Movimento de Condução</td>
+            <td>
+              <input
+                type="radio"
+                name="movimentoConducao"
+                [value]="0"
+                [(ngModel)]="avaliacaoFicha.movimentoConducao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="movimentoConducao"
+                [value]="5"
+                [(ngModel)]="avaliacaoFicha.movimentoConducao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="movimentoConducao"
+                [value]="6"
+                [(ngModel)]="avaliacaoFicha.movimentoConducao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="movimentoConducao"
+                [value]="7"
+                [(ngModel)]="avaliacaoFicha.movimentoConducao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="movimentoConducao"
+                [value]="8"
+                [(ngModel)]="avaliacaoFicha.movimentoConducao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="movimentoConducao"
+                [value]="9"
+                [(ngModel)]="avaliacaoFicha.movimentoConducao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="movimentoConducao"
+                [value]="10"
+                [(ngModel)]="avaliacaoFicha.movimentoConducao"
+                [ngModelOptions]="{ standalone: true }"
+                (change)="calcularNotaFicha()"
+              />
+            </td>
+          </tr>
+        </table>
+
+        <div class="ficha-grid">
+          <table class="ficha-tabela">
+            <tr>
+              <th colspan="3" class="titulo-verde">
+                DISTRIBUIÇÃO DA PONTUAÇÃO
+              </th>
+            </tr>
+            <tr>
+              <th>Avaliação</th>
+              <th>Pontos</th>
+              <th>Descrição</th>
+            </tr>
+            <tr>
+              <td>Não Atingido</td>
+              <td>0</td>
+              <td>Não demonstrou domínio mínimo.</td>
+            </tr>
+            <tr>
+              <td>Inicial</td>
+              <td>5</td>
+              <td>Apresentou conceitos básicos, mas com muitas lacunas.</td>
+            </tr>
+            <tr>
+              <td>Em Desenvolvimento</td>
+              <td>6</td>
+              <td>Próximo do mínimo exigido, necessita de ajustes pontuais.</td>
+            </tr>
+            <tr>
+              <td>Regular</td>
+              <td>7</td>
+              <td>Aprovado, porém precisa aprimorar.</td>
+            </tr>
+            <tr>
+              <td>Bom</td>
+              <td>8</td>
+              <td>Bom domínio do conteúdo avaliado.</td>
+            </tr>
+            <tr>
+              <td>Ótimo</td>
+              <td>10</td>
+              <td>Desempenho acima da média.</td>
+            </tr>
+          </table>
+
+          <table class="ficha-tabela resultado">
+            <!-- <tr>
+              <th colspan="2" class="titulo-cinza">
+                Preenchido pelo Secretário
+              </th>
+            </tr> -->
+            <tr>
+              <th colspan="2" class="titulo-verde">RESULTADO</th>
+            </tr>
+            <tr>
+              <td class="label">Soma dos Pontos</td>
+              <td>{{ somaPontosFicha || "" }}</td>
+            </tr>
+            <tr>
+              <td class="label">Pontuação Final<br />(Soma ÷ 3)</td>
+              <td>{{ pontuacaoFinalFicha || "" }}</td>
+            </tr>
+            <tr>
+              <td class="label">Resultado</td>
+              <td>{{ resultadoFicha || "" }}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="linha">
+          <div class="input-text">
+            <tcx-text
+              label="Professor"
+              type="text"
+              formControlName="professorLancamento"
+              [required]="true"
+              errorMessage="Campo obrigatório"
+            />
+          </div>
+        </div>
+
+        <div class="linha">
+          <div class="input-text">
+            <label class="label-textarea">Observações</label>
+            <textarea
+              class="textarea-observacao"
+              formControlName="observacaoLancamento"
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="linhaButton button-extra">
+      <div class="form__button">
+        <button class="buttons" type="button" (click)="voltarTabela()">
+          <i class="bi bi-arrow-left"></i> Voltar
+        </button>
+      </div>
+      <div class="form__button">
+        <button class="buttons" type="button" (click)="salvarNota()">
+          Salvar
+        </button>
+      </div>
+    </div>
+  }
   <!-- SOLICITAR/EDITAR EXAME -->
   <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
     <div class="templates__form">

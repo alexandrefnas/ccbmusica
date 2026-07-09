@@ -95,6 +95,7 @@ export class ExamesComponent implements OnInit {
     this.notaForm = this.fb.group({
       nota: [''],
       professorLancamento: ['', Validators.required],
+      observacaoLancamento: [''],
     });
 
     this.dadosForms = this.fb.group({
@@ -117,12 +118,18 @@ export class ExamesComponent implements OnInit {
     });
   }
 
+  //S9974cav2sz6Ne2M6UjB
   isMobile = window.innerWidth <= 576;
   converterISOParaBR = converterISOParaBR;
 
   title = 'EXAMES';
   mostrarModal = false;
   mostrarModalAceite = false;
+  tabelaVisivel = true;
+
+  somaPontosFicha = '';
+  pontuacaoFinalFicha = '';
+  resultadoFicha = '';
 
   examesSelecionados: Exames[] = [];
   mostrarModalAceiteLote = false;
@@ -267,25 +274,49 @@ export class ExamesComponent implements OnInit {
   acoes = [
     {
       label: '📝',
-      descricao: 'Lançar nota',
+      descricao: 'Lançar nota manual',
       classe: 'acao-editar',
-      visivel: (item: Exames) => {
-        const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
-          item,
-          item.etapaAtual,
-        );
-
-        return (
-          this.liberaEditar &&
-          item.status !== 'solicitado' &&
-          item.status !== 'aprovado' &&
-          item.status !== 'reprovado' &&
-          item.status !== 'cancelado' &&
-          !!avaliacaoGrupo?.dataAvaliacao
-        );
-      },
+      visivel: (item: ExameTabela) => this.podeLancarNota(item),
       callback: (item: ExameTabela) => this.lancarNota(item),
     },
+    {
+      label: '📄',
+      descricao: 'Lançar nota pela ficha',
+      classe: 'acao-editar',
+      visivel: (item: ExameTabela) =>
+        this.podeLancarNota(item) && item.etapaAtualLabel === 'PARTE PRÁTICA',
+      callback: (item: ExameTabela) => this.abrirFichaAvaliacao(item),
+    },
+    //     {
+    //       label: '📝',
+    //       descricao: 'Lançar nota',
+    //       classe: 'acao-editar',
+    //       visivel: (item: Exames) => {
+    //         const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
+    //           item,
+    //           item.etapaAtual,
+    //         );
+
+    //         return (
+    //           this.liberaEditar &&
+    //           item.status !== 'solicitado' &&
+    //           item.status !== 'aprovado' &&
+    //           item.status !== 'reprovado' &&
+    //           item.status !== 'cancelado' &&
+    //           !!avaliacaoGrupo?.dataAvaliacao
+    //         );
+    //       },
+    //       callback: (item: ExameTabela) => this.lancarNota(item),
+    //     },
+    // {
+    //   label: '📄',
+    //   descricao: 'Ficha de avaliação',
+    //   classe: 'acao-editar',
+    //   visivel: (item: ExameTabela) =>
+    //     item.etapaAtualLabel === 'PARTE PRÁTICA',
+
+    //   callback: (item: ExameTabela) => this.abrirFichaAvaliacao(item),
+    // },
     // {
     //   label: '📅',
     //   descricao: 'Agendar etapa',
@@ -874,6 +905,70 @@ export class ExamesComponent implements OnInit {
     return etapa?.avaliacao?.find((a: any) => a.ordem === ordem) || null;
   }
 
+  // abrirFichaAvaliacao(exame: ExameTabela): void {
+  //   this.exameSelecionado = exame;
+
+  //   this.somaPontosFicha = '';
+  //   this.pontuacaoFinalFicha = '';
+  //   this.resultadoFicha = '';
+
+  //   this.tabelaVisivel = false;
+  // }
+
+  abrirFichaAvaliacao(exame: ExameTabela): void {
+    const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
+
+    if (!etapa) {
+      this.snackBar.open('Nenhuma etapa disponível.', 'Fechar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const configEtapa = this.buscarAvaliacaoDoGrupo(exame, etapa.ordem);
+
+    if (!configEtapa) {
+      this.snackBar.open(
+        'Configuração da etapa não encontrada no grupo.',
+        'Fechar',
+        {
+          duration: 3000,
+        },
+      );
+      return;
+    }
+
+    this.exameSelecionado = exame;
+    this.etapaSelecionada = etapa;
+    this.configEtapaSelecionada = configEtapa;
+
+    this.notaForm.reset();
+
+    this.notaForm.patchValue({
+      nota: etapa.nota ?? '',
+      professorLancamento:
+        etapa.professorLancamento || this.auth.usuario?.nome || '',
+      observacaoLancamento: etapa.observacaoLancamento || '',
+    });
+
+    this.avaliacaoFicha = {
+      pulsacao: null,
+      leituraMusical: null,
+      movimentoConducao: null,
+    };
+
+    this.somaPontosFicha = '';
+    this.pontuacaoFinalFicha = '';
+    this.resultadoFicha = '';
+
+    this.tabelaVisivel = false;
+  }
+
+  voltarTabela(): void {
+    this.tabelaVisivel = true;
+    this.exameSelecionado = null;
+  }
+
   aoSelecionarStatusFiltro(status: string): void {
     this.statusFiltro = status || 'TODOS';
     this.aplicarFiltroStatus();
@@ -1411,6 +1506,19 @@ export class ExamesComponent implements OnInit {
   //   this.mostrarModalNota = true;
   // }
 
+  podeLancarNota(item: ExameTabela): boolean {
+    const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(item, item.etapaAtual);
+
+    return (
+      this.liberaEditar &&
+      item.status !== 'solicitado' &&
+      item.status !== 'aprovado' &&
+      item.status !== 'reprovado' &&
+      item.status !== 'cancelado' &&
+      !!avaliacaoGrupo?.dataAvaliacao
+    );
+  }
+
   lancarNota(exame: ExameTabela): void {
     const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
 
@@ -1454,9 +1562,52 @@ export class ExamesComponent implements OnInit {
       nota: etapa.nota ?? '',
       professorLancamento:
         etapa.professorLancamento || this.auth.usuario?.nome || '',
+      observacaoLancamento: etapa.observacaoLancamento || '',
     });
 
     this.mostrarModalNota = true;
+  }
+
+  avaliacaoFicha = {
+    pulsacao: null as number | null,
+    leituraMusical: null as number | null,
+    movimentoConducao: null as number | null,
+  };
+
+  calcularNotaFicha(): void {
+    const valores = [
+      this.avaliacaoFicha.pulsacao,
+      this.avaliacaoFicha.leituraMusical,
+      this.avaliacaoFicha.movimentoConducao,
+    ];
+
+    if (valores.some((v) => v === null)) {
+      this.somaPontosFicha = '';
+      this.pontuacaoFinalFicha = '';
+      this.resultadoFicha = '';
+      this.notaForm.patchValue({ nota: '' });
+      return;
+    }
+
+    const notas = valores as number[];
+
+    const soma = notas.reduce((acc, valor) => acc + valor, 0);
+
+    const notaMinima = Number(this.configEtapaSelecionada?.notaMinima ?? 0);
+    const notaMaxima = Number(this.configEtapaSelecionada?.notaMaxima ?? 0);
+
+    const maiorNotaPorCriterio = 10;
+    const pontuacaoMaximaFicha = notas.length * maiorNotaPorCriterio;
+
+    const notaFinal = (soma / pontuacaoMaximaFicha) * notaMaxima;
+
+    this.somaPontosFicha = soma.toString();
+    this.pontuacaoFinalFicha = notaFinal.toFixed(2).replace('.', ',');
+    this.resultadoFicha = notaFinal >= notaMinima ? 'Aprovado' : 'Reprovado';
+
+    this.notaForm.patchValue({
+      nota: Number(notaFinal.toFixed(2)),
+    });
   }
 
   // async salvarNota(): Promise<void> {
@@ -1714,6 +1865,7 @@ export class ExamesComponent implements OnInit {
           resultado: e.resultado,
           dataLancamento: e.dataLancamento || '',
           professorLancamento: e.professorLancamento || '',
+          observacaoLancamento: e.observacaoLancamento || '',
         };
       }
 
@@ -1725,6 +1877,9 @@ export class ExamesComponent implements OnInit {
             nota >= notaMinima ? ('aprovado' as const) : ('reprovado' as const),
           dataLancamento: formatarDataString(new Date()),
           professorLancamento,
+          observacaoLancamento: upper(
+            this.notaForm.value.observacaoLancamento || '',
+          ),
         };
       }
 
@@ -1734,6 +1889,7 @@ export class ExamesComponent implements OnInit {
         resultado: 'bloqueado' as const,
         dataLancamento: '',
         professorLancamento: '',
+        observacaoLancamento: '',
       };
     });
 
@@ -1902,8 +2058,15 @@ export class ExamesComponent implements OnInit {
   }
 
   // SELECIONAR
-  aoSelecionarExames(lista: ExameTabela[]): void {
+  aoSelecionarExamesOf(lista: ExameTabela[]): void {
     this.examesSelecionados = lista;
+  }
+
+  aoSelecionarExames(selecionados: Exames[]): void {
+    this.examesSelecionados = selecionados;
+
+    this.exameSelecionado =
+      selecionados.length === 1 ? (selecionados[0] as ExameTabela) : null;
   }
 
   podeSelecionarExame = (item: Exames): boolean => {
@@ -2022,22 +2185,22 @@ export class ExamesComponent implements OnInit {
 
     this.aceiteForm.reset();
 
-this.listaGrupoExamesFiltrada = this.gruposExames
-  .filter(
-    (grupo) =>
-      !grupo.concluido &&
-      this.auth.temAcessoAoRegistro({
-        idSetor: grupo.idSetor,
-        idComum: grupo.idComum,
-      }) &&
-      this.examesSelecionados.every((exame) =>
-        this.grupoCompativelComExame(grupo, exame),
-      ),
-  )
-  .map((g) => ({
-    value: g.id!,
-    label: `${g.grupoExame} - ${g.descricao}`,
-  }));
+    this.listaGrupoExamesFiltrada = this.gruposExames
+      .filter(
+        (grupo) =>
+          !grupo.concluido &&
+          this.auth.temAcessoAoRegistro({
+            idSetor: grupo.idSetor,
+            idComum: grupo.idComum,
+          }) &&
+          this.examesSelecionados.every((exame) =>
+            this.grupoCompativelComExame(grupo, exame),
+          ),
+      )
+      .map((g) => ({
+        value: g.id!,
+        label: `${g.grupoExame} - ${g.descricao}`,
+      }));
 
     if (!this.listaGrupoExamesFiltrada.length) {
       this.snackBar.open(
@@ -2416,6 +2579,7 @@ this.listaGrupoExamesFiltrada = this.gruposExames
           resultado: e.resultado,
           dataLancamento: e.dataLancamento || '',
           professorLancamento: e.professorLancamento || '',
+          observacaoLancamento: e.observacaoLancamento || '',
         };
       }
 
@@ -2426,6 +2590,7 @@ this.listaGrupoExamesFiltrada = this.gruposExames
           resultado: 'pendente' as const,
           dataLancamento: '',
           professorLancamento: '',
+  observacaoLancamento: '',
         };
       }
 
@@ -2435,6 +2600,8 @@ this.listaGrupoExamesFiltrada = this.gruposExames
         resultado: 'bloqueado' as const,
         dataLancamento: '',
         professorLancamento: '',
+  observacaoLancamento: '',
+
       };
     });
 

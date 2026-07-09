@@ -73,6 +73,7 @@ export interface EtapaExame {
   resultado: ResultadoEtapa;
   dataLancamento: string;
   professorLancamento: string;
+  observacaoLancamento: string;
 }
 
 export interface Exames {
