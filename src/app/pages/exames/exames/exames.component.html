@@ -760,9 +760,11 @@
             class="container__button"
             *ngIf="etapaSelecionada?.nota !== null"
           >
-            <button type="button" class="buttons" (click)="excluirNota()">
+            <tcx-button label="Excluir Nota" type="button" (click)="excluirNota()"></tcx-button>
+
+            <!-- <button type="button" class="buttons" (click)="excluirNota()">
               Excluir Nota
-            </button>
+            </button> -->
           </div>
         </div>
       </form>

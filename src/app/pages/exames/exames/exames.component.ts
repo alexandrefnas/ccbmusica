@@ -1920,6 +1920,7 @@ export class ExamesComponent implements OnInit {
       status: novoStatus,
     });
 
+    if (this.tabelaVisivel === false) this.tabelaVisivel = true;
     this.snackBar.open('Nota salva com sucesso!', 'Fechar', {
       duration: 4000,
     });

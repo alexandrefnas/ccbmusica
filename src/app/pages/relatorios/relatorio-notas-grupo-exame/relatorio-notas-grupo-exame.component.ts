@@ -18,6 +18,7 @@ import {
   listaPeriodoPratico,
 } from '../../../services/select.service';
 import { AuthService } from '../../../services/auth.service';
+import { TextComponent } from '../../../component/inputs/text/text.component';
 
 type LinhaRelatorioNotas = {
   nomeAluno: string;
@@ -29,7 +30,13 @@ type LinhaRelatorioNotas = {
 
 @Component({
   selector: 'tcx-relatorio-notas-grupo-exame',
-  imports: [CommonModule, FormsModule, SelectComponent, TableComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SelectComponent,
+    TableComponent,
+    TextComponent,
+  ],
   templateUrl: './relatorio-notas-grupo-exame.component.html',
   styleUrl: './relatorio-notas-grupo-exame.component.css',
 })
@@ -40,6 +47,7 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
   ) {}
 
   filtroStatus = true;
+  pesquisa = '';
 
   listaGrupos: { value: string; label: string }[] = [];
   grupos: GrupoExames[] = [];
@@ -48,6 +56,7 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
   grupoSelecionado: GrupoExames | null = null;
 
   dados: LinhaRelatorioNotas[] = [];
+  dadosTodos: LinhaRelatorioNotas[] = [];
 
   colunas: string[] = [];
   labels: { [key: string]: string } = {};
@@ -60,9 +69,13 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
     this.carregarGrupos();
   }
 
-  get filtroStatusOp(): boolean {
-    return (this.filtroStatus = !this.filtroStatus);
-  }
+  // get filtroStatusOp(): boolean {
+  //   return (this.filtroStatus = !this.filtroStatus);
+  // }
+
+alternarFiltro(): void {
+  this.filtroStatus = !this.filtroStatus;
+}
 
   carregarGrupos(): void {
     this.firestoreService.getSemestres().subscribe((grupos) => {
@@ -96,7 +109,6 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
     }
 
     this.montarRelatorio();
-    this.filtroStatusOp;
   }
 
   montarRelatorio(): void {
@@ -119,9 +131,36 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
       );
 
       this.montarColunas(examesGrupo);
-      this.dados = this.montarLinhas(examesGrupo, alunosPermitidos, igrejas);
+      // this.dados = this.montarLinhas(examesGrupo, alunosPermitidos, igrejas);
+      this.dadosTodos = this.montarLinhas(
+        examesGrupo,
+        alunosPermitidos,
+        igrejas,
+      );
+      this.buscarPesquisa();
     });
   }
+
+buscarPesquisa(): void {
+  const termo = this.pesquisa
+    .trim()
+    .toLocaleLowerCase('pt-BR');
+
+  if (!termo) {
+    this.dados = [...this.dadosTodos];
+    return;
+  }
+
+  this.dados = this.dadosTodos.filter((linha) =>
+    this.colunas.some((coluna) => {
+      const valor = linha[coluna];
+
+      return String(valor ?? '')
+        .toLocaleLowerCase('pt-BR')
+        .includes(termo);
+    }),
+  );
+}
 
   montarColunas(exames: Exames[]): void {
     const maiorQtdEtapas = Math.max(
