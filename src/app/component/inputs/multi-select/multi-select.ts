@@ -127,24 +127,24 @@ export class MultiSelectComponent {
     return `${labels.length} selecionados`;
   }
 
-  // onBlur(): void {
-  //   setTimeout(() => {
-  //     this.isFocused = false;
-  //     this.onTouched();
-  //   }, 150);
-  // }
-
   onBlur(): void {
     setTimeout(() => {
-      const elementoAtivo = document.activeElement;
-
-      if (!this.elementRef.nativeElement.contains(elementoAtivo)) {
-        this.open = false;
-        this.isFocused = false;
-        this.onTouched();
-      }
+      this.isFocused = false;
+      this.onTouched();
     }, 150);
   }
+
+  // onBlur(): void {
+  //   setTimeout(() => {
+  //     const elementoAtivo = document.activeElement;
+
+  //     if (!this.elementRef.nativeElement.contains(elementoAtivo)) {
+  //       this.open = false;
+  //       this.isFocused = false;
+  //       this.onTouched();
+  //     }
+  //   }, 150);
+  // }
 
   hasError(): boolean {
     return !!this.ngControl?.control?.invalid && !!this.ngControl?.control?.touched;
