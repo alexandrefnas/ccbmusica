@@ -19,9 +19,11 @@ import {
 } from '../../../services/select.service';
 import { AuthService } from '../../../services/auth.service';
 import { TextComponent } from '../../../component/inputs/text/text.component';
+import { MultiSelectComponent } from "../../../component/inputs/multi-select/multi-select";
 
 type LinhaRelatorioNotas = {
   nomeAluno: string;
+idComum: string;
   nomeComum: string;
   categoriaExameLabel: string;
   statusLabel: string;
@@ -36,7 +38,8 @@ type LinhaRelatorioNotas = {
     SelectComponent,
     TableComponent,
     TextComponent,
-  ],
+    MultiSelectComponent
+],
   templateUrl: './relatorio-notas-grupo-exame.component.html',
   styleUrl: './relatorio-notas-grupo-exame.component.css',
 })
@@ -48,6 +51,9 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
 
   filtroStatus = true;
   pesquisa = '';
+comunsSelecionadas: string[] = [];
+
+listaSelect: { value: string; label: string }[] = [];
 
   listaGrupos: { value: string; label: string }[] = [];
   grupos: GrupoExames[] = [];
@@ -98,18 +104,37 @@ alternarFiltro(): void {
     });
   }
 
-  aoSelecionarGrupo(idGrupo: string): void {
-    this.idGrupoSelecionado = idGrupo;
-    this.grupoSelecionado =
-      this.grupos.find((g) => g.id === this.idGrupoSelecionado) || null;
+  // aoSelecionarGrupo(idGrupo: string): void {
+  //   this.idGrupoSelecionado = idGrupo;
+  //   this.grupoSelecionado =
+  //     this.grupos.find((g) => g.id === this.idGrupoSelecionado) || null;
 
-    if (!this.grupoSelecionado) {
-      this.dados = [];
-      return;
-    }
+  //   if (!this.grupoSelecionado) {
+  //     this.dados = [];
+  //     return;
+  //   }
 
-    this.montarRelatorio();
+  //   this.montarRelatorio();
+  // }
+
+aoSelecionarGrupo(idGrupo: string): void {
+  this.idGrupoSelecionado = idGrupo;
+
+  this.grupoSelecionado =
+    this.grupos.find((g) => g.id === this.idGrupoSelecionado) || null;
+
+  this.comunsSelecionadas = [];
+  this.pesquisa = '';
+  this.listaSelect = [];
+
+  if (!this.grupoSelecionado) {
+    this.dados = [];
+    this.dadosTodos = [];
+    return;
   }
+
+  this.montarRelatorio();
+}
 
   montarRelatorio(): void {
     combineLatest([
@@ -132,34 +157,94 @@ alternarFiltro(): void {
 
       this.montarColunas(examesGrupo);
       // this.dados = this.montarLinhas(examesGrupo, alunosPermitidos, igrejas);
-      this.dadosTodos = this.montarLinhas(
-        examesGrupo,
-        alunosPermitidos,
-        igrejas,
-      );
-      this.buscarPesquisa();
+      // this.dadosTodos = this.montarLinhas(
+      //   examesGrupo,
+      //   alunosPermitidos,
+      //   igrejas,
+      // );
+      // this.buscarPesquisa();
+this.dadosTodos = this.montarLinhas(
+  examesGrupo,
+  alunosPermitidos,
+  igrejas,
+);
+
+this.listaSelect = this.dadosTodos
+  .filter((linha) => linha.idComum && linha.nomeComum)
+  .map((linha) => ({
+    value: linha.idComum,
+    label: linha.nomeComum,
+  }))
+  .filter(
+    (item, index, lista) =>
+      lista.findIndex(
+        (outro) => outro.value === item.value,
+      ) === index,
+  )
+  .sort((a, b) =>
+    a.label.localeCompare(b.label, 'pt-BR'),
+  );
+
+this.aplicarFiltros();
     });
   }
 
-buscarPesquisa(): void {
+
+aoSelecionarComunsFiltro(comuns: string[]): void {
+  this.comunsSelecionadas = comuns ?? [];
+
+  this.aplicarFiltros();
+}
+
+// buscarPesquisa(): void {
+//   const termo = this.pesquisa
+//     .trim()
+//     .toLocaleLowerCase('pt-BR');
+
+//   if (!termo) {
+//     this.dados = [...this.dadosTodos];
+//     return;
+//   }
+
+//   this.dados = this.dadosTodos.filter((linha) =>
+//     this.colunas.some((coluna) => {
+//       const valor = linha[coluna];
+
+//       return String(valor ?? '')
+//         .toLocaleLowerCase('pt-BR')
+//         .includes(termo);
+//     }),
+//   );
+// }
+
+aplicarFiltros(): void {
+  let dadosFiltrados = [...this.dadosTodos];
+
+  // Filtro por comuns
+  if (this.comunsSelecionadas.length > 0) {
+    dadosFiltrados = dadosFiltrados.filter((linha) =>
+      this.comunsSelecionadas.includes(linha.idComum),
+    );
+  }
+
+  // Filtro por pesquisa
   const termo = this.pesquisa
     .trim()
     .toLocaleLowerCase('pt-BR');
 
-  if (!termo) {
-    this.dados = [...this.dadosTodos];
-    return;
+  if (termo) {
+    dadosFiltrados = dadosFiltrados.filter((linha) =>
+      this.colunas.some((coluna) => {
+        const valor = linha[coluna];
+
+        return String(valor ?? '')
+          .toLocaleLowerCase('pt-BR')
+          .includes(termo);
+      }),
+    );
   }
 
-  this.dados = this.dadosTodos.filter((linha) =>
-    this.colunas.some((coluna) => {
-      const valor = linha[coluna];
-
-      return String(valor ?? '')
-        .toLocaleLowerCase('pt-BR')
-        .includes(termo);
-    }),
-  );
+  this.dados = dadosFiltrados;
 }
 
   montarColunas(exames: Exames[]): void {
@@ -224,19 +309,35 @@ buscarPesquisa(): void {
         const aluno = alunos.find((a) => a.id === exame.idAluno);
         const igreja = igrejas.find((i) => i.id === aluno?.idComum);
 
-        const linha: LinhaRelatorioNotas = {
-          nomeAluno:
-            aluno?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
-            'ALUNO NÃO CADASTRADO',
-          nomeComum:
-            igreja?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
-            'COMUM NÃO CADASTRADA',
-          categoriaExameLabel: this.buscarCategoriaExame(
-            exame.categoriaExame || '',
-          ),
-          statusLabel: this.formatarStatus(exame.status),
-        };
+        // const linha: LinhaRelatorioNotas = {
+        //   nomeAluno:
+        //     aluno?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+        //     'ALUNO NÃO CADASTRADO',
+        //   nomeComum:
+        //     igreja?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
+        //     'COMUM NÃO CADASTRADA',
+        //   categoriaExameLabel: this.buscarCategoriaExame(
+        //     exame.categoriaExame || '',
+        //   ),
+        //   statusLabel: this.formatarStatus(exame.status),
+        // };
+const linha: LinhaRelatorioNotas = {
+  idComum: aluno?.idComum || '',
 
+  nomeAluno:
+    aluno?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+    'ALUNO NÃO CADASTRADO',
+
+  nomeComum:
+    igreja?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
+    'COMUM NÃO CADASTRADA',
+
+  categoriaExameLabel: this.buscarCategoriaExame(
+    exame.categoriaExame || '',
+  ),
+
+  statusLabel: this.formatarStatus(exame.status),
+};
         exame.etapas?.forEach((etapa) => {
           const configEtapa = this.buscarConfigEtapa(exame, etapa.ordem);
 

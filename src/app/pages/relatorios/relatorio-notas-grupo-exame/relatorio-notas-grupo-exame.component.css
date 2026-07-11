@@ -47,10 +47,20 @@
   align-items: center;
   gap: 15px;
   padding: 15px 0;
+  flex-wrap: wrap;
 }
 
 .filtro-grupo {
-  width: 350px;
+  flex: 0 0 350px;
+}
+
+.filtro-item {
+  flex: 0 0 300px;
+}
+
+.filtro-pesquisa {
+  flex: 1 1 250px;
+  min-width: 250px;
 }
 
 #tela__container-tabela {
@@ -108,12 +118,35 @@
   color: #777;
 }
 
+
 @media (max-width: 768px) {
   .container__tela {
     padding: 0 15px 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
-  .filtro-grupo {
+  .filtros {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     width: 100%;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .filtro-grupo,
+  .filtro-item,
+  .filtro-pesquisa {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  #tela__container-tabela {
+    flex: 0 0 auto;
+    min-height: 300px;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 }

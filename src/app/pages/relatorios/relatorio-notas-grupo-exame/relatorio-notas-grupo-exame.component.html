@@ -36,13 +36,21 @@
         (valorMudou)="aoSelecionarGrupo($event)"
       />
     </div>
-
-      <div style="width: 250px">
+      <div class="filtro-item">
+        <tcx-multi-select
+          [label]="'Comuns'"
+          [placeholder]="'Todas as Comuns'"
+          [niveisLimitados]="listaSelect"
+          [(ngModel)]="comunsSelecionadas"
+          (valorMudou)="aoSelecionarComunsFiltro($event)"
+        />
+      </div>
+      <div  class="filtro-pesquisa">
         <tcx-text
           label="Pesquisa..."
           type="text"
           [(value)]="pesquisa"
-          (valueChange)="buscarPesquisa()"
+          (valueChange)="aplicarFiltros()"
         />
       </div>
   </div>
