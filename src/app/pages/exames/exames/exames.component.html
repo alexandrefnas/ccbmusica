@@ -76,11 +76,8 @@
         <!-- </div> -->
       </div>
     </div>
-    <div
-      style="display: flex; gap: 15px; width: 100%; padding-top: 10px"
-      *ngIf="filtroStatus"
-    >
-      <div style="width: 250px">
+    <div class="filtros-container" *ngIf="filtroStatus">
+      <div class="filtro-item">
         <tcx-select
           [label]="'Filtro Status'"
           [placeholder]="''"
@@ -89,7 +86,8 @@
           (valorMudou)="aoSelecionarStatusFiltro($event)"
         />
       </div>
-      <div style="width: 250px">
+
+      <div class="filtro-item">
         <tcx-select
           [label]="'Categorias'"
           [placeholder]="''"
@@ -98,7 +96,18 @@
           (valorMudou)="aoSelecionarCategoriaFiltro($event)"
         />
       </div>
-      <div style="width: 250px">
+
+      <div class="filtro-item">
+        <tcx-multi-select
+          [label]="'Comuns'"
+          [placeholder]="'Todas as Comuns'"
+          [niveisLimitados]="listaSelect"
+          [(ngModel)]="comunsSelecionadas"
+          (valorMudou)="aoSelecionarComunsFiltro($event)"
+        />
+      </div>
+
+      <div class="filtro-item">
         <tcx-text
           label="Pesquisa..."
           type="text"
@@ -125,36 +134,42 @@
     </div>
 
     <!-- /* [podeSelecionar]="podeSelecionarExame" */ -->
+    @if (dados.length > itensPorPagina) {
+      <div class="paginacao">
+        <button
+          class="buttons"
+          (click)="paginaAnterior()"
+          [disabled]="paginaAtual === 1"
+        >
+          <i class="bi bi-chevron-left"></i>
+        </button>
 
-    <div class="paginacao" *ngIf="dados.length > itensPorPagina">
-      <button
-        class="buttons"
-        (click)="paginaAnterior()"
-        [disabled]="paginaAtual === 1"
-      >
-        <i class="bi bi-chevron-left"></i>
-      </button>
+        <span>
+          Página {{ paginaAtual }} de {{ totalPaginas }} ( {{ dados.length }}
+          registros )
+        </span>
 
-      <span>
-        Página {{ paginaAtual }} de {{ totalPaginas }} ({{ dados.length }}
-        registros)
-      </span>
-
-      <button
-        class="buttons"
-        (click)="proximaPagina()"
-        [disabled]="paginaAtual >= totalPaginas"
-      >
-        <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
+        <button
+          class="buttons"
+          (click)="proximaPagina()"
+          [disabled]="paginaAtual >= totalPaginas"
+        >
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    } @else {
+      <div class="paginacao">
+        <span>
+          ( {{ dados.length }}
+          registros )
+        </span>
+      </div>
+    }
   } @else {
     <div class="container__ficha-avaliacao">
       <div id="tela__barra-menu">
         <div id="barra-titulo__container">
-          <h2 style="font-weight: normal; color: grey">
-            Avaliação Prática
-          </h2>
+          <h2 style="font-weight: normal; color: grey">Avaliação Prática</h2>
         </div>
       </div>
       <form [formGroup]="notaForm" class="ficha-avaliacao">
@@ -760,7 +775,11 @@
             class="container__button"
             *ngIf="etapaSelecionada?.nota !== null"
           >
-            <tcx-button label="Excluir Nota" type="button" (click)="excluirNota()"></tcx-button>
+            <tcx-button
+              label="Excluir Nota"
+              type="button"
+              (click)="excluirNota()"
+            ></tcx-button>
 
             <!-- <button type="button" class="buttons" (click)="excluirNota()">
               Excluir Nota

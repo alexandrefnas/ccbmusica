@@ -42,6 +42,7 @@ import {
 // import { DecimalComponent } from '../../../component/inputs/decimal/decimal.component';
 import { TableComponentSelect } from '../../../component/table-select/table.component';
 import { AlertService } from '../../../services/alert.service';
+import { MultiSelectComponent } from '../../../component/inputs/multi-select/multi-select';
 
 // type ExameTabela = Exames & {
 //   idadeAluno?: string;
@@ -52,7 +53,7 @@ import { AlertService } from '../../../services/alert.service';
 type ExameTabela = Exames & {
   nomeAluno?: string;
   comum?: string;
-
+  idComum?: string;
   idadeAluno?: string;
   instrumentoAluno?: string;
   afinacaoAluno?: string;
@@ -80,6 +81,7 @@ type ExameTabela = Exames & {
     // TableComponent,
     // DecimalComponent,
     TableComponentSelect,
+    MultiSelectComponent,
   ],
   templateUrl: './exames.component.html',
   styleUrl: './exames.component.css',
@@ -176,6 +178,9 @@ export class ExamesComponent implements OnInit {
 
   listaStatusFiltro = listaStatusFiltro;
   listaCategorias = listaCategorias;
+
+  comunsSelecionadas: string[] = [];
+  listaSelect: { value: string; label: string }[] = [];
   // dadosTodos: any[] = [];
 
   dadosTodos: ExameTabela[] = [];
@@ -779,110 +784,263 @@ export class ExamesComponent implements OnInit {
   //   });
   // }
 
-  carregarDados(): void {
-    combineLatest([
-      this.firestoreService.getExames(),
-      this.firestoreService.getCandidato(),
-      this.firestoreService.getIgrejas(),
-      this.firestoreService.getSemestres(),
-    ]).subscribe(([exames, alunos, igrejas, grupos]) => {
-      this.gruposExames = grupos;
+  // carregarDados(): void {
+  //   combineLatest([
+  //     this.firestoreService.getExames(),
+  //     this.firestoreService.getCandidato(),
+  //     this.firestoreService.getIgrejas(),
+  //     this.firestoreService.getSemestres(),
+  //   ]).subscribe(([exames, alunos, igrejas, grupos]) => {
+  //     this.gruposExames = grupos;
 
-      if (!this.auth.temPermissao('exames', 'read')) {
-        this.dados = [];
-        this.dadosTodos = [];
-        return;
-      }
+  //     if (!this.auth.temPermissao('exames', 'read')) {
+  //       this.dados = [];
+  //       this.dadosTodos = [];
+  //       return;
+  //     }
 
-      const alunosPermitidos = alunos.filter((a) =>
-        this.auth.temAcessoAoRegistro(a),
-      );
+  //     const alunosPermitidos = alunos.filter((a) =>
+  //       this.auth.temAcessoAoRegistro(a),
+  //     );
 
-      const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
+  //     const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
 
-      // const dadosExames = exames
-      //   .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
-      //   .map((exame) => {
-      const dadosExames = exames
-        .filter((exame) => {
-          const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
+  //     // const dadosExames = exames
+  //     //   .filter((exame) => idsAlunosPermitidos.includes(exame.idAluno))
+  //     //   .map((exame) => {
+  //     const dadosExames = exames
+  //       .filter((exame) => {
+  //         const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
 
-          return (
-            idsAlunosPermitidos.includes(exame.idAluno) &&
-            (exame.status === 'solicitado' ||
-              (!!grupo && grupo.concluido !== true))
-          );
-        })
-        .map((exame) => {
-          const alunoFiltro = alunosPermitidos.find(
-            (a) => a.id === exame.idAluno,
-          );
+  //         return (
+  //           idsAlunosPermitidos.includes(exame.idAluno) &&
+  //           (exame.status === 'solicitado' ||
+  //             (!!grupo && grupo.concluido !== true))
+  //         );
+  //       })
+  //       .map((exame) => {
+  //         const alunoFiltro = alunosPermitidos.find(
+  //           (a) => a.id === exame.idAluno,
+  //         );
 
-          const comum = igrejas.find((i) => i.id === alunoFiltro?.idComum);
-          const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
-            exame,
-            exame.etapaAtual,
-          );
+  //         const comum = igrejas.find((i) => i.id === alunoFiltro?.idComum);
+  //         const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
+  //           exame,
+  //           exame.etapaAtual,
+  //         );
 
-          return {
-            ...exame,
-            idadeAluno: this.calcularIdade(alunoFiltro?.dataNascimento),
-            instrumentoAluno: alunoFiltro?.idInstrumento || '',
-            afinacaoAluno: alunoFiltro?.afinacao || '',
-            dataSolicitacao: converterISOParaBR(exame.dataSolicitacao || ''),
-            dataAgendada: converterISOParaBR(
-              avaliacaoGrupo?.dataAvaliacao || '',
-            ),
-            nomeAluno:
-              alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
-              'ALUNO NÃO CADASTRADO',
-            comum: comum?.nomeCongregacao?.toLocaleUpperCase('pt-BR') || '',
-            tipoExameLabel: this.buscarLabel(
-              this.listaTipoExame,
-              exame.tipoExame,
-            ),
-            categoriaExameLabel: this.buscarCategoriaExame(
-              exame.categoriaExame || '',
-            ),
-            statusLabel: this.formatarStatus(exame.status),
-            etapaAtualLabel:
-              exame.status === 'aprovado'
-                ? 'CONCLUÍDO'
-                : exame.status === 'reprovado'
-                  ? 'REPROVADO'
-                  : avaliacaoGrupo?.nome || 'AGUARDANDO',
-          };
-        });
+  //         return {
+  //           ...exame,
+  //           idadeAluno: this.calcularIdade(alunoFiltro?.dataNascimento),
+  //           instrumentoAluno: alunoFiltro?.idInstrumento || '',
+  //           afinacaoAluno: alunoFiltro?.afinacao || '',
+  //           dataSolicitacao: converterISOParaBR(exame.dataSolicitacao || ''),
+  //           dataAgendada: converterISOParaBR(
+  //             avaliacaoGrupo?.dataAvaliacao || '',
+  //           ),
+  //           nomeAluno:
+  //             alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+  //             'ALUNO NÃO CADASTRADO',
+  //           idComum: alunoFiltro?.idComum || '',
+  //           comum: comum?.nomeCongregacao?.toLocaleUpperCase('pt-BR') || '',
+  //           tipoExameLabel: this.buscarLabel(
+  //             this.listaTipoExame,
+  //             exame.tipoExame,
+  //           ),
+  //           categoriaExameLabel: this.buscarCategoriaExame(
+  //             exame.categoriaExame || '',
+  //           ),
+  //           statusLabel: this.formatarStatus(exame.status),
+  //           etapaAtualLabel:
+  //             exame.status === 'aprovado'
+  //               ? 'CONCLUÍDO'
+  //               : exame.status === 'reprovado'
+  //                 ? 'REPROVADO'
+  //                 : avaliacaoGrupo?.nome || 'AGUARDANDO',
+  //         };
+  //       });
 
-      const ordemStatus: Record<string, number> = {
-        solicitado: 1,
-        agendado: 2,
-        emAndamento: 3,
-        aprovado: 4,
-        reprovado: 5,
-        cancelado: 6,
-      };
+  //     const ordemStatus: Record<string, number> = {
+  //       solicitado: 1,
+  //       agendado: 2,
+  //       emAndamento: 3,
+  //       aprovado: 4,
+  //       reprovado: 5,
+  //       cancelado: 6,
+  //     };
 
-      this.dadosTodos = [...dadosExames].sort((a, b) => {
-        const statusA = ordemStatus[a.status] || 999;
-        const statusB = ordemStatus[b.status] || 999;
+  //     this.dadosTodos = [...dadosExames].sort((a, b) => {
+  //       const statusA = ordemStatus[a.status] || 999;
+  //       const statusB = ordemStatus[b.status] || 999;
 
-        if (statusA !== statusB) return statusA - statusB;
+  //       if (statusA !== statusB) return statusA - statusB;
 
-        const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
-        if (tipo !== 0) return tipo;
+  //       const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
+  //       if (tipo !== 0) return tipo;
 
-        const categoria = (a.categoriaExame || '').localeCompare(
-          b.categoriaExame || '',
+  //       const categoria = (a.categoriaExame || '').localeCompare(
+  //         b.categoriaExame || '',
+  //       );
+  //       if (categoria !== 0) return categoria;
+
+  //       return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
+  //     });
+
+  //     this.aplicarFiltroStatus();
+  //   });
+  // }
+carregarDados(): void {
+  combineLatest([
+    this.firestoreService.getExames(),
+    this.firestoreService.getCandidato(),
+    this.firestoreService.getIgrejas(),
+    this.firestoreService.getSemestres(),
+  ]).subscribe(([exames, alunos, igrejas, grupos]) => {
+    this.gruposExames = grupos;
+
+    if (!this.auth.temPermissao('exames', 'read')) {
+      this.dados = [];
+      this.dadosTodos = [];
+      this.listaSelect = [];
+      return;
+    }
+
+    const alunosPermitidos = alunos.filter((a) =>
+      this.auth.temAcessoAoRegistro(a),
+    );
+
+    const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
+
+    const dadosExames: ExameTabela[] = exames
+      .filter((exame) => {
+        const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
+
+        return (
+          idsAlunosPermitidos.includes(exame.idAluno) &&
+          (exame.status === 'solicitado' ||
+            (!!grupo && grupo.concluido !== true))
         );
-        if (categoria !== 0) return categoria;
+      })
+      .map((exame) => {
+        const alunoFiltro = alunosPermitidos.find(
+          (a) => a.id === exame.idAluno,
+        );
 
-        return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
+        const comum = igrejas.find(
+          (i) => i.id === alunoFiltro?.idComum,
+        );
+
+        const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
+          exame,
+          exame.etapaAtual,
+        );
+
+        return {
+          ...exame,
+
+          idadeAluno: this.calcularIdade(
+            alunoFiltro?.dataNascimento,
+          ),
+
+          instrumentoAluno: alunoFiltro?.idInstrumento || '',
+          afinacaoAluno: alunoFiltro?.afinacao || '',
+
+          idComum: alunoFiltro?.idComum || '',
+
+          comum:
+            comum?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
+            '',
+
+          dataSolicitacao: converterISOParaBR(
+            exame.dataSolicitacao || '',
+          ),
+
+          dataAgendada: converterISOParaBR(
+            avaliacaoGrupo?.dataAvaliacao || '',
+          ),
+
+          nomeAluno:
+            alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+            'ALUNO NÃO CADASTRADO',
+
+          tipoExameLabel: this.buscarLabel(
+            this.listaTipoExame,
+            exame.tipoExame,
+          ),
+
+          categoriaExameLabel: this.buscarCategoriaExame(
+            exame.categoriaExame || '',
+          ),
+
+          statusLabel: this.formatarStatus(exame.status),
+
+          etapaAtualLabel:
+            exame.status === 'aprovado'
+              ? 'CONCLUÍDO'
+              : exame.status === 'reprovado'
+                ? 'REPROVADO'
+                : avaliacaoGrupo?.nome || 'AGUARDANDO',
+        };
       });
 
-      this.aplicarFiltroStatus();
+    // Somente comuns existentes nos exames disponíveis
+    this.listaSelect = dadosExames
+      .filter((item) => item.idComum && item.comum)
+      .map((item) => ({
+        value: item.idComum!,
+        label: item.comum!,
+      }))
+      .filter(
+        (item, index, lista) =>
+          lista.findIndex(
+            (outro) => outro.value === item.value,
+          ) === index,
+      )
+      .sort((a, b) =>
+        a.label.localeCompare(b.label, 'pt-BR'),
+      );
+
+    const ordemStatus: Record<string, number> = {
+      solicitado: 1,
+      agendado: 2,
+      emAndamento: 3,
+      aprovado: 4,
+      reprovado: 5,
+      cancelado: 6,
+    };
+
+    this.dadosTodos = [...dadosExames].sort((a, b) => {
+      const statusA = ordemStatus[a.status] || 999;
+      const statusB = ordemStatus[b.status] || 999;
+
+      if (statusA !== statusB) {
+        return statusA - statusB;
+      }
+
+      const tipo = (a.tipoExame || '').localeCompare(
+        b.tipoExame || '',
+      );
+
+      if (tipo !== 0) {
+        return tipo;
+      }
+
+      const categoria = (
+        a.categoriaExame || ''
+      ).localeCompare(b.categoriaExame || '');
+
+      if (categoria !== 0) {
+        return categoria;
+      }
+
+      return (a.nomeAluno || '').localeCompare(
+        b.nomeAluno || '',
+      );
     });
-  }
+
+    this.aplicarFiltroStatus();
+  });
+}
 
   buscarPesquisa(): void {
     this.aplicarFiltroStatus();
@@ -905,6 +1063,12 @@ export class ExamesComponent implements OnInit {
     return etapa?.avaliacao?.find((a: any) => a.ordem === ordem) || null;
   }
 
+  aoSelecionarComunsFiltro(comuns: string[]): void {
+    this.comunsSelecionadas = comuns ?? [];
+
+    this.aplicarFiltroStatus();
+    this.limparSelecaoExames();
+  }
   // abrirFichaAvaliacao(exame: ExameTabela): void {
   //   this.exameSelecionado = exame;
 
@@ -1026,6 +1190,47 @@ export class ExamesComponent implements OnInit {
   //   this.paginaAtual = 1;
   // }
 
+  // aplicarFiltroStatus(): void {
+  //   let dadosFiltrados = [...this.dadosTodos];
+
+  //   // Filtro por status
+  //   if (this.statusFiltro !== 'TODOS') {
+  //     dadosFiltrados = dadosFiltrados.filter(
+  //       (item) => item.status === this.statusFiltro,
+  //     );
+  //   }
+
+  //   // Filtro por categoria
+  //   if (this.statusCategorias !== 'TODOS') {
+  //     dadosFiltrados = dadosFiltrados.filter(
+  //       (item) => item.categoriaExame === this.statusCategorias,
+  //     );
+  //   }
+
+  //   // Filtro por pesquisa
+  //   if (this.pesquisa.trim()) {
+  //     const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
+
+  //     dadosFiltrados = dadosFiltrados.filter(
+  //       (item) =>
+  //         item.nomeAluno?.includes(termo) ||
+  //         item.idadeAluno?.includes(termo) ||
+  //         item.comum?.includes(termo) ||
+  //         item.tipoExameLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.categoriaExameLabel
+  //           ?.toLocaleUpperCase('pt-BR')
+  //           .includes(termo) ||
+  //         item.statusLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.etapaAtualLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
+  //         item.dataSolicitacao?.includes(termo) ||
+  //         item.dataAgendada?.includes(termo),
+  //     );
+  //   }
+
+  //   this.dados = dadosFiltrados;
+  //   this.paginaAtual = 1;
+  // }
+
   aplicarFiltroStatus(): void {
     let dadosFiltrados = [...this.dadosTodos];
 
@@ -1040,6 +1245,16 @@ export class ExamesComponent implements OnInit {
     if (this.statusCategorias !== 'TODOS') {
       dadosFiltrados = dadosFiltrados.filter(
         (item) => item.categoriaExame === this.statusCategorias,
+      );
+    }
+
+    // Filtro por comuns
+    if (
+      this.comunsSelecionadas.length > 0 &&
+      !this.comunsSelecionadas.includes('TODOS')
+    ) {
+      dadosFiltrados = dadosFiltrados.filter((item) =>
+        this.comunsSelecionadas.includes(item.idComum || ''),
       );
     }
 
@@ -2591,7 +2806,7 @@ export class ExamesComponent implements OnInit {
           resultado: 'pendente' as const,
           dataLancamento: '',
           professorLancamento: '',
-  observacaoLancamento: '',
+          observacaoLancamento: '',
         };
       }
 
@@ -2601,8 +2816,7 @@ export class ExamesComponent implements OnInit {
         resultado: 'bloqueado' as const,
         dataLancamento: '',
         professorLancamento: '',
-  observacaoLancamento: '',
-
+        observacaoLancamento: '',
       };
     });
 

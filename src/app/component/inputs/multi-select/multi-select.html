@@ -1,0 +1,61 @@
+<div
+  class="form-field"
+  [class.focused]="isFocused || selectedValues.length || placeholder"
+>
+  <label class="form-label">{{ label }}</label>
+
+  <div class="input-wrapper">
+    <div
+      class="form-input custom-select"
+      (click)="toggleDropdown($event)"
+      [class.disabled]="disabled"
+      tabindex="0"
+      (focus)="isFocused = true"
+      (blur)="onBlur()"
+      (keydown)="onKeyDownCustom($event); buscarPorTecla($event)"
+      [class.open]="open"
+    >
+      <span class="selected-text">
+         {{
+    selectedValues.length > 0
+      ? getSelectedLabel()
+      : placeholder
+  }}
+      </span>
+
+      @if (selectedValues.length) {
+        <button
+          class="clear-btn"
+          type="button"
+          title="Limpar seleção"
+          (click)="limparSelecao($event)"
+        >
+          ×
+        </button>
+      }
+    </div>
+
+    <div class="dropdown" *ngIf="open">
+      <div
+        class="option"
+        *ngFor="let nivel of niveisLimitados; let i = index"
+        [attr.data-index]="i"
+        [class.destacado]="i === indiceDestacado"
+        [class.selecionado]="isSelected(nivel.value)"
+        (click)="toggleOption(nivel, $event)"
+      >
+        <span class="option-label">
+          {{ nivel.label }}
+        </span>
+
+        @if (isSelected(nivel.value)) {
+          <span class="check">✓</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="form-error" *ngIf="hasError() && !isFocused">
+    {{ errorMessage }}
+  </div>
+</div>

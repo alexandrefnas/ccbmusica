@@ -345,6 +345,20 @@
 }
 /* FIM PAGINAÇÃO */
 
+
+.filtros-container {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  padding-top: 10px;
+  flex-wrap: nowrap;
+}
+
+.filtro-item {
+  width: 250px;
+  flex-shrink: 0;
+}
+
 /* RESPONSIVIDADE */
 
 /* MOBILE */
@@ -398,6 +412,14 @@
 
   .resultado {
     margin-left: 0;
+  }
+
+  .filtros-container {
+    flex-wrap: wrap;
+  }
+
+  .filtro-item {
+    width: calc(50% - 8px);
   }
 }
 

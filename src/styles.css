@@ -1,3 +1,148 @@
+:root,
+body.tema-azul {
+  /* layout */
+  --cor-fundo-app: #f4f6f8;
+  --cor-card: #ffffff;
+  --cor-borda: #cfd8dc;
+  --cor-texto: #263238;
+  --cor-texto-suave: #666;
+
+  /* topo/menu */
+  --cor-topo-1: #2d89ef;
+  --cor-topo-2: #1b4f9c;
+  --cor-menu-lateral: #dadada;
+  --cor-menu-grupo: #1565c0;
+  --cor-menu-submenu: #e3f2fd;
+  --cor-menu-hover: #e6f7ff;
+  --cor-menu-ativo: #82bbe2;
+  --cor-texto-menu: #333;
+
+  /* botão */
+  --cor-botao: #1b4f9c;
+  --cor-botao-texto: #ffffff;
+  --cor-botao-borda: #000000;
+  --cor-botao-claro: rgba(255, 255, 255, 0.45);
+  --cor-botao-escuro: rgba(0, 0, 0, 0.6);
+
+  /* botão desabilitado */
+  --cor-botao-disabled: #d6d6d6;
+  --cor-botao-disabled-texto: #7a7a7a;
+  --cor-botao-disabled-borda: #b5b5b5;
+
+  /* tabela */
+  --cor-tabela-header: #1b4f9c;
+  --cor-tabela-header-texto: #ffffff;
+  --cor-tabela-linha: #ffffff;
+  --cor-tabela-linha-alt: #f3f7fb;
+  --cor-tabela-hover: #e6f7ff;
+  --cor-tabela-borda: #cfd8dc;
+
+  /* inputs */
+  --cor-input-fundo: #ffffff;
+  --cor-input-texto: #263238;
+  --cor-input-borda: #b0bec5;
+  --cor-input-focus: #2d89ef;
+  --cor-input-disabled: #eeeeee;
+  --cor-placeholder: #888;
+
+  /* status */
+  --cor-sucesso: #2e7d32;
+  --cor-alerta: #f9a825;
+  --cor-erro: #c62828;
+  --cor-info: #0277bd;
+
+  /* gráficos */
+  --grafico-1: #4285f4;
+  --grafico-2: #ea4335;
+  --grafico-3: #fbbc04;
+  --grafico-4: #34a853;
+  --grafico-5: #ff8c00;
+  --grafico-6: #46bdc6;
+
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #999;
+  --scrollbar-thumb-hover: #666;
+
+  /* efeitos */
+  --cor-splash-texto: #ffffff;
+  --cor-splash-spinner: rgba(255, 255, 255, 0.25);
+
+  --cor-overlay: rgba(0, 0, 0, 0.35);
+  --cor-sombra: rgba(0, 0, 0, 0.25);
+}
+
+body.tema-verde {
+  /* layout */
+  --cor-fundo-app: #edf5ed;
+  --cor-card: #ffffff;
+  --cor-borda: #c5d9c6;
+  --cor-texto: #1f2d21;
+  --cor-texto-suave: #5f6b60;
+
+  /* topo/menu */
+  --cor-topo-1: #2e7d32;
+  --cor-topo-2: #1b5e20;
+  --cor-menu-lateral: #dce8dc;
+  --cor-menu-grupo: #2e7d32;
+  --cor-menu-submenu: #e8f5e9;
+  --cor-menu-hover: #e8f5e9;
+  --cor-menu-ativo: #81c784;
+  --cor-texto-menu: #263238;
+
+  /* botão */
+  --cor-botao: #1b5e20;
+  --cor-botao-texto: #ffffff;
+  --cor-botao-borda: #000000;
+  --cor-botao-claro: rgba(255, 255, 255, 0.45);
+  --cor-botao-escuro: rgba(0, 0, 0, 0.6);
+
+  /* botão desabilitado */
+  --cor-botao-disabled: #d6d6d6;
+  --cor-botao-disabled-texto: #7a7a7a;
+  --cor-botao-disabled-borda: #b5b5b5;
+
+  /* tabela */
+  --cor-tabela-header: #1b5e20;
+  --cor-tabela-header-texto: #ffffff;
+  --cor-tabela-linha: #ffffff;
+  --cor-tabela-linha-alt: #f1f8f1;
+  --cor-tabela-hover: #dff2df;
+  --cor-tabela-borda: #c5d9c6;
+
+  /* inputs */
+  --cor-input-fundo: #ffffff;
+  --cor-input-texto: #1f2d21;
+  --cor-input-borda: #81c784;
+  --cor-input-focus: #2e7d32;
+  --cor-input-disabled: #edf5ed;
+  --cor-placeholder: #6d7c6e;
+
+  /* status */
+  --cor-sucesso: #2e7d32;
+  --cor-alerta: #f9a825;
+  --cor-erro: #c62828;
+  --cor-info: #0277bd;
+
+  /* gráficos */
+  --grafico-1: #2e7d32;
+  --grafico-2: #43a047;
+  --grafico-3: #66bb6a;
+  --grafico-4: #81c784;
+  --grafico-5: #a5d6a7;
+  --grafico-6: #c8e6c9;
+
+  --scrollbar-track: #edf5ed;
+  --scrollbar-thumb: #66bb6a;
+  --scrollbar-thumb-hover: #388e3c;
+
+  /* efeitos */
+  --cor-splash-texto: #ffffff;
+  --cor-splash-spinner: rgba(255, 255, 255, 0.25);
+
+  --cor-overlay: rgba(0, 0, 0, 0.35);
+  --cor-sombra: rgba(0, 0, 0, 0.25);
+}
+
 html,
 body {
   height: 100%;
