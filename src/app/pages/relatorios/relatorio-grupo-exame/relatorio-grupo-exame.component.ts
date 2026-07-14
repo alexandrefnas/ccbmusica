@@ -20,6 +20,7 @@ import { AuthService } from '../../../services/auth.service';
 type Resumo = {
   total: number;
   aprovado: number;
+  recuperacao: number;
   reprovado: number;
   cancelado: number;
 };
@@ -56,6 +57,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
   resumoGeral: Resumo = {
     total: 0,
     aprovado: 0,
+    recuperacao: 0,
     reprovado: 0,
     cancelado: 0,
   };
@@ -73,31 +75,47 @@ export class RelatorioGrupoExameComponent implements OnInit {
     'cancelado',
   ];
 
-  colunasIgreja = ['nomeComum', 'total', 'aprovado', 'reprovado', 'cancelado'];
+  colunasIgreja = [
+    'nomeComum',
+    'total',
+    'aprovado',
+    'recuperacao',
+    'reprovado',
+    'cancelado',
+  ];
 
   labels = {
     categoriaExameLabel: 'Nível',
     nomeComum: 'Comum',
     total: 'Total',
     aprovado: 'Apro.',
+    recuperacao: 'Recup.',
     reprovado: 'Repr.',
     cancelado: 'Canc.',
   };
 
   tamanhosNivel = {
-    categoriaExameLabel: { width: '40%', minWidth: '120px' },
-    total: { width: '15%' },
-    aprovado: { width: '15%' },
-    reprovado: { width: '15%' },
-    cancelado: { width: '15%' },
+    categoriaExameLabel: {
+      width: '35%',
+      minWidth: '120px',
+    },
+    total: { width: '13%' },
+    aprovado: { width: '13%' },
+    recuperacao: { width: '13%' },
+    reprovado: { width: '13%' },
+    cancelado: { width: '13%' },
   };
 
   tamanhosIgreja = {
-    nomeComum: { width: '40%', minWidth: '120px' },
-    total: { width: '15%' },
-    aprovado: { width: '15%' },
-    reprovado: { width: '15%' },
-    cancelado: { width: '15%' },
+    nomeComum: {
+      width: '35%',
+      minWidth: '120px',
+    },
+    total: { width: '13%' },
+    aprovado: { width: '13%' },
+    recuperacao: { width: '13%' },
+    reprovado: { width: '13%' },
+    cancelado: { width: '13%' },
   };
 
   alinhamentoTitulo: { [coluna: string]: 'left' | 'center' | 'right' } = {
@@ -105,6 +123,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
     nomeComum: 'center',
     total: 'center',
     aprovado: 'center',
+    recuperacao: 'center',
     reprovado: 'center',
     cancelado: 'center',
   };
@@ -114,6 +133,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
     nomeComum: 'left',
     total: 'center',
     aprovado: 'center',
+    recuperacao: 'center',
     reprovado: 'center',
     cancelado: 'center',
   };
@@ -196,6 +216,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
     return {
       total: exames.length,
       aprovado: exames.filter((e) => e.status === 'aprovado').length,
+      recuperacao: exames.filter((e) => e.status === 'recuperacao').length,
       reprovado: exames.filter((e) => e.status === 'reprovado').length,
       cancelado: exames.filter((e) => e.status === 'cancelado').length,
     };
@@ -213,6 +234,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
           categoriaExameLabel: this.buscarCategoriaExame(chave),
           total: 0,
           aprovado: 0,
+          recuperacao: 0,
           reprovado: 0,
           cancelado: 0,
         });
@@ -248,6 +270,8 @@ export class RelatorioGrupoExameComponent implements OnInit {
           nomeComum,
           total: 0,
           aprovado: 0,
+          recuperacao: 0,
+
           reprovado: 0,
           cancelado: 0,
           niveis: [],
@@ -276,6 +300,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
         categoriaExameLabel: this.buscarCategoriaExame(categoria),
         total: 0,
         aprovado: 0,
+        recuperacao: 0,
         reprovado: 0,
         cancelado: 0,
       };
@@ -294,6 +319,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
     resumo.total++;
 
     if (exame.status === 'aprovado') resumo.aprovado++;
+    if (exame.status === 'recuperacao') resumo.recuperacao++;
     if (exame.status === 'reprovado') resumo.reprovado++;
     if (exame.status === 'cancelado') resumo.cancelado++;
   }
@@ -311,11 +337,24 @@ export class RelatorioGrupoExameComponent implements OnInit {
     );
   }
 
-  percentualAprovacao(): string {
-    if (!this.resumoGeral.total) return '0%';
+  // percentualAprovacao(): string {
+  //   if (!this.resumoGeral.total) return '0%';
 
-    const percentual =
-      (this.resumoGeral.aprovado / this.resumoGeral.total) * 100;
+  //   const percentual =
+  //     (this.resumoGeral.aprovado / this.resumoGeral.total) * 100;
+
+  //   return `${percentual.toFixed(1)}%`;
+  // }
+
+  percentualAprovacao(): string {
+    const totalFinalizados =
+      this.resumoGeral.aprovado + this.resumoGeral.reprovado;
+
+    if (!totalFinalizados) {
+      return '0%';
+    }
+
+    const percentual = (this.resumoGeral.aprovado / totalFinalizados) * 100;
 
     return `${percentual.toFixed(1)}%`;
   }
@@ -324,6 +363,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
     this.resumoGeral = {
       total: 0,
       aprovado: 0,
+      recuperacao: 0,
       reprovado: 0,
       cancelado: 0,
     };
@@ -362,11 +402,21 @@ export class RelatorioGrupoExameComponent implements OnInit {
 
     autoTable(doc, {
       startY: y,
-      head: [['Total', 'Aprovados', 'Reprovados', 'Cancelados', '% Aprovação']],
+      head: [
+        [
+          'Total',
+          'Aprovados',
+          'Recuperação',
+          'Reprovados',
+          'Cancelados',
+          '% Aprovação',
+        ],
+      ],
       body: [
         [
           this.resumoGeral.total,
           this.resumoGeral.aprovado,
+          this.resumoGeral.recuperacao,
           this.resumoGeral.reprovado,
           this.resumoGeral.cancelado,
           this.percentualAprovacao(),
@@ -392,6 +442,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
           'Resultado por nível',
           'Total',
           'Aprovados',
+          'recuperacao',
           'Reprovados',
           'Cancelados',
         ],
@@ -400,6 +451,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
         item.categoriaExameLabel,
         item.total,
         item.aprovado,
+        item.recuperacao,
         item.reprovado,
         item.cancelado,
       ]),
@@ -417,6 +469,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
         2: { halign: 'center' },
         3: { halign: 'center' },
         4: { halign: 'center' },
+        5: { halign: 'center' },
       },
     });
 
@@ -429,6 +482,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
           'Resultado por comum',
           'Total',
           'Aprovados',
+          'recuperacao',
           'Reprovados',
           'Cancelados',
         ],
@@ -437,6 +491,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
         item.nomeComum,
         item.total,
         item.aprovado,
+        item.recuperacao,
         item.reprovado,
         item.cancelado,
       ]),
@@ -454,6 +509,7 @@ export class RelatorioGrupoExameComponent implements OnInit {
         2: { halign: 'center' },
         3: { halign: 'center' },
         4: { halign: 'center' },
+        5: { halign: 'center' },
       },
     });
 
@@ -466,11 +522,21 @@ export class RelatorioGrupoExameComponent implements OnInit {
 
       autoTable(doc, {
         startY: 22,
-        head: [['Nível', 'Total', 'Aprovados', 'Reprovados', 'Cancelados']],
+        head: [
+          [
+            'Nível',
+            'Total',
+            'Aprovados',
+            'Recuperação',
+            'Reprovados',
+            'Cancelados',
+          ],
+        ],
         body: igreja.niveis.map((nivel) => [
           nivel.categoriaExameLabel,
           nivel.total,
           nivel.aprovado,
+          nivel.recuperacao,
           nivel.reprovado,
           nivel.cancelado,
         ]),

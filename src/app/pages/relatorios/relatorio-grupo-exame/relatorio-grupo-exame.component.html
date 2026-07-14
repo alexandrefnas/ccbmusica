@@ -53,6 +53,14 @@
           <strong>{{ resumoGeral.aprovado }}</strong>
         </div>
 
+        <div class="card recuperacao">
+          <span>Recuperação</span>
+
+          <strong>
+            {{ resumoGeral.recuperacao }}
+          </strong>
+        </div>
+
         <div class="card reprovado">
           <span>Reprovados</span>
           <strong>{{ resumoGeral.reprovado }}</strong>
@@ -107,8 +115,8 @@
                 <strong>{{ igreja.nomeComum }}</strong>
                 <span>
                   Total: {{ igreja.total }} | Aprovados: {{ igreja.aprovado }} |
-                  Reprovados: {{ igreja.reprovado }} | Cancelados:
-                  {{ igreja.cancelado }}
+                  Recuperação: {{ igreja.recuperacao }} | Reprovados:
+                  {{ igreja.reprovado }} | Cancelados: {{ igreja.cancelado }}
                 </span>
               </div>
 

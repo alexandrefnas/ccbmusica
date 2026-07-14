@@ -889,158 +889,149 @@ export class ExamesComponent implements OnInit {
   //     this.aplicarFiltroStatus();
   //   });
   // }
-carregarDados(): void {
-  combineLatest([
-    this.firestoreService.getExames(),
-    this.firestoreService.getCandidato(),
-    this.firestoreService.getIgrejas(),
-    this.firestoreService.getSemestres(),
-  ]).subscribe(([exames, alunos, igrejas, grupos]) => {
-    this.gruposExames = grupos;
 
-    if (!this.auth.temPermissao('exames', 'read')) {
-      this.dados = [];
-      this.dadosTodos = [];
-      this.listaSelect = [];
-      return;
-    }
+  carregarDados(): void {
+    combineLatest([
+      this.firestoreService.getExames(),
+      this.firestoreService.getCandidato(),
+      this.firestoreService.getIgrejas(),
+      this.firestoreService.getSemestres(),
+    ]).subscribe(([exames, alunos, igrejas, grupos]) => {
+      this.gruposExames = grupos;
 
-    const alunosPermitidos = alunos.filter((a) =>
-      this.auth.temAcessoAoRegistro(a),
-    );
+      if (!this.auth.temPermissao('exames', 'read')) {
+        this.dados = [];
+        this.dadosTodos = [];
+        this.listaSelect = [];
+        return;
+      }
 
-    const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
+      const alunosPermitidos = alunos.filter((a) =>
+        this.auth.temAcessoAoRegistro(a),
+      );
 
-    const dadosExames: ExameTabela[] = exames
-      .filter((exame) => {
-        const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
+      const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
 
-        return (
-          idsAlunosPermitidos.includes(exame.idAluno) &&
-          (exame.status === 'solicitado' ||
-            (!!grupo && grupo.concluido !== true))
+      const dadosExames: ExameTabela[] = exames
+        .filter((exame) => {
+          const grupo = grupos.find((g) => g.id === exame.idGrupoExame);
+
+          return (
+            idsAlunosPermitidos.includes(exame.idAluno) &&
+            (exame.status === 'solicitado' ||
+              (!!grupo && grupo.concluido !== true))
+          );
+        })
+        .map((exame) => {
+          const alunoFiltro = alunosPermitidos.find(
+            (a) => a.id === exame.idAluno,
+          );
+
+          const comum = igrejas.find((i) => i.id === alunoFiltro?.idComum);
+
+          const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
+            exame,
+            exame.etapaAtual,
+          );
+
+          return {
+            ...exame,
+
+            idadeAluno: this.calcularIdade(alunoFiltro?.dataNascimento),
+
+            instrumentoAluno: alunoFiltro?.idInstrumento || '',
+            afinacaoAluno: alunoFiltro?.afinacao || '',
+
+            idComum: alunoFiltro?.idComum || '',
+
+            comum: comum?.nomeCongregacao?.toLocaleUpperCase('pt-BR') || '',
+
+            dataSolicitacao: converterISOParaBR(exame.dataSolicitacao || ''),
+
+            // dataAgendada: converterISOParaBR(
+            //   avaliacaoGrupo?.dataAvaliacao || '',
+            // ),
+            dataAgendada: converterISOParaBR(
+              exame.status === 'recuperacao'
+                ? avaliacaoGrupo?.dataRecuperacao || ''
+                : avaliacaoGrupo?.dataAvaliacao || '',
+            ),
+
+            nomeAluno:
+              alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+              'ALUNO NÃO CADASTRADO',
+
+            tipoExameLabel: this.buscarLabel(
+              this.listaTipoExame,
+              exame.tipoExame,
+            ),
+
+            categoriaExameLabel: this.buscarCategoriaExame(
+              exame.categoriaExame || '',
+            ),
+
+            statusLabel: this.formatarStatus(exame.status),
+
+            etapaAtualLabel:
+              exame.status === 'aprovado'
+                ? 'CONCLUÍDO'
+                : exame.status === 'reprovado'
+                  ? 'REPROVADO'
+                  : avaliacaoGrupo?.nome || 'AGUARDANDO',
+          };
+        });
+
+      // Somente comuns existentes nos exames disponíveis
+      this.listaSelect = dadosExames
+        .filter((item) => item.idComum && item.comum)
+        .map((item) => ({
+          value: item.idComum!,
+          label: item.comum!,
+        }))
+        .filter(
+          (item, index, lista) =>
+            lista.findIndex((outro) => outro.value === item.value) === index,
+        )
+        .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+
+      const ordemStatus: Record<string, number> = {
+        solicitado: 1,
+        agendado: 2,
+        emAndamento: 3,
+        aprovado: 4,
+        reprovado: 5,
+        cancelado: 6,
+      };
+
+      this.dadosTodos = [...dadosExames].sort((a, b) => {
+        const statusA = ordemStatus[a.status] || 999;
+        const statusB = ordemStatus[b.status] || 999;
+
+        if (statusA !== statusB) {
+          return statusA - statusB;
+        }
+
+        const tipo = (a.tipoExame || '').localeCompare(b.tipoExame || '');
+
+        if (tipo !== 0) {
+          return tipo;
+        }
+
+        const categoria = (a.categoriaExame || '').localeCompare(
+          b.categoriaExame || '',
         );
-      })
-      .map((exame) => {
-        const alunoFiltro = alunosPermitidos.find(
-          (a) => a.id === exame.idAluno,
-        );
 
-        const comum = igrejas.find(
-          (i) => i.id === alunoFiltro?.idComum,
-        );
+        if (categoria !== 0) {
+          return categoria;
+        }
 
-        const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(
-          exame,
-          exame.etapaAtual,
-        );
-
-        return {
-          ...exame,
-
-          idadeAluno: this.calcularIdade(
-            alunoFiltro?.dataNascimento,
-          ),
-
-          instrumentoAluno: alunoFiltro?.idInstrumento || '',
-          afinacaoAluno: alunoFiltro?.afinacao || '',
-
-          idComum: alunoFiltro?.idComum || '',
-
-          comum:
-            comum?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
-            '',
-
-          dataSolicitacao: converterISOParaBR(
-            exame.dataSolicitacao || '',
-          ),
-
-          dataAgendada: converterISOParaBR(
-            avaliacaoGrupo?.dataAvaliacao || '',
-          ),
-
-          nomeAluno:
-            alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
-            'ALUNO NÃO CADASTRADO',
-
-          tipoExameLabel: this.buscarLabel(
-            this.listaTipoExame,
-            exame.tipoExame,
-          ),
-
-          categoriaExameLabel: this.buscarCategoriaExame(
-            exame.categoriaExame || '',
-          ),
-
-          statusLabel: this.formatarStatus(exame.status),
-
-          etapaAtualLabel:
-            exame.status === 'aprovado'
-              ? 'CONCLUÍDO'
-              : exame.status === 'reprovado'
-                ? 'REPROVADO'
-                : avaliacaoGrupo?.nome || 'AGUARDANDO',
-        };
+        return (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
       });
 
-    // Somente comuns existentes nos exames disponíveis
-    this.listaSelect = dadosExames
-      .filter((item) => item.idComum && item.comum)
-      .map((item) => ({
-        value: item.idComum!,
-        label: item.comum!,
-      }))
-      .filter(
-        (item, index, lista) =>
-          lista.findIndex(
-            (outro) => outro.value === item.value,
-          ) === index,
-      )
-      .sort((a, b) =>
-        a.label.localeCompare(b.label, 'pt-BR'),
-      );
-
-    const ordemStatus: Record<string, number> = {
-      solicitado: 1,
-      agendado: 2,
-      emAndamento: 3,
-      aprovado: 4,
-      reprovado: 5,
-      cancelado: 6,
-    };
-
-    this.dadosTodos = [...dadosExames].sort((a, b) => {
-      const statusA = ordemStatus[a.status] || 999;
-      const statusB = ordemStatus[b.status] || 999;
-
-      if (statusA !== statusB) {
-        return statusA - statusB;
-      }
-
-      const tipo = (a.tipoExame || '').localeCompare(
-        b.tipoExame || '',
-      );
-
-      if (tipo !== 0) {
-        return tipo;
-      }
-
-      const categoria = (
-        a.categoriaExame || ''
-      ).localeCompare(b.categoriaExame || '');
-
-      if (categoria !== 0) {
-        return categoria;
-      }
-
-      return (a.nomeAluno || '').localeCompare(
-        b.nomeAluno || '',
-      );
+      this.aplicarFiltroStatus();
+      this.atualizarSelecaoAposCarregar();
     });
-
-    this.aplicarFiltroStatus();
-  });
-}
+  }
 
   buscarPesquisa(): void {
     this.aplicarFiltroStatus();
@@ -1145,91 +1136,6 @@ carregarDados(): void {
     this.aplicarFiltroStatus();
     this.limparSelecaoExames();
   }
-  // aplicarFiltroStatus(): void {
-  //   if (this.statusFiltro === 'TODOS') {
-  //     this.dados = [...this.dadosTodos];
-  //     return;
-  //   }
-
-  //   this.dados = this.dadosTodos.filter(
-  //     (item) => item.status === this.statusFiltro,
-  //   );
-  //   this.paginaAtual = 1;
-  // }
-
-  // aplicarFiltroStatus(): void {
-  //   let dadosFiltrados = [...this.dadosTodos];
-
-  //   // Filtro por status
-  //   if (this.statusFiltro !== 'TODOS') {
-  //     dadosFiltrados = dadosFiltrados.filter(
-  //       (item) => item.status === this.statusFiltro,
-  //     );
-  //   }
-
-  //   // Filtro por pesquisa
-  //   if (this.pesquisa.trim()) {
-  //     const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
-
-  //     dadosFiltrados = dadosFiltrados.filter(
-  //       (item) =>
-  //         item.nomeAluno?.includes(termo) ||
-  //         item.idadeAluno?.includes(termo) ||
-  //         item.tipoExameLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
-  //         item.categoriaExameLabel
-  //           ?.toLocaleUpperCase('pt-BR')
-  //           .includes(termo) ||
-  //         item.statusLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
-  //         item.etapaAtualLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
-  //         item.dataSolicitacao?.includes(termo) ||
-  //         item.dataAgendada?.includes(termo),
-  //     );
-  //   }
-
-  //   this.dados = dadosFiltrados;
-  //   this.paginaAtual = 1;
-  // }
-
-  // aplicarFiltroStatus(): void {
-  //   let dadosFiltrados = [...this.dadosTodos];
-
-  //   // Filtro por status
-  //   if (this.statusFiltro !== 'TODOS') {
-  //     dadosFiltrados = dadosFiltrados.filter(
-  //       (item) => item.status === this.statusFiltro,
-  //     );
-  //   }
-
-  //   // Filtro por categoria
-  //   if (this.statusCategorias !== 'TODOS') {
-  //     dadosFiltrados = dadosFiltrados.filter(
-  //       (item) => item.categoriaExame === this.statusCategorias,
-  //     );
-  //   }
-
-  //   // Filtro por pesquisa
-  //   if (this.pesquisa.trim()) {
-  //     const termo = this.pesquisa.trim().toLocaleUpperCase('pt-BR');
-
-  //     dadosFiltrados = dadosFiltrados.filter(
-  //       (item) =>
-  //         item.nomeAluno?.includes(termo) ||
-  //         item.idadeAluno?.includes(termo) ||
-  //         item.comum?.includes(termo) ||
-  //         item.tipoExameLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
-  //         item.categoriaExameLabel
-  //           ?.toLocaleUpperCase('pt-BR')
-  //           .includes(termo) ||
-  //         item.statusLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
-  //         item.etapaAtualLabel?.toLocaleUpperCase('pt-BR').includes(termo) ||
-  //         item.dataSolicitacao?.includes(termo) ||
-  //         item.dataAgendada?.includes(termo),
-  //     );
-  //   }
-
-  //   this.dados = dadosFiltrados;
-  //   this.paginaAtual = 1;
-  // }
 
   aplicarFiltroStatus(): void {
     let dadosFiltrados = [...this.dadosTodos];
@@ -1330,6 +1236,7 @@ carregarDados(): void {
       solicitado: 'SOLICITADO',
       agendado: 'AGENDADO',
       emAndamento: 'EM ANDAMENTO',
+      recuperacao: 'RECUPERAÇÃO',
       aprovado: 'APROVADO',
       reprovado: 'REPROVADO',
       cancelado: 'CANCELADO',
@@ -1337,87 +1244,6 @@ carregarDados(): void {
 
     return mapa[status] || status;
   }
-
-  // criarEtapas(tipoExame: string) {
-  //   if (tipoExame === 'TEÓRICO') {
-  //     return [
-  //       {
-  //         nome: 'PARTE TEÓRICA',
-  //         ordem: 1,
-  //         nota: null,
-  //         notaMinima: 7,
-  //         resultado: 'pendente' as const,
-  //         dataAgendada: '',
-  //         professorLancamento: '',
-  //         dataLancamento: '',
-  //       },
-  //     ];
-  //   }
-
-  //   if (tipoExame === 'PRÁTICO') {
-  //     return [
-  //       {
-  //         nome: 'PARTE PRÁTICA',
-  //         ordem: 1,
-  //         nota: null,
-  //         notaMinima: 7,
-  //         resultado: 'pendente' as const,
-  //         dataAgendada: '',
-  //         professorLancamento: '',
-  //         dataLancamento: '',
-  //       },
-  //     ];
-  //   }
-
-  //   return [
-  //     {
-  //       nome: 'PARTE TEÓRICA',
-  //       ordem: 1,
-  //       nota: null,
-  //       notaMinima: 7,
-  //       resultado: 'pendente' as const,
-  //       dataAgendada: '',
-  //       professorLancamento: '',
-  //       dataLancamento: '',
-  //     },
-  //     {
-  //       nome: 'PARTE PRÁTICA',
-  //       ordem: 2,
-  //       nota: null,
-  //       notaMinima: 7,
-  //       resultado: 'bloqueado' as const,
-  //       dataAgendada: '',
-  //       professorLancamento: '',
-  //       dataLancamento: '',
-  //     },
-  //   ];
-  // }
-
-  // criarEtapasPorGrupo(grupo: GrupoExames, exame: Exames): any[] {
-  //   const periodoGrupo = grupo.periodos?.find(
-  //     (p: any) => p.categoriaExame === exame.tipoExame,
-  //   );
-
-  //   if (!periodoGrupo) return [];
-
-  //   const etapaPeriodo = periodoGrupo.etapas?.find(
-  //     (e: any) => e.tipo === exame.categoriaExame,
-  //   );
-
-  //   if (!etapaPeriodo) return [];
-
-  //   return etapaPeriodo.avaliacao.map((a: any) => ({
-  //     nome: a.nome,
-  //     ordem: a.ordem,
-  //     nota: null,
-  //     notaMinima: a.notaMinima,
-  //     notaMaxima: a.notaMaxima,
-  //     resultado: a.bloqueadaInicialmente ? 'bloqueado' : 'pendente',
-  //     dataAgendada: a.dataAvaliacao || '',
-  //     professorLancamento: '',
-  //     dataLancamento: '',
-  //   }));
-  // }
 
   criarEtapasPorGrupo(grupo: GrupoExames, exame: Exames): any[] {
     const periodoGrupo = grupo.periodos?.find(
@@ -1438,6 +1264,12 @@ carregarDados(): void {
       resultado: a.bloqueadaInicialmente ? 'bloqueado' : 'pendente',
       professorLancamento: '',
       dataLancamento: '',
+      observacaoLancamento: '',
+
+      notaRecuperacao: null,
+      dataRecuperacao: '',
+      professorRecuperacao: '',
+      observacaoRecuperacao: '',
     }));
   }
 
@@ -1462,6 +1294,14 @@ carregarDados(): void {
     );
   }
 
+  estaEmRecuperacao(exame: Exames, etapa: any): boolean {
+    return (
+      exame.status === 'recuperacao' &&
+      etapa.resultado === 'recuperacao' &&
+      exame.etapaAtual === etapa.ordem
+    );
+  }
+
   async onSalvar(): Promise<void> {
     if (!this.dadosForms.valid) {
       this.dadosForms.markAllAsTouched();
@@ -1471,30 +1311,6 @@ carregarDados(): void {
       );
       return;
     }
-
-    // const dataAgendada = this.dadosForms.value.dataAgendada
-    //   ? formatarDataString(new Date(this.dadosForms.value.dataAgendada))
-    //   : '';
-
-    // const baseData: Exames = {
-    //   idAluno: this.dadosForms.value.idAluno,
-    //   tipoExame: upper(this.dadosForms.value.tipoExame),
-    //   categoriaExame: upper(this.dadosForms.value.categoriaExame),
-    //   observacao: upper(this.dadosForms.value.observacao),
-    //   dataSolicitacao:
-    //     this.dadosParaEditar?.dataSolicitacao || formatarDataString(new Date()),
-    //   status: 'solicitado',
-    //   etapaAtual: 1,
-    //   etapas:
-    //     this.dadosParaEditar?.etapas ||
-    //     this.criarEtapas(upper(this.dadosForms.value.tipoExame)),
-    // };
-
-    // if (baseData.dataAgendada) {
-    //   baseData.etapas = baseData.etapas.map((e) =>
-    //     e.ordem === 1 ? { ...e, dataAgendada: baseData.dataAgendada } : e,
-    //   );
-    // }
 
     const baseData: Exames = {
       idAluno: this.dadosForms.value.idAluno,
@@ -1572,157 +1388,28 @@ carregarDados(): void {
       categoriaExame: exame.categoriaExame || '',
       observacao: exame.observacao || '',
     });
-
-    // this.dadosForms.patchValue({
-    //   idAluno: exame.idAluno || '',
-    //   tipoExameLabel: this.buscarLabel(this.listaTipoExame, exame.tipoExame),
-    //   categoriaExameLabel: this.buscarCategoriaExame(
-    //     exame.categoriaExame || '',
-    //   ),
-    //   // tipoExame: exame.tipoExame || '',
-    //   // categoriaExame: exame.categoriaExame || '',
-    //   // dataAgendada: exame.dataAgendada || '',
-    //   // professorResponsavel: exame.professorResponsavel || '',
-    //   observacao: exame.observacao || '',
-    // });
   }
 
-  // async lancarNota(exame: Exames): Promise<void> {
-  //   const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
+  // podeLancarNota(item: ExameTabela): boolean {
+  //   const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(item, item.etapaAtual);
 
-  //   if (!etapa) {
-  //     this.snackBar.open('Nenhuma etapa disponível.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   const notaTexto = prompt(`Informe a nota da etapa: ${etapa.nome}`);
-
-  //   if (notaTexto === null) return;
-
-  //   const nota = Number(notaTexto.replace(',', '.'));
-
-  //   if (isNaN(nota)) {
-  //     this.snackBar.open('Nota inválida.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   const etapasAtualizadas = exame.etapas.map((e) => {
-  //     if (e.ordem !== etapa.ordem) return e;
-
-  //     return {
-  //       ...e,
-  //       nota,
-  //       resultado:
-  //         nota >= e.notaMinima ? ('aprovado' as const) : ('reprovado' as const),
-  //       dataLancamento: formatarDataString(new Date()),
-  //     };
-  //   });
-
-  //   let novoStatus: Exames['status'] = 'emAndamento';
-  //   let novaEtapaAtual = exame.etapaAtual;
-
-  //   if (nota < etapa.notaMinima) {
-  //     novoStatus = 'reprovado';
-  //   } else {
-  //     const proximaEtapa = etapasAtualizadas.find(
-  //       (e) => e.ordem === exame.etapaAtual + 1,
-  //     );
-
-  //     if (proximaEtapa) {
-  //       novaEtapaAtual = proximaEtapa.ordem;
-
-  //       etapasAtualizadas.forEach((e) => {
-  //         if (e.ordem === proximaEtapa.ordem) {
-  //           e.resultado = 'pendente';
-  //         }
-  //       });
-
-  //       novoStatus = 'emAndamento';
-  //     } else {
-  //       novoStatus = 'aprovado';
-  //     }
-  //   }
-
-  //   await this.firestoreService.updateExame(exame.id!, {
-  //     etapas: etapasAtualizadas,
-  //     etapaAtual: novaEtapaAtual,
-  //     status: novoStatus,
-  //   });
-
-  //   this.snackBar.open('Nota lançada com sucesso!', 'Fechar', {
-  //     duration: 4000,
-  //   });
-  // }
-
-  // lancarNota(exame: Exames): void {
-  //   const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
-
-  //   if (!etapa) {
-  //     this.snackBar.open('Nenhuma etapa disponível.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-  //   console.log('exame:', exame);
-  //   this.exameSelecionado = exame;
-  //   this.etapaSelecionada = etapa;
-  //   this.notaForm.reset();
-
-  //   this.notaForm.patchValue({
-  //     nota: etapa.nota ?? '',
-  //     professorLancamento:
-  //       etapa.professorLancamento || this.auth.usuario?.nome || '',
-  //   });
-
-  //   this.mostrarModalNota = true;
-  // }
-
-  // lancarNota(exame: ExameTabela): void {
-  //   const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
-  //   if (!etapa) {
-  //     this.snackBar.open('Nenhuma etapa disponível.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   this.exameSelecionado = exame;
-  //   this.etapaSelecionada = etapa;
-
-  //   const notaControl = this.notaForm.get('nota');
-
-  //   const configEtapa = this.buscarAvaliacaoDoGrupo(exame, etapa.ordem);
-
-  //   notaControl?.setValidators([
-  //     Validators.required,
-  //     Validators.min(0),
-  //     Validators.max(configEtapa?.notaMaxima ?? 0),
-  //   ]);
-  //   // notaControl?.setValidators([
-  //   //   Validators.required,
-  //   //   Validators.min(0),
-  //   //   // Validators.max(etapa.notaMaxima),
-  //   // ]);
-
-  //   notaControl?.updateValueAndValidity();
-
-  //   this.notaForm.reset();
-
-  //   this.notaForm.patchValue({
-  //     nota: etapa.nota ?? '',
-  //     professorLancamento:
-  //       etapa.professorLancamento || this.auth.usuario?.nome || '',
-  //   });
-
-  //   this.mostrarModalNota = true;
+  //   return (
+  //     this.liberaEditar &&
+  //     item.status !== 'solicitado' &&
+  //     item.status !== 'aprovado' &&
+  //     item.status !== 'reprovado' &&
+  //     item.status !== 'cancelado' &&
+  //     !!avaliacaoGrupo?.dataAvaliacao
+  //   );
   // }
 
   podeLancarNota(item: ExameTabela): boolean {
     const avaliacaoGrupo = this.buscarAvaliacaoDoGrupo(item, item.etapaAtual);
+
+    const dataLancamento =
+      item.status === 'recuperacao'
+        ? avaliacaoGrupo?.dataRecuperacao
+        : avaliacaoGrupo?.dataAvaliacao;
 
     return (
       this.liberaEditar &&
@@ -1730,7 +1417,7 @@ carregarDados(): void {
       item.status !== 'aprovado' &&
       item.status !== 'reprovado' &&
       item.status !== 'cancelado' &&
-      !!avaliacaoGrupo?.dataAvaliacao
+      !!dataLancamento
     );
   }
 
@@ -1761,6 +1448,8 @@ carregarDados(): void {
     this.etapaSelecionada = etapa;
     this.configEtapaSelecionada = configEtapa;
 
+    const emRecuperacao = this.estaEmRecuperacao(exame, etapa);
+
     const notaControl = this.notaForm.get('nota');
 
     notaControl?.setValidators([
@@ -1774,10 +1463,14 @@ carregarDados(): void {
     this.notaForm.reset();
 
     this.notaForm.patchValue({
-      nota: etapa.nota ?? '',
-      professorLancamento:
-        etapa.professorLancamento || this.auth.usuario?.nome || '',
-      observacaoLancamento: etapa.observacaoLancamento || '',
+      nota: emRecuperacao ? (etapa.notaRecuperacao ?? '') : (etapa.nota ?? ''),
+      professorLancamento: emRecuperacao
+        ? etapa.professorRecuperacao || this.auth.usuario?.nome || ''
+        : etapa.professorLancamento || this.auth.usuario?.nome || '',
+
+      observacaoLancamento: emRecuperacao
+        ? etapa.observacaoRecuperacao || ''
+        : etapa.observacaoLancamento || '',
     });
 
     this.mostrarModalNota = true;
@@ -1826,62 +1519,67 @@ carregarDados(): void {
   }
 
   // async salvarNota(): Promise<void> {
-  //   // if (
-  //   //   !this.notaForm.valid ||
-  //   //   !this.exameSelecionado ||
-  //   //   !this.etapaSelecionada
-  //   // ) {
-  //   //   this.notaForm.markAllAsTouched();
-  //   //   return;
-  //   // }
-
   //   if (!this.exameSelecionado || !this.etapaSelecionada) {
   //     return;
   //   }
 
-  //   const notaDigitada = this.converterNotaParaNumero(this.notaForm.value.nota);
-  //   // const notaMaxima = this.etapaSelecionada?.notaMaxima ?? 0;
-  //   const configEtapa = this.buscarAvaliacaoDoGrupo(
-  //     this.exameSelecionado,
-  //     this.etapaSelecionada.ordem,
-  //   );
+  //   const exame = this.exameSelecionado;
+  //   const etapa = this.etapaSelecionada;
 
-  //   const notaMaxima = configEtapa?.notaMaxima ?? 0;
-  //   const notaMinima = configEtapa?.notaMinima ?? 0;
+  //   const configEtapa = this.buscarAvaliacaoDoGrupo(exame, etapa.ordem);
 
-  //   if (notaDigitada > notaMaxima) {
+  //   if (!configEtapa) {
   //     this.snackBar.open(
-  //       `A nota não pode ser maior que ${notaMaxima}.`,
+  //       'Configuração da etapa não encontrada no grupo.',
   //       'Fechar',
-  //       { duration: 3000 },
+  //       {
+  //         duration: 3000,
+  //       },
   //     );
   //     return;
   //   }
 
-  //   if (notaDigitada < 0) {
-  //     this.snackBar.open('A nota não pode ser menor que zero.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
+  //   const nota = this.converterNotaParaNumero(this.notaForm.value.nota);
+  //   const notaMinima = configEtapa.notaMinima ?? 0;
+  //   const notaMaxima = configEtapa.notaMaxima ?? 0;
 
-  //   if (this.notaForm.invalid) {
-  //     this.notaForm.markAllAsTouched();
-  //     return;
-  //   }
-
-  //   const notaVazia =
+  //   if (
   //     this.notaForm.value.nota === null ||
   //     this.notaForm.value.nota === undefined ||
-  //     this.notaForm.value.nota === '';
-
-  //   if (this.etapaSelecionada.nota === null && notaVazia) {
+  //     this.notaForm.value.nota === ''
+  //   ) {
   //     this.notaForm.markAllAsTouched();
   //     this.snackBar.open('Informe a nota.', 'Fechar', {
   //       duration: 3000,
   //     });
   //     return;
   //   }
+
+  //   if (isNaN(nota)) {
+  //     this.snackBar.open('Nota inválida.', 'Fechar', {
+  //       duration: 3000,
+  //     });
+  //     return;
+  //   }
+
+  //   if (nota < 0) {
+  //     this.snackBar.open('A nota não pode ser menor que zero.', 'Fechar', {
+  //       duration: 3000,
+  //     });
+  //     return;
+  //   }
+
+  //   if (nota > notaMaxima) {
+  //     this.snackBar.open(
+  //       `A nota não pode ser maior que ${notaMaxima}.`,
+  //       'Fechar',
+  //       {
+  //         duration: 3000,
+  //       },
+  //     );
+  //     return;
+  //   }
+
   //   const professorLancamento = upper(this.notaForm.value.professorLancamento);
 
   //   if (!professorLancamento) {
@@ -1891,65 +1589,52 @@ carregarDados(): void {
   //     });
   //     return;
   //   }
-  //   const nota = Number(String(this.notaForm.value.nota).replace(',', '.'));
-
-  //   if (isNaN(nota)) {
-  //     this.snackBar.open('Nota inválida.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   const exame = this.exameSelecionado;
-  //   const etapa = this.etapaSelecionada;
 
   //   const nomeAluno = this.getNomeAluno(exame.idAluno);
   //   const mensagem = `Deseja realmente salvar a nota ${nota} para ${nomeAluno}?`;
 
-  //   // if (!confirmarAcao(mensagem)) return;
   //   if (!(await this.alertService.confirmar(mensagem))) return;
 
   //   const etapasAtualizadas = exame.etapas.map((e) => {
-  //     if (e.ordem !== etapa.ordem) {
-  //       /**
-  //        * Se estou alterando uma etapa anterior,
-  //        * as etapas seguintes precisam ser recalculadas.
-  //        */
-  //       if (e.ordem > etapa.ordem) {
-  //         return {
-  //           ...e,
-  //           nota: null,
-  //           resultado: 'bloqueado' as const,
-  //           dataLancamento: '',
-  //           professorLancamento: '',
-  //         };
-  //       }
-
-  //       return e;
+  //     if (e.ordem < etapa.ordem) {
+  //       return {
+  //         ordem: e.ordem,
+  //         nota: e.nota ?? null,
+  //         resultado: e.resultado,
+  //         dataLancamento: e.dataLancamento || '',
+  //         professorLancamento: e.professorLancamento || '',
+  //         observacaoLancamento: e.observacaoLancamento || '',
+  //       };
   //     }
 
-  //     // return {
-  //     //   ...e,
-  //     //   nota,
-  //     //   resultado: nota >= notaMinima ? 'aprovado' : 'reprovado',
-  //     //   // nota >= e.notaMinima ? ('aprovado' as const) : ('reprovado' as const),
-  //     //   dataLancamento: formatarDataString(new Date()),
-  //     //   professorLancamento,
-  //     // };
+  //     if (e.ordem === etapa.ordem) {
+  //       return {
+  //         ordem: e.ordem,
+  //         nota,
+  //         resultado:
+  //           nota >= notaMinima ? ('aprovado' as const) : ('reprovado' as const),
+  //         dataLancamento: formatarDataString(new Date()),
+  //         professorLancamento,
+  //         observacaoLancamento: upper(
+  //           this.notaForm.value.observacaoLancamento || '',
+  //         ),
+  //       };
+  //     }
+
   //     return {
-  //       ...e,
-  //       nota,
-  //       resultado:
-  //         nota >= notaMinima ? ('aprovado' as const) : ('reprovado' as const),
-  //       dataLancamento: formatarDataString(new Date()),
-  //       professorLancamento,
+  //       ordem: e.ordem,
+  //       nota: null,
+  //       resultado: 'bloqueado' as const,
+  //       dataLancamento: '',
+  //       professorLancamento: '',
+  //       observacaoLancamento: '',
   //     };
   //   });
 
   //   let novoStatus: Exames['status'] = 'emAndamento';
   //   let novaEtapaAtual = etapa.ordem;
 
-  //   if (nota < etapa.notaMinima) {
+  //   if (nota < notaMinima) {
   //     novoStatus = 'reprovado';
   //     novaEtapaAtual = etapa.ordem;
   //   } else {
@@ -1967,27 +1652,13 @@ carregarDados(): void {
   //     }
   //   }
 
-  //   // await this.firestoreService.updateExame(exame.id!, {
-  //   //   etapas: etapasAtualizadas,
-  //   //   etapaAtual: novaEtapaAtual,
-  //   //   status: novoStatus,
-  //   // });
-
-  //   // this.snackBar.open('Nota salva com sucesso!', 'Fechar', {
-  //   //   duration: 4000,
-  //   // });
-
-  //   // this.fecharModalNota();
   //   await this.firestoreService.updateExame(exame.id!, {
   //     etapas: etapasAtualizadas,
   //     etapaAtual: novaEtapaAtual,
   //     status: novoStatus,
   //   });
 
-  //   this.etapaSelecionada = etapasAtualizadas.find(
-  //     (e) => e.ordem === etapa.ordem,
-  //   );
-
+  //   if (this.tabelaVisivel === false) this.tabelaVisivel = true;
   //   this.snackBar.open('Nota salva com sucesso!', 'Fechar', {
   //     duration: 4000,
   //   });
@@ -2013,29 +1684,49 @@ carregarDados(): void {
           duration: 3000,
         },
       );
+
       return;
     }
 
-    const nota = this.converterNotaParaNumero(this.notaForm.value.nota);
-    const notaMinima = configEtapa.notaMinima ?? 0;
-    const notaMaxima = configEtapa.notaMaxima ?? 0;
+    const valorNota = this.notaForm.value.nota;
 
-    if (
-      this.notaForm.value.nota === null ||
-      this.notaForm.value.nota === undefined ||
-      this.notaForm.value.nota === ''
-    ) {
+    if (valorNota === null || valorNota === undefined || valorNota === '') {
       this.notaForm.markAllAsTouched();
+
       this.snackBar.open('Informe a nota.', 'Fechar', {
         duration: 3000,
       });
+
       return;
     }
+
+    const nota = this.converterNotaParaNumero(valorNota);
+
+    const notaMinima = Number(configEtapa.notaMinima ?? 0);
+
+    const notaMaxima = Number(configEtapa.notaMaxima ?? 0);
+
+    // const notaMinRecuperacao =
+    //   configEtapa.notaMinRecuperacao !== null &&
+    //   configEtapa.notaMinRecuperacao !== undefined
+    //     ? Number(configEtapa.notaMinRecuperacao)
+    //     : null;
+
+    const possuiRecuperacao =
+      configEtapa.notaMinRecuperacao !== null &&
+      configEtapa.notaMinRecuperacao !== undefined &&
+      configEtapa.notaMinRecuperacao !== '' &&
+      !isNaN(Number(configEtapa.notaMinRecuperacao));
+
+    const notaMinRecuperacao = possuiRecuperacao
+      ? Number(configEtapa.notaMinRecuperacao)
+      : null;
 
     if (isNaN(nota)) {
       this.snackBar.open('Nota inválida.', 'Fechar', {
         duration: 3000,
       });
+
       return;
     }
 
@@ -2043,6 +1734,7 @@ carregarDados(): void {
       this.snackBar.open('A nota não pode ser menor que zero.', 'Fechar', {
         duration: 3000,
       });
+
       return;
     }
 
@@ -2054,6 +1746,7 @@ carregarDados(): void {
           duration: 3000,
         },
       );
+
       return;
     }
 
@@ -2061,86 +1754,211 @@ carregarDados(): void {
 
     if (!professorLancamento) {
       this.notaForm.markAllAsTouched();
+
       this.snackBar.open('Informe o professor.', 'Fechar', {
         duration: 3000,
       });
+
       return;
     }
 
+    const observacao = upper(this.notaForm.value.observacaoLancamento || '');
+
+    const emRecuperacao = this.estaEmRecuperacao(exame, etapa);
+
     const nomeAluno = this.getNomeAluno(exame.idAluno);
-    const mensagem = `Deseja realmente salvar a nota ${nota} para ${nomeAluno}?`;
 
-    if (!(await this.alertService.confirmar(mensagem))) return;
+    const descricaoLancamento = emRecuperacao ? 'nota da recuperação' : 'nota';
 
-    const etapasAtualizadas = exame.etapas.map((e) => {
-      if (e.ordem < etapa.ordem) {
-        return {
-          ordem: e.ordem,
-          nota: e.nota ?? null,
-          resultado: e.resultado,
-          dataLancamento: e.dataLancamento || '',
-          professorLancamento: e.professorLancamento || '',
-          observacaoLancamento: e.observacaoLancamento || '',
-        };
-      }
+    const mensagem =
+      `Deseja realmente salvar a ${descricaoLancamento} ` +
+      `${nota} para ${nomeAluno}?`;
 
-      if (e.ordem === etapa.ordem) {
-        return {
-          ordem: e.ordem,
-          nota,
-          resultado:
-            nota >= notaMinima ? ('aprovado' as const) : ('reprovado' as const),
-          dataLancamento: formatarDataString(new Date()),
-          professorLancamento,
-          observacaoLancamento: upper(
-            this.notaForm.value.observacaoLancamento || '',
-          ),
-        };
-      }
-
-      return {
-        ordem: e.ordem,
-        nota: null,
-        resultado: 'bloqueado' as const,
-        dataLancamento: '',
-        professorLancamento: '',
-        observacaoLancamento: '',
-      };
-    });
+    if (!(await this.alertService.confirmar(mensagem))) {
+      return;
+    }
 
     let novoStatus: Exames['status'] = 'emAndamento';
     let novaEtapaAtual = etapa.ordem;
 
-    if (nota < notaMinima) {
+    /*
+     * Variável específica para a mensagem.
+     * Evita o erro de comparação de tipos do TypeScript.
+     */
+    let entrouEmRecuperacao = false;
+
+    const etapasAtualizadas = exame.etapas.map((e) => {
+      /*
+       * As outras etapas permanecem como estão.
+       */
+      if (e.ordem !== etapa.ordem) {
+        return {
+          ...e,
+        };
+      }
+
+      /*
+       * LANÇAMENTO DA NOTA DE RECUPERAÇÃO
+       */
+      if (emRecuperacao) {
+        const aprovadoNaRecuperacao = nota >= notaMinima;
+
+        novoStatus = aprovadoNaRecuperacao ? 'emAndamento' : 'reprovado';
+
+        return {
+          ...e,
+
+          notaRecuperacao: nota,
+          dataRecuperacao: formatarDataString(new Date()),
+          professorRecuperacao: professorLancamento,
+          observacaoRecuperacao: observacao,
+
+          resultado: aprovadoNaRecuperacao
+            ? ('aprovado' as const)
+            : ('reprovado' as const),
+        };
+      }
+
+      /*
+       * APROVADO DIRETAMENTE
+       */
+      if (nota >= notaMinima) {
+        novoStatus = 'emAndamento';
+
+        return {
+          ...e,
+
+          nota,
+          resultado: 'aprovado' as const,
+          dataLancamento: formatarDataString(new Date()),
+          professorLancamento,
+          observacaoLancamento: observacao,
+
+          notaRecuperacao: null,
+          dataRecuperacao: '',
+          professorRecuperacao: '',
+          observacaoRecuperacao: '',
+        };
+      }
+
+      /*
+       * ENTROU EM RECUPERAÇÃO
+       */
+      // if (notaMinRecuperacao !== null && nota >= notaMinRecuperacao) {
+      if (
+        possuiRecuperacao &&
+        notaMinRecuperacao !== null &&
+        nota >= notaMinRecuperacao
+      ) {
+        novoStatus = 'recuperacao';
+        entrouEmRecuperacao = true;
+
+        return {
+          ...e,
+
+          nota,
+          resultado: 'recuperacao' as const,
+          dataLancamento: formatarDataString(new Date()),
+          professorLancamento,
+          observacaoLancamento: observacao,
+
+          notaRecuperacao: null,
+          dataRecuperacao: '',
+          professorRecuperacao: '',
+          observacaoRecuperacao: '',
+        };
+      }
+
+      /*
+       * REPROVADO DIRETAMENTE
+       */
       novoStatus = 'reprovado';
-      novaEtapaAtual = etapa.ordem;
-    } else {
+
+      return {
+        ...e,
+
+        nota,
+        resultado: 'reprovado' as const,
+        dataLancamento: formatarDataString(new Date()),
+        professorLancamento,
+        observacaoLancamento: observacao,
+
+        notaRecuperacao: null,
+        dataRecuperacao: '',
+        professorRecuperacao: '',
+        observacaoRecuperacao: '',
+      };
+    });
+
+    const etapaAtualizada = etapasAtualizadas.find(
+      (e) => e.ordem === etapa.ordem,
+    );
+
+    /*
+     * Só avança quando a etapa foi aprovada.
+     */
+    if (etapaAtualizada?.resultado === 'aprovado') {
       const proximaEtapa = etapasAtualizadas.find(
         (e) => e.ordem === etapa.ordem + 1,
       );
 
       if (proximaEtapa) {
         proximaEtapa.resultado = 'pendente';
+
         novaEtapaAtual = proximaEtapa.ordem;
         novoStatus = 'emAndamento';
       } else {
         novaEtapaAtual = etapa.ordem;
         novoStatus = 'aprovado';
       }
+    } else {
+      /*
+       * Em recuperação ou reprovado, permanece na mesma etapa.
+       */
+      novaEtapaAtual = etapa.ordem;
     }
 
-    await this.firestoreService.updateExame(exame.id!, {
-      etapas: etapasAtualizadas,
-      etapaAtual: novaEtapaAtual,
-      status: novoStatus,
-    });
+    try {
+      await this.firestoreService.updateExame(exame.id!, {
+        etapas: etapasAtualizadas,
+        etapaAtual: novaEtapaAtual,
+        status: novoStatus,
+      });
 
-    if (this.tabelaVisivel === false) this.tabelaVisivel = true;
-    this.snackBar.open('Nota salva com sucesso!', 'Fechar', {
-      duration: 4000,
-    });
+      if (!this.tabelaVisivel) {
+        this.tabelaVisivel = true;
+      }
 
-    this.fecharModalNota();
+      let mensagemSucesso = 'Nota salva com sucesso!';
+
+      if (emRecuperacao) {
+        mensagemSucesso =
+          etapaAtualizada?.resultado === 'aprovado'
+            ? 'Nota da recuperação salva. Candidato aprovado!'
+            : 'Nota da recuperação salva. Candidato reprovado!';
+      } else if (entrouEmRecuperacao) {
+        mensagemSucesso = 'Nota salva. Candidato encaminhado para recuperação!';
+      } else if (etapaAtualizada?.resultado === 'reprovado') {
+        mensagemSucesso = 'Nota salva. Candidato reprovado!';
+      } else if (
+        etapaAtualizada?.resultado === 'aprovado' &&
+        !etapasAtualizadas.some((e) => e.ordem > etapa.ordem)
+      ) {
+        mensagemSucesso = 'Nota salva. Exame concluído com aprovação!';
+      }
+
+      this.snackBar.open(mensagemSucesso, 'Fechar', {
+        duration: 4000,
+      });
+
+      this.fecharModalNota();
+    } catch (error) {
+      console.error('Erro ao salvar a nota:', error);
+
+      this.snackBar.open('Erro ao salvar a nota.', 'Fechar', {
+        duration: 4000,
+      });
+    }
   }
 
   converterNotaParaNumero(valor: any): number {
@@ -2150,114 +1968,6 @@ carregarDados(): void {
 
     return Number(String(valor).replace(',', '.'));
   }
-
-  // agendarEtapa(exame: Exames): void {
-  //   const etapa = exame.etapas.find((e) => e.ordem === exame.etapaAtual);
-
-  //   if (!etapa) {
-  //     this.snackBar.open('Nenhuma etapa atual encontrada.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   this.exameAgendamentoEtapa = exame;
-  //   this.etapaAgendamento = etapa;
-
-  //   this.agendamentoEtapaForm.patchValue({
-  //     dataAgendada: etapa.dataAgendada || '',
-  //   });
-
-  //   this.mostrarModalAgendamentoEtapa = true;
-  // }
-
-  // agendarEtapa(exame: Exames): void {
-  //   const etapa = exame.etapas.find(
-  //     (e) => Number(e.ordem) === Number(exame.etapaAtual),
-  //   );
-
-  //   if (!etapa) {
-  //     this.snackBar.open('Nenhuma etapa atual encontrada.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   // console.log('ETAPA ATUAL:', etapa);
-  //   // console.log('DATA DA ETAPA:', etapa.dataAgendada);
-
-  //   this.exameAgendamentoEtapa = exame;
-  //   this.etapaAgendamento = etapa;
-
-  //   this.agendamentoEtapaForm.reset();
-
-  //   this.mostrarModalAgendamentoEtapa = true;
-
-  //   setTimeout(() => {
-  //     this.agendamentoEtapaForm.patchValue({
-  //       dataAgendada: etapa.dataAgendada || '',
-  //     });
-  //   });
-  // }
-
-  // async salvarAgendamentoEtapa(): Promise<void> {
-  //   if (
-  //     // !this.agendamentoEtapaForm.valid ||
-  //     !this.exameAgendamentoEtapa ||
-  //     !this.etapaAgendamento
-  //   ) {
-  //     // this.agendamentoEtapaForm.markAllAsTouched();
-  //     return;
-  //   }
-
-  //   const dataAgendada = formatarDataString(
-  //     new Date(this.agendamentoEtapaForm.value.dataAgendada),
-  //   );
-
-  //   // const dataAgendada = this.agendamentoEtapaForm.value.dataAgendada;
-
-  //   const exame = this.exameAgendamentoEtapa;
-  //   const etapa = this.etapaAgendamento;
-
-  //   const etapasAtualizadas = exame.etapas.map((e) =>
-  //     e.ordem === etapa.ordem ? { ...e, dataAgendada } : e,
-  //   );
-
-  //   await this.firestoreService.updateExame(exame.id!, {
-  //     etapas: etapasAtualizadas,
-  //     status: 'agendado',
-  //   });
-
-  //   this.snackBar.open('Etapa agendada com sucesso!', 'Fechar', {
-  //     duration: 4000,
-  //   });
-
-  //   this.fecharModalAgendamentoEtapa();
-  // }
-
-  // async cancelarExame(exame: Exames): Promise<void> {
-  //   const confirmacao = confirm(
-  //     `Deseja realmente cancelar o exame de "${(exame as any).nomeAluno}"?`,
-  //   );
-
-  //   if (!confirmacao) return;
-
-  //   try {
-  //     await this.firestoreService.updateExame(exame.id!, {
-  //       status: 'cancelado',
-  //     });
-
-  //     this.snackBar.open('Exame cancelado com sucesso!', 'Fechar', {
-  //       duration: 4000,
-  //     });
-  //   } catch (error) {
-  //     console.error(error);
-
-  //     this.snackBar.open('Erro ao cancelar exame.', 'Fechar', {
-  //       duration: 4000,
-  //     });
-  //   }
-  // }
 
   cancelarExame(exame: Exames): void {
     // console.log('CLICOU CANCELAR', exame);
@@ -2314,6 +2024,19 @@ carregarDados(): void {
     );
   }
 
+  // get podeAlterarNota(): boolean {
+  //   const item = this.exameSelecionadoUnico;
+
+  //   return !!(
+  //     item &&
+  //     !this.isMobile &&
+  //     this.liberaEditar &&
+  //     item.status !== 'cancelado' &&
+  //     item.status !== 'solicitado' &&
+  //     item.etapas?.some((e) => e.nota !== null)
+  //   );
+  // }
+
   get podeAlterarNota(): boolean {
     const item = this.exameSelecionadoUnico;
 
@@ -2323,7 +2046,9 @@ carregarDados(): void {
       this.liberaEditar &&
       item.status !== 'cancelado' &&
       item.status !== 'solicitado' &&
-      item.etapas?.some((e) => e.nota !== null)
+      item.etapas?.some(
+        (etapa) => etapa.nota !== null || etapa.notaRecuperacao !== null,
+      )
     );
   }
 
@@ -2375,20 +2100,6 @@ carregarDados(): void {
     }
   }
 
-  // abrirAceiteEmLote(): void {
-  //   if (!this.podeAceitarSelecionados) {
-  //     this.snackBar.open(
-  //       'Selecione apenas solicitações com status SOLICITADO.',
-  //       'Fechar',
-  //       { duration: 3000 },
-  //     );
-  //     return;
-  //   }
-
-  //   this.aceiteForm.reset();
-  //   this.mostrarModalAceiteLote = true;
-  // }
-
   abrirAceiteEmLote(): void {
     if (!this.podeAceitarSelecionados) {
       this.snackBar.open(
@@ -2436,67 +2147,6 @@ carregarDados(): void {
     this.aceiteForm.reset();
     this.limparSelecaoExames();
   }
-
-  // async confirmarAceiteEmLote(): Promise<void> {
-  //   if (!this.aceiteForm.valid) {
-  //     this.aceiteForm.markAllAsTouched();
-  //     return;
-  //   }
-
-  //   const grupoSelecionado = this.gruposExames.find(
-  //     (g) => g.id === this.aceiteForm.value.idGrupoExame,
-  //   );
-
-  //   if (!grupoSelecionado) {
-  //     this.snackBar.open('Grupo de avaliação não encontrado.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   const examesValidos: Exames[] = [];
-
-  //   for (const exame of this.examesSelecionados) {
-  //     const etapas = this.criarEtapasPorGrupo(grupoSelecionado, exame);
-
-  //     if (etapas.length) {
-  //       examesValidos.push({ ...exame, etapas });
-  //     }
-  //   }
-
-  //   if (!examesValidos.length) {
-  //     this.snackBar.open(
-  //       'Nenhuma solicitação selecionada é compatível com esse grupo.',
-  //       'Fechar',
-  //       { duration: 4000 },
-  //     );
-  //     return;
-  //   }
-
-  //   const confirmacao = await this.alertService.confirmar(
-  //     `Deseja realmente aceitar ${examesValidos.length} solicitação(ões)?`,
-  //   );
-
-  //   if (!confirmacao) return;
-
-  //   await Promise.all(
-  //     examesValidos.map((exame) =>
-  //       this.firestoreService.updateExame(exame.id!, {
-  //         idGrupoExame: grupoSelecionado.id!,
-  //         etapas: exame.etapas,
-  //         etapaAtual: 1,
-  //         status: 'agendado',
-  //       }),
-  //     ),
-  //   );
-
-  //   this.snackBar.open('Solicitações aceitas com sucesso!', 'Fechar', {
-  //     duration: 4000,
-  //   });
-
-  //   this.examesSelecionados = [];
-  //   this.fecharModalAceiteLote();
-  // }
 
   async confirmarAceiteEmLote(): Promise<void> {
     if (!this.aceiteForm.valid) {
@@ -2553,6 +2203,30 @@ carregarDados(): void {
 
     this.examesSelecionados = [];
     this.fecharModalAceiteLote();
+  }
+
+  private atualizarSelecaoAposCarregar(): void {
+    if (!this.examesSelecionados.length) {
+      this.exameSelecionado = null;
+      return;
+    }
+
+    const idsSelecionados = this.examesSelecionados
+      .map((item) => item.id)
+      .filter((id): id is string => !!id);
+
+    /*
+     * Substitui os objetos antigos pelos objetos atualizados
+     * que acabaram de chegar do Firestore.
+     */
+    this.examesSelecionados = this.dadosTodos.filter(
+      (item) => item.id && idsSelecionados.includes(item.id),
+    );
+
+    this.exameSelecionado =
+      this.examesSelecionados.length === 1
+        ? (this.examesSelecionados[0] as ExameTabela)
+        : null;
   }
 
   @ViewChild(TableComponentSelect) tableComponent!: TableComponentSelect;
@@ -2642,99 +2316,6 @@ carregarDados(): void {
     }
   }
 
-  // alterarNota(exame: Exames): void {
-  //   const etapasComNota = exame.etapas.filter((e) => e.nota !== null);
-
-  //   if (!etapasComNota.length) {
-  //     this.snackBar.open('Nenhuma nota lançada para alterar.', 'Fechar', {
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-
-  //   const ultimaEtapaLancada = etapasComNota[etapasComNota.length - 1];
-
-  //   this.exameSelecionado = exame;
-  //   this.etapaSelecionada = ultimaEtapaLancada;
-
-  //   this.notaForm.patchValue({
-  //     nota: ultimaEtapaLancada.nota,
-  //     professorLancamento:
-  //       ultimaEtapaLancada.professorLancamento || this.auth.usuario?.nome || '',
-  //   });
-
-  //   this.mostrarModalNota = true;
-  // }
-
-  // async excluirNota(): Promise<void> {
-  //   if (!this.exameSelecionado || !this.etapaSelecionada) return;
-
-  //   const exame = this.exameSelecionado;
-  //   const etapa = this.etapaSelecionada;
-
-  //   const nomeAluno = this.getNomeAluno(exame.idAluno);
-  //   const mensagem = `Deseja realmente excluir a nota de ${nomeAluno}?`;
-
-  //   if (!(await this.alertService.confirmar(mensagem))) return;
-
-  //   const etapasAtualizadas = exame.etapas.map((e) => {
-  //     if (e.ordem < etapa.ordem) {
-  //       return e;
-  //     }
-
-  //     if (e.ordem === etapa.ordem) {
-  //       return {
-  //         // ...e,
-  //         nota: null,
-  //         resultado: 'pendente' as const,
-  //         dataLancamento: '',
-  //         professorLancamento: '',
-  //       };
-  //     }
-
-  //     return {
-  //       // ...e,
-  //       nota: null,
-  //       resultado: 'bloqueado' as const,
-  //       dataLancamento: '',
-  //       professorLancamento: '',
-  //     };
-  //   });
-
-  //   // await this.firestoreService.updateExame(exame.id!, {
-  //   //   etapas: etapasAtualizadas,
-  //   //   etapaAtual: etapa.ordem,
-  //   //   status: 'emAndamento',
-  //   // });
-
-  //   let novoStatus: Exames['status'];
-
-  //   const existeAlgumaNota = etapasAtualizadas.some((e) => e.nota !== null);
-
-  //   if (!existeAlgumaNota) {
-  //     const etapaAtualizada = etapasAtualizadas.find(
-  //       (e) => e.ordem === etapa.ordem,
-  //     );
-
-  //     // novoStatus = etapaAtualizada?.dataAgendada ? 'agendado' : 'solicitado';
-  //     novoStatus = exame.idGrupoExame ? 'agendado' : 'solicitado';
-  //   } else {
-  //     novoStatus = 'emAndamento';
-  //   }
-
-  //   await this.firestoreService.updateExame(exame.id!, {
-  //     etapas: etapasAtualizadas,
-  //     etapaAtual: etapa.ordem,
-  //     status: novoStatus,
-  //   });
-
-  //   this.snackBar.open('Nota excluída com sucesso!', 'Fechar', {
-  //     duration: 4000,
-  //   });
-
-  //   this.fecharModalNota();
-  // }
-
   alterarNota(exame: ExameTabela): void {
     const etapasComNota = exame.etapas.filter((e) => e.nota !== null);
 
@@ -2776,69 +2357,224 @@ carregarDados(): void {
     this.mostrarModalNota = true;
   }
 
-  async excluirNota(): Promise<void> {
-    if (!this.exameSelecionado || !this.etapaSelecionada) return;
+  // async excluirNota(): Promise<void> {
+  //   if (!this.exameSelecionado || !this.etapaSelecionada) return;
 
+  //   const exame = this.exameSelecionado;
+  //   const etapa = this.etapaSelecionada;
+
+  //   const nomeAluno = this.getNomeAluno(exame.idAluno);
+  //   const mensagem = `Deseja realmente excluir a nota de ${nomeAluno}?`;
+
+  //   if (!(await this.alertService.confirmar(mensagem))) return;
+
+  //   const etapasAtualizadas = exame.etapas.map((e) => {
+  //     if (e.ordem < etapa.ordem) {
+  //       return {
+  //         ordem: e.ordem,
+  //         nota: e.nota ?? null,
+  //         resultado: e.resultado,
+  //         dataLancamento: e.dataLancamento || '',
+  //         professorLancamento: e.professorLancamento || '',
+  //         observacaoLancamento: e.observacaoLancamento || '',
+  //       };
+  //     }
+
+  //     if (e.ordem === etapa.ordem) {
+  //       return {
+  //         ordem: e.ordem,
+  //         nota: null,
+  //         resultado: 'pendente' as const,
+  //         dataLancamento: '',
+  //         professorLancamento: '',
+  //         observacaoLancamento: '',
+  //       };
+  //     }
+
+  //     return {
+  //       ordem: e.ordem,
+  //       nota: null,
+  //       resultado: 'bloqueado' as const,
+  //       dataLancamento: '',
+  //       professorLancamento: '',
+  //       observacaoLancamento: '',
+  //     };
+  //   });
+
+  //   const existeAlgumaNota = etapasAtualizadas.some((e) => e.nota !== null);
+
+  //   let novoStatus: Exames['status'];
+
+  //   if (!existeAlgumaNota) {
+  //     novoStatus = exame.idGrupoExame ? 'agendado' : 'solicitado';
+  //   } else {
+  //     novoStatus = 'emAndamento';
+  //   }
+
+  //   await this.firestoreService.updateExame(exame.id!, {
+  //     etapas: etapasAtualizadas,
+  //     etapaAtual: etapa.ordem,
+  //     status: novoStatus,
+  //   });
+
+  //   this.snackBar.open('Nota excluída com sucesso!', 'Fechar', {
+  //     duration: 4000,
+  //   });
+
+  //   this.fecharModalNota();
+  // }
+
+  async excluirNota(): Promise<void> {
     const exame = this.exameSelecionado;
-    const etapa = this.etapaSelecionada;
+
+    if (!exame?.id) return;
+
+    const etapasOrdenadas = [...exame.etapas].sort((a, b) => b.ordem - a.ordem);
+
+    const ultimaEtapa = etapasOrdenadas.find(
+      (etapa) =>
+        (etapa.notaRecuperacao !== null &&
+          etapa.notaRecuperacao !== undefined) ||
+        (etapa.nota !== null && etapa.nota !== undefined),
+    );
+
+    if (!ultimaEtapa) {
+      this.snackBar.open('Não existe nenhuma nota para excluir.', 'Fechar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const temNotaRecuperacao =
+      ultimaEtapa.notaRecuperacao !== null &&
+      ultimaEtapa.notaRecuperacao !== undefined;
 
     const nomeAluno = this.getNomeAluno(exame.idAluno);
-    const mensagem = `Deseja realmente excluir a nota de ${nomeAluno}?`;
 
-    if (!(await this.alertService.confirmar(mensagem))) return;
+    const confirmou = await this.alertService.confirmar(
+      temNotaRecuperacao
+        ? `Deseja excluir a nota da recuperação de ${nomeAluno}?`
+        : `Deseja excluir a nota da etapa ${ultimaEtapa.ordem} de ${nomeAluno}?`,
+    );
 
-    const etapasAtualizadas = exame.etapas.map((e) => {
-      if (e.ordem < etapa.ordem) {
+    if (!confirmou) return;
+
+    /*
+     * Se existe nota de recuperação, exclui somente ela.
+     * A nota original permanece e o aluno volta para recuperação.
+     */
+    if (temNotaRecuperacao) {
+      const etapasAtualizadas = exame.etapas.map((etapa) =>
+        etapa.ordem === ultimaEtapa.ordem
+          ? {
+              ...etapa,
+              resultado: 'recuperacao' as const,
+              notaRecuperacao: null,
+              dataRecuperacao: '',
+              professorRecuperacao: '',
+              observacaoRecuperacao: '',
+            }
+          : { ...etapa },
+      );
+
+      await this.firestoreService.updateExame(exame.id, {
+        etapas: etapasAtualizadas,
+        etapaAtual: ultimaEtapa.ordem,
+        status: 'recuperacao',
+      });
+
+      this.snackBar.open(
+        'Nota da recuperação excluída com sucesso!',
+        'Fechar',
+        { duration: 4000 },
+      );
+
+      this.fecharModalNota();
+      return;
+    }
+
+    /*
+     * Procura a etapa anterior antes de limpar a última.
+     */
+    const etapaAnterior = etapasOrdenadas.find(
+      (etapa) =>
+        etapa.ordem < ultimaEtapa.ordem &&
+        etapa.nota !== null &&
+        etapa.nota !== undefined,
+    );
+
+    const novaEtapaAtual = ultimaEtapa.ordem;
+
+    const etapasAtualizadas = exame.etapas.map((etapa) => {
+      // A etapa cuja nota foi excluída fica pendente.
+      if (etapa.ordem === ultimaEtapa.ordem) {
         return {
-          ordem: e.ordem,
-          nota: e.nota ?? null,
-          resultado: e.resultado,
-          dataLancamento: e.dataLancamento || '',
-          professorLancamento: e.professorLancamento || '',
-          observacaoLancamento: e.observacaoLancamento || '',
-        };
-      }
+          ...etapa,
 
-      if (e.ordem === etapa.ordem) {
-        return {
-          ordem: e.ordem,
           nota: null,
           resultado: 'pendente' as const,
           dataLancamento: '',
           professorLancamento: '',
           observacaoLancamento: '',
+
+          notaRecuperacao: null,
+          dataRecuperacao: '',
+          professorRecuperacao: '',
+          observacaoRecuperacao: '',
         };
       }
 
-      return {
-        ordem: e.ordem,
-        nota: null,
-        resultado: 'bloqueado' as const,
-        dataLancamento: '',
-        professorLancamento: '',
-        observacaoLancamento: '',
-      };
+      // Etapas posteriores ficam bloqueadas.
+      if (etapa.ordem > novaEtapaAtual) {
+        return {
+          ...etapa,
+
+          nota: null,
+          resultado: 'bloqueado' as const,
+          dataLancamento: '',
+          professorLancamento: '',
+          observacaoLancamento: '',
+
+          notaRecuperacao: null,
+          dataRecuperacao: '',
+          professorRecuperacao: '',
+          observacaoRecuperacao: '',
+        };
+      }
+
+      return { ...etapa };
     });
 
-    const existeAlgumaNota = etapasAtualizadas.some((e) => e.nota !== null);
+    const statusAtualizado: Exames['status'] = etapaAnterior
+      ? 'emAndamento'
+      : exame.idGrupoExame
+        ? 'agendado'
+        : 'solicitado';
 
-    let novoStatus: Exames['status'];
-
-    if (!existeAlgumaNota) {
-      novoStatus = exame.idGrupoExame ? 'agendado' : 'solicitado';
-    } else {
-      novoStatus = 'emAndamento';
-    }
-
-    await this.firestoreService.updateExame(exame.id!, {
+    await this.firestoreService.updateExame(exame.id, {
       etapas: etapasAtualizadas,
-      etapaAtual: etapa.ordem,
-      status: novoStatus,
+      etapaAtual: novaEtapaAtual,
+      status: statusAtualizado,
     });
 
-    this.snackBar.open('Nota excluída com sucesso!', 'Fechar', {
-      duration: 4000,
-    });
+    const exameAtualizado: ExameTabela = {
+      ...exame,
+      etapas: etapasAtualizadas,
+      etapaAtual: novaEtapaAtual,
+      status: statusAtualizado,
+    };
+
+    this.exameSelecionado = exameAtualizado;
+
+    this.examesSelecionados = this.examesSelecionados.map((item) =>
+      item.id === exameAtualizado.id ? exameAtualizado : item,
+    );
+
+    this.snackBar.open(
+      `Nota excluída. A etapa ${novaEtapaAtual} está disponível para novo lançamento.`,
+      'Fechar',
+      { duration: 4000 },
+    );
 
     this.fecharModalNota();
   }
@@ -2857,35 +2593,6 @@ carregarDados(): void {
       });
     }
   }
-
-  // abrirAceite(exame: Exames): void {
-  //   this.exameAceite = exame;
-  //   this.aceiteForm.reset();
-  //   this.mostrarModalAceite = true;
-  // }
-
-  // abrirAceite(exame: Exames): void {
-  //   this.exameAceite = exame;
-  //   this.aceiteForm.reset();
-
-  //   this.listaGrupoExamesFiltrada = this.gruposExames
-  //     .filter((grupo) => this.grupoCompativelComExame(grupo, exame))
-  //     .map((g) => ({
-  //       value: g.id!,
-  //       label: `${g.grupoExame} - ${g.descricao}`,
-  //     }));
-
-  //   if (!this.listaGrupoExamesFiltrada.length) {
-  //     this.snackBar.open(
-  //       'Nenhum grupo de avaliação compatível com essa solicitação.',
-  //       'Fechar',
-  //       { duration: 4000 },
-  //     );
-  //     return;
-  //   }
-
-  //   this.mostrarModalAceite = true;
-  // }
 
   fecharModalAceite(): void {
     this.mostrarModalAceite = false;
@@ -2909,6 +2616,12 @@ carregarDados(): void {
 
   fecharModalNota(): void {
     this.mostrarModalNota = false;
+    this.notaForm.reset({
+      professorLancamento: this.auth.usuario?.nome ?? '',
+      nota: null,
+      observacaoLancamento: '',
+    });
+
     this.exameSelecionado = null;
     this.etapaSelecionada = null;
     this.configEtapaSelecionada = null;

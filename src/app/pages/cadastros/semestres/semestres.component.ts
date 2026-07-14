@@ -65,6 +65,8 @@ export class SemestresComponent {
       idComum: ['', Validators.required],
       dataTeorica: [''],
       dataPratica: [''],
+      dataRecuperacao: [''],
+
       tipoExame: ['', Validators.required],
       avaliacoes: this.fb.array([]),
       concluido: [false],
@@ -89,6 +91,8 @@ export class SemestresComponent {
   listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
 
   dados: any[] = [];
+
+  selectRecuperacao: boolean = true;
   //#endregion
 
   //#region TABELA
@@ -228,54 +232,6 @@ export class SemestresComponent {
     this.escutarMudancaIgreja();
   }
 
-  // carregarDados(): void {
-  //   this.firestoreService.getSemestres().subscribe((lista: GrupoExames[]) => {
-  //     this.dados = lista.map((item) => {
-  //       const comum =
-  //         this.listaIgrejaTodas.find((i) => i.value === item.idComum) ||
-  //         this.listaIgreja.find((i) => i.value === item.idComum);
-
-  //       const tipoExame = this.listaTipoExame.find(
-  //         (t) => t.value === (item as any).tipoExame,
-  //       );
-
-  //       const qtdPeriodos =
-  //         item.periodos?.reduce((total: number, periodo: any) => {
-  //           return total + (periodo.etapas?.length || 0);
-  //         }, 0) || 0;
-
-  //       const primeiraEtapa = item.periodos?.[0]?.etapas?.[0];
-
-  //       const dataTeorica =
-  //         primeiraEtapa?.avaliacao?.find((a: any) => a.nome === 'PARTE TEÓRICA')
-  //           ?.dataAvaliacao || '';
-
-  //       const dataPratica =
-  //         primeiraEtapa?.avaliacao?.find((a: any) => a.nome === 'PARTE PRÁTICA')
-  //           ?.dataAvaliacao || '';
-
-  //       const datas: string[] = [];
-
-  //       if (dataTeorica) {
-  //         datas.push(`${converterISOParaBR(dataTeorica)}`);
-  //       }
-
-  //       if (dataPratica) {
-  //         datas.push(`${converterISOParaBR(dataPratica)}`);
-  //       }
-
-  //       return {
-  //         ...item,
-  //         tipoExameLabel: tipoExame?.label || item.tipoExame || '',
-  //         comumLabel: comum?.label || '',
-  //         qtdPeriodos,
-  //         datasLabel: datas.join(' | '),
-  //         concluidoLabel: item.concluido ? 'CONCLUÍDO' : 'ABERTO',
-  //       };
-  //     });
-  //   });
-  // }
-
   carregarDados(): void {
     this.firestoreService.getSemestres().subscribe((lista: GrupoExames[]) => {
       const usuario = this.auth.usuario;
@@ -304,10 +260,26 @@ export class SemestresComponent {
           primeiraEtapa?.avaliacao?.find((a: any) => a.nome === 'PARTE PRÁTICA')
             ?.dataAvaliacao || '';
 
+        const dataRecuperacao =
+          primeiraEtapa?.avaliacao?.find((a: any) => a.nome === 'PARTE TEÓRICA')
+            ?.dataRecuperacao || '';
+
         const datas: string[] = [];
 
-        if (dataTeorica) datas.push(converterISOParaBR(dataTeorica));
-        if (dataPratica) datas.push(converterISOParaBR(dataPratica));
+        // if (dataTeorica) datas.push(converterISOParaBR(dataTeorica));
+        // if (dataPratica) datas.push(converterISOParaBR(dataPratica));
+
+        if (dataTeorica) {
+          datas.push(`Teórica: ${converterISOParaBR(dataTeorica)}`);
+        }
+
+        if (dataPratica) {
+          datas.push(`Prática: ${converterISOParaBR(dataPratica)}`);
+        }
+
+        if (dataRecuperacao) {
+          datas.push(`Recuperação: ${converterISOParaBR(dataRecuperacao)}`);
+        }
 
         return {
           ...item,
@@ -418,6 +390,10 @@ export class SemestresComponent {
       this.dadosForms.value.dataPratica,
     );
 
+    const dataRecuperacao = this.formatarDataFormulario(
+      this.dadosForms.value.dataRecuperacao,
+    );
+
     if (tipoExame === '001') {
       return [
         {
@@ -429,7 +405,20 @@ export class SemestresComponent {
               {
                 nome: 'PARTE TEÓRICA',
                 dataAvaliacao: dataTeorica,
+                dataRecuperacao:
+                  item.teoricaRecuperacao !== null &&
+                  item.teoricaRecuperacao !== undefined &&
+                  item.teoricaRecuperacao !== ''
+                    ? dataRecuperacao
+                    : '',
                 ordem: 1,
+                // notaMinRecuperacao: Number(item.teoricaRecuperacao),
+                notaMinRecuperacao:
+                  item.teoricaRecuperacao !== null &&
+                  item.teoricaRecuperacao !== undefined &&
+                  item.teoricaRecuperacao !== ''
+                    ? Number(item.teoricaRecuperacao)
+                    : null,
                 notaMinima: Number(item.teoricaNotaMinima),
                 notaMaxima: Number(item.teoricaNotaMaxima),
                 bloqueadaInicialmente: false,
@@ -475,7 +464,16 @@ export class SemestresComponent {
 
   onTipoExameChange(): void {
     this.avaliacoesArray.clear();
-
+    this.dadosForms.patchValue(
+      {
+        dataTeorica: '',
+        dataPratica: '',
+        dataRecuperacao: '',
+      },
+      {
+        emitEvent: false,
+      },
+    );
     const tipoExame = this.dadosForms.get('tipoExame')?.value;
 
     if (tipoExame === '001') {
@@ -486,6 +484,7 @@ export class SemestresComponent {
             label: [periodo.label],
             dataTeorica: [''],
 
+            teoricaRecuperacao: [null],
             teoricaNotaMinima: [null, Validators.required],
             teoricaNotaMaxima: [null, Validators.required],
 
@@ -638,6 +637,7 @@ export class SemestresComponent {
             tipo: [periodo.tipo],
             label: [periodoLista?.label || periodo.tipo],
 
+            teoricaRecuperacao: [teorica?.notaMinRecuperacao ?? null],
             teoricaNotaMinima: [
               teorica?.notaMinima ?? null,
               Validators.required,
@@ -661,6 +661,7 @@ export class SemestresComponent {
         this.dadosForms.patchValue({
           dataTeorica: teorica?.dataAvaliacao || '',
           dataPratica: pratica?.dataAvaliacao || '',
+          dataRecuperacao: teorica?.dataRecuperacao || '',
         });
       });
     }

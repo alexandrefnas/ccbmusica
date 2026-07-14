@@ -1,9 +1,10 @@
 <div class="container__button">
   <button
+    [type]="type"
     [title]="descricao"
+    [disabled]="disabled"
     (click)="onClick($event)"
   >
     {{ label }}
   </button>
 </div>
-

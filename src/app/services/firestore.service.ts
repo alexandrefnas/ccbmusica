@@ -45,6 +45,7 @@ export type StatusExame =
   | 'solicitado'
   | 'agendado'
   | 'emAndamento'
+  | 'recuperacao'
   | 'aprovado'
   | 'reprovado'
   | 'cancelado';
@@ -52,6 +53,7 @@ export type StatusExame =
 export type ResultadoEtapa =
   | 'pendente'
   | 'bloqueado'
+  | 'recuperacao'
   | 'aprovado'
   | 'reprovado';
 
@@ -74,6 +76,12 @@ export interface EtapaExame {
   dataLancamento: string;
   professorLancamento: string;
   observacaoLancamento: string;
+
+  // Dados da recuperação
+  notaRecuperacao?: number | null;
+  dataRecuperacao?: string;
+  professorRecuperacao?: string;
+  observacaoRecuperacao?: string;
 }
 
 export interface Exames {

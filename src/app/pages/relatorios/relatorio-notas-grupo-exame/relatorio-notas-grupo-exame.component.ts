@@ -19,11 +19,11 @@ import {
 } from '../../../services/select.service';
 import { AuthService } from '../../../services/auth.service';
 import { TextComponent } from '../../../component/inputs/text/text.component';
-import { MultiSelectComponent } from "../../../component/inputs/multi-select/multi-select";
+import { MultiSelectComponent } from '../../../component/inputs/multi-select/multi-select';
 
 type LinhaRelatorioNotas = {
   nomeAluno: string;
-idComum: string;
+  idComum: string;
   nomeComum: string;
   categoriaExameLabel: string;
   statusLabel: string;
@@ -38,8 +38,8 @@ idComum: string;
     SelectComponent,
     TableComponent,
     TextComponent,
-    MultiSelectComponent
-],
+    MultiSelectComponent,
+  ],
   templateUrl: './relatorio-notas-grupo-exame.component.html',
   styleUrl: './relatorio-notas-grupo-exame.component.css',
 })
@@ -51,9 +51,9 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
 
   filtroStatus = true;
   pesquisa = '';
-comunsSelecionadas: string[] = [];
+  comunsSelecionadas: string[] = [];
 
-listaSelect: { value: string; label: string }[] = [];
+  listaSelect: { value: string; label: string }[] = [];
 
   listaGrupos: { value: string; label: string }[] = [];
   grupos: GrupoExames[] = [];
@@ -79,9 +79,9 @@ listaSelect: { value: string; label: string }[] = [];
   //   return (this.filtroStatus = !this.filtroStatus);
   // }
 
-alternarFiltro(): void {
-  this.filtroStatus = !this.filtroStatus;
-}
+  alternarFiltro(): void {
+    this.filtroStatus = !this.filtroStatus;
+  }
 
   carregarGrupos(): void {
     this.firestoreService.getSemestres().subscribe((grupos) => {
@@ -117,24 +117,24 @@ alternarFiltro(): void {
   //   this.montarRelatorio();
   // }
 
-aoSelecionarGrupo(idGrupo: string): void {
-  this.idGrupoSelecionado = idGrupo;
+  aoSelecionarGrupo(idGrupo: string): void {
+    this.idGrupoSelecionado = idGrupo;
 
-  this.grupoSelecionado =
-    this.grupos.find((g) => g.id === this.idGrupoSelecionado) || null;
+    this.grupoSelecionado =
+      this.grupos.find((g) => g.id === this.idGrupoSelecionado) || null;
 
-  this.comunsSelecionadas = [];
-  this.pesquisa = '';
-  this.listaSelect = [];
+    this.comunsSelecionadas = [];
+    this.pesquisa = '';
+    this.listaSelect = [];
 
-  if (!this.grupoSelecionado) {
-    this.dados = [];
-    this.dadosTodos = [];
-    return;
+    if (!this.grupoSelecionado) {
+      this.dados = [];
+      this.dadosTodos = [];
+      return;
+    }
+
+    this.montarRelatorio();
   }
-
-  this.montarRelatorio();
-}
 
   montarRelatorio(): void {
     combineLatest([
@@ -163,89 +163,82 @@ aoSelecionarGrupo(idGrupo: string): void {
       //   igrejas,
       // );
       // this.buscarPesquisa();
-this.dadosTodos = this.montarLinhas(
-  examesGrupo,
-  alunosPermitidos,
-  igrejas,
-);
+      this.dadosTodos = this.montarLinhas(
+        examesGrupo,
+        alunosPermitidos,
+        igrejas,
+      );
 
-this.listaSelect = this.dadosTodos
-  .filter((linha) => linha.idComum && linha.nomeComum)
-  .map((linha) => ({
-    value: linha.idComum,
-    label: linha.nomeComum,
-  }))
-  .filter(
-    (item, index, lista) =>
-      lista.findIndex(
-        (outro) => outro.value === item.value,
-      ) === index,
-  )
-  .sort((a, b) =>
-    a.label.localeCompare(b.label, 'pt-BR'),
-  );
+      this.listaSelect = this.dadosTodos
+        .filter((linha) => linha.idComum && linha.nomeComum)
+        .map((linha) => ({
+          value: linha.idComum,
+          label: linha.nomeComum,
+        }))
+        .filter(
+          (item, index, lista) =>
+            lista.findIndex((outro) => outro.value === item.value) === index,
+        )
+        .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
 
-this.aplicarFiltros();
+      this.aplicarFiltros();
     });
   }
 
+  aoSelecionarComunsFiltro(comuns: string[]): void {
+    this.comunsSelecionadas = comuns ?? [];
 
-aoSelecionarComunsFiltro(comuns: string[]): void {
-  this.comunsSelecionadas = comuns ?? [];
-
-  this.aplicarFiltros();
-}
-
-// buscarPesquisa(): void {
-//   const termo = this.pesquisa
-//     .trim()
-//     .toLocaleLowerCase('pt-BR');
-
-//   if (!termo) {
-//     this.dados = [...this.dadosTodos];
-//     return;
-//   }
-
-//   this.dados = this.dadosTodos.filter((linha) =>
-//     this.colunas.some((coluna) => {
-//       const valor = linha[coluna];
-
-//       return String(valor ?? '')
-//         .toLocaleLowerCase('pt-BR')
-//         .includes(termo);
-//     }),
-//   );
-// }
-
-aplicarFiltros(): void {
-  let dadosFiltrados = [...this.dadosTodos];
-
-  // Filtro por comuns
-  if (this.comunsSelecionadas.length > 0) {
-    dadosFiltrados = dadosFiltrados.filter((linha) =>
-      this.comunsSelecionadas.includes(linha.idComum),
-    );
+    this.aplicarFiltros();
   }
 
-  // Filtro por pesquisa
-  const termo = this.pesquisa
-    .trim()
-    .toLocaleLowerCase('pt-BR');
+  // buscarPesquisa(): void {
+  //   const termo = this.pesquisa
+  //     .trim()
+  //     .toLocaleLowerCase('pt-BR');
 
-  if (termo) {
-    dadosFiltrados = dadosFiltrados.filter((linha) =>
-      this.colunas.some((coluna) => {
-        const valor = linha[coluna];
+  //   if (!termo) {
+  //     this.dados = [...this.dadosTodos];
+  //     return;
+  //   }
 
-        return String(valor ?? '')
-          .toLocaleLowerCase('pt-BR')
-          .includes(termo);
-      }),
-    );
+  //   this.dados = this.dadosTodos.filter((linha) =>
+  //     this.colunas.some((coluna) => {
+  //       const valor = linha[coluna];
+
+  //       return String(valor ?? '')
+  //         .toLocaleLowerCase('pt-BR')
+  //         .includes(termo);
+  //     }),
+  //   );
+  // }
+
+  aplicarFiltros(): void {
+    let dadosFiltrados = [...this.dadosTodos];
+
+    // Filtro por comuns
+    if (this.comunsSelecionadas.length > 0) {
+      dadosFiltrados = dadosFiltrados.filter((linha) =>
+        this.comunsSelecionadas.includes(linha.idComum),
+      );
+    }
+
+    // Filtro por pesquisa
+    const termo = this.pesquisa.trim().toLocaleLowerCase('pt-BR');
+
+    if (termo) {
+      dadosFiltrados = dadosFiltrados.filter((linha) =>
+        this.colunas.some((coluna) => {
+          const valor = linha[coluna];
+
+          return String(valor ?? '')
+            .toLocaleLowerCase('pt-BR')
+            .includes(termo);
+        }),
+      );
+    }
+
+    this.dados = dadosFiltrados;
   }
-
-  this.dados = dadosFiltrados;
-}
 
   montarColunas(exames: Exames[]): void {
     const maiorQtdEtapas = Math.max(
@@ -321,43 +314,121 @@ aplicarFiltros(): void {
         //   ),
         //   statusLabel: this.formatarStatus(exame.status),
         // };
-const linha: LinhaRelatorioNotas = {
-  idComum: aluno?.idComum || '',
+        const linha: LinhaRelatorioNotas = {
+          idComum: aluno?.idComum || '',
 
-  nomeAluno:
-    aluno?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
-    'ALUNO NÃO CADASTRADO',
+          nomeAluno:
+            aluno?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
+            'ALUNO NÃO CADASTRADO',
 
-  nomeComum:
-    igreja?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
-    'COMUM NÃO CADASTRADA',
+          nomeComum:
+            igreja?.nomeCongregacao?.toLocaleUpperCase('pt-BR') ||
+            'COMUM NÃO CADASTRADA',
 
-  categoriaExameLabel: this.buscarCategoriaExame(
-    exame.categoriaExame || '',
-  ),
+          categoriaExameLabel: this.buscarCategoriaExame(
+            exame.categoriaExame || '',
+          ),
 
-  statusLabel: this.formatarStatus(exame.status),
-};
+          statusLabel: this.formatarStatus(exame.status),
+        };
+        //         exame.etapas?.forEach((etapa) => {
+        //           const configEtapa = this.buscarConfigEtapa(exame, etapa.ordem);
+
+        //           const campo = `etapa${etapa.ordem}`;
+
+        //           // if (
+        //           //   etapa.nota === null ||
+        //           //   etapa.nota === undefined ||
+        //           //   !configEtapa?.notaMaxima
+        //           // ) {
+        //           //   linha[campo] = '-';
+        //           //   return;
+        //           // }
+
+        //           // const nota = Number(etapa.nota);
+        //           // const notaMaxima = Number(configEtapa.notaMaxima);
+
+        //           // const percentual = (nota / notaMaxima) * 100;
+
+        //           // linha[campo] = `${nota.toFixed(0)} (${percentual.toFixed(1)}%)`;
+        // const possuiNotaRecuperacao =
+        //   etapa.notaRecuperacao !== null &&
+        //   etapa.notaRecuperacao !== undefined;
+
+        // const notaOriginal =
+        //   etapa.nota !== null && etapa.nota !== undefined
+        //     ? Number(etapa.nota)
+        //     : null;
+
+        // const notaRecuperacao = possuiNotaRecuperacao
+        //   ? Number(etapa.notaRecuperacao)
+        //   : null;
+
+        // const notaMaxima = Number(configEtapa?.notaMaxima ?? 0);
+
+        // if (
+        //   notaOriginal === null ||
+        //   notaMaxima <= 0
+        // ) {
+        //   linha[campo] = '-';
+        //   return;
+        // }
+
+        // /*
+        //  * Para o percentual:
+        //  * - usa a recuperação quando existir;
+        //  * - senão usa a nota original.
+        //  */
+        // const notaConsiderada =
+        //   notaRecuperacao ?? notaOriginal;
+
+        // const percentual =
+        //   (notaConsiderada / notaMaxima) * 100;
+
+        // /*
+        //  * Sem recuperação:
+        //  * 18 (72.0%)
+        //  *
+        //  * Com recuperação:
+        //  * 14 / 18 (72.0%)
+        //  */
+        // linha[campo] = possuiNotaRecuperacao
+        //   ? `${notaOriginal.toFixed(0)} / ${notaRecuperacao!.toFixed(0)} (${percentual.toFixed(1)}%)`
+        //   : `${notaOriginal.toFixed(0)} (${percentual.toFixed(1)}%)`;
+        //         });
+
         exame.etapas?.forEach((etapa) => {
           const configEtapa = this.buscarConfigEtapa(exame, etapa.ordem);
 
           const campo = `etapa${etapa.ordem}`;
 
-          if (
-            etapa.nota === null ||
-            etapa.nota === undefined ||
-            !configEtapa?.notaMaxima
-          ) {
+          const possuiNotaRecuperacao =
+            etapa.notaRecuperacao !== null &&
+            etapa.notaRecuperacao !== undefined;
+
+          const notaOriginal =
+            etapa.nota !== null && etapa.nota !== undefined
+              ? Number(etapa.nota)
+              : null;
+
+          const notaRecuperacao = possuiNotaRecuperacao
+            ? Number(etapa.notaRecuperacao)
+            : null;
+
+          const notaMaxima = Number(configEtapa?.notaMaxima ?? 0);
+
+          if (notaOriginal === null || notaMaxima <= 0) {
             linha[campo] = '-';
             return;
           }
 
-          const nota = Number(etapa.nota);
-          const notaMaxima = Number(configEtapa.notaMaxima);
+          const notaConsiderada = notaRecuperacao ?? notaOriginal;
 
-          const percentual = (nota / notaMaxima) * 100;
+          const percentual = (notaConsiderada / notaMaxima) * 100;
 
-          linha[campo] = `${nota.toFixed(0)} (${percentual.toFixed(1)}%)`;
+          linha[campo] = possuiNotaRecuperacao
+            ? `${notaOriginal.toFixed(0)} / ${notaRecuperacao!.toFixed(0)} (${percentual.toFixed(1)}%)`
+            : `${notaOriginal.toFixed(0)} (${percentual.toFixed(1)}%)`;
         });
 
         return linha;

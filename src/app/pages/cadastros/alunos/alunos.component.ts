@@ -244,7 +244,7 @@ export class AlunosComponent implements OnInit {
     categoriaExameLabel: { width: '16%', minWidth: '220px' },
     etapaLabel: { width: '12%', minWidth: '140px' },
     dataTesteLabel: { width: '10%', minWidth: '102px' },
-    notaLabelPorcentagem: { width: '6%', minWidth: '65px' },
+    notaLabelPorcentagem: { width: '6%', minWidth: '100px' },
     professorLabel: { width: '24%', minWidth: '200px' },
     resultadoLabel: { width: '10%', minWidth: '100px' },
   };
@@ -688,43 +688,114 @@ export class AlunosComponent implements OnInit {
             .filter((etapa: any) =>
               ['aprovado', 'reprovado'].includes(etapa.resultado),
             )
-            .map((etapa: any) => {
-              const avaliacaoGrupo = etapaGrupo?.avaliacao?.find(
-                (a: any) => a.ordem === etapa.ordem,
-              );
+.map((etapa: any) => {
+  const avaliacaoGrupo = etapaGrupo?.avaliacao?.find(
+    (a: any) => a.ordem === etapa.ordem,
+  );
 
-              const notaMaxima = avaliacaoGrupo?.notaMaxima ?? 0;
+  const notaMaxima = Number(
+    avaliacaoGrupo?.notaMaxima ?? 0,
+  );
 
-              const notaLabelPorcentagem =
-                etapa.nota !== null && notaMaxima > 0
-                  ? `${((etapa.nota * 100) / notaMaxima).toFixed(1)}%`
-                  : '-';
+  const possuiNotaRecuperacao =
+    etapa.notaRecuperacao !== null &&
+    etapa.notaRecuperacao !== undefined;
 
-              return {
-                idExame: exame.id,
-                grupoExameLabel: grupo?.grupoExame || '-',
-                tipoExameLabel: this.buscarLabel(
-                  listaTipoExame,
-                  exame.tipoExame,
-                ),
-                categoriaExameLabel: this.buscarCategoriaExame(
-                  exame.categoriaExame || '',
-                ),
-                etapaLabel: avaliacaoGrupo?.nome || '-',
-                dataTeste:
-                  avaliacaoGrupo?.dataAvaliacao || etapa.dataLancamento || '',
-                dataTesteLabel: converterISOParaBR(
-                  avaliacaoGrupo?.dataAvaliacao || etapa.dataLancamento || '',
-                ),
-                notaLabelPorcentagem,
-                notaMinimaLabel: avaliacaoGrupo?.notaMinima ?? '-',
-                notaMaximaLabel: avaliacaoGrupo?.notaMaxima ?? '-',
-                professorLabel: etapa.professorLancamento || '-',
-                resultadoLabel:
-                  etapa.resultado === 'aprovado' ? 'APROVADO' : 'REPROVADO',
-                statusLabel: this.formatarStatus(exame.status),
-              };
-            });
+  const notaOriginal =
+    etapa.nota !== null &&
+    etapa.nota !== undefined
+      ? Number(etapa.nota)
+      : null;
+
+  const notaRecuperacao = possuiNotaRecuperacao
+    ? Number(etapa.notaRecuperacao)
+    : null;
+
+  /*
+   * O percentual final será calculado usando
+   * a nota de recuperação, quando existir.
+   */
+  const notaConsiderada =
+    notaRecuperacao ?? notaOriginal;
+
+  const percentual =
+    notaConsiderada !== null &&
+    notaMaxima > 0
+      ? `${(
+          (notaConsiderada * 100) /
+          notaMaxima
+        ).toFixed(1)}%`
+      : '-';
+
+  /*
+   * Exemplo:
+   * sem recuperação: 18 (72.0%)
+   * com recuperação: 14 / 18 (72.0%)
+   */
+  const notaLabelPorcentagem =
+    possuiNotaRecuperacao
+      ? `${notaOriginal ?? '-'} / ${notaRecuperacao} (${percentual})`
+      : notaOriginal !== null
+        ? `${notaOriginal} (${percentual})`
+        : '-';
+
+  const dataConsiderada =
+    possuiNotaRecuperacao
+      ? etapa.dataRecuperacao ||
+        avaliacaoGrupo?.dataRecuperacao ||
+        etapa.dataLancamento ||
+        ''
+      : avaliacaoGrupo?.dataAvaliacao ||
+        etapa.dataLancamento ||
+        '';
+
+  return {
+    idExame: exame.id,
+
+    grupoExameLabel:
+      grupo?.grupoExame || '-',
+
+    tipoExameLabel: this.buscarLabel(
+      listaTipoExame,
+      exame.tipoExame,
+    ),
+
+    categoriaExameLabel:
+      this.buscarCategoriaExame(
+        exame.categoriaExame || '',
+      ),
+
+    etapaLabel:
+      avaliacaoGrupo?.nome || '-',
+
+    dataTeste: dataConsiderada,
+
+    dataTesteLabel:
+      converterISOParaBR(dataConsiderada),
+
+    notaLabelPorcentagem,
+
+    notaMinimaLabel:
+      avaliacaoGrupo?.notaMinima ?? '-',
+
+    notaMaximaLabel:
+      avaliacaoGrupo?.notaMaxima ?? '-',
+
+    professorLabel: possuiNotaRecuperacao
+      ? etapa.professorRecuperacao ||
+        etapa.professorLancamento ||
+        '-'
+      : etapa.professorLancamento || '-',
+
+    resultadoLabel:
+      etapa.resultado === 'aprovado'
+        ? 'APROVADO'
+        : 'REPROVADO',
+
+    statusLabel:
+      this.formatarStatus(exame.status),
+  };
+})
         })
         .sort((a, b) => (b.dataTeste || '').localeCompare(a.dataTeste || ''));
     });

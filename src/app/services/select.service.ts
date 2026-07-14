@@ -334,6 +334,7 @@ export const listaStatusFiltro = [
   { value: 'solicitado', label: 'SOLICITADO' },
   { value: 'agendado', label: 'AGENDADO' },
   { value: 'emAndamento', label: 'EM ANDAMENTO' },
+  { value: 'recuperacao', label: 'RECUPERAÇÃO' },
   { value: 'aprovado', label: 'APROVADO' },
   { value: 'reprovado', label: 'REPROVADO' },
   { value: 'cancelado', label: 'CANCELADO' },

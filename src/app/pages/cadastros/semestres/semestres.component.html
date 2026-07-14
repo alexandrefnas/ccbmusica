@@ -133,6 +133,7 @@
                       </div>
                     </div>
                   </div>
+
                   <div>
                     <p>Parte Prática</p>
                     <div style="display: flex; flex-direction: row; gap: 5px">
@@ -152,6 +153,28 @@
                           type="number"
                           formControlName="praticaNotaMaxima"
                           [required]="true"
+                          errorMessage="Campo obrigatório"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="selectRecuperacao">
+                    <p>Recuperação</p>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: row;
+                        gap: 5px;
+                        min-width: 80px;
+                      "
+                    >
+                      <div class="input-text input-recuperacao">
+                        <tcx-text
+                          label="Nota mín"
+                          type="number"
+                          formControlName="teoricaRecuperacao"
+                          [required]="false"
                           errorMessage="Campo obrigatório"
                         />
                       </div>
@@ -208,6 +231,16 @@
                   type="data"
                   formControlName="dataPratica"
                   [required]="true"
+                />
+              </div>
+              <div class="input-data" *ngIf="selectRecuperacao">
+                <p>Recuperação</p>
+
+                <tcx-data
+                  label="Data da Recuperação"
+                  type="data"
+                  formControlName="dataRecuperacao"
+                  [required]="false"
                 />
               </div>
             </div>
