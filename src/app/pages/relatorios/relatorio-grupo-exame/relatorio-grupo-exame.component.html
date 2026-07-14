@@ -48,6 +48,10 @@
           <strong>{{ resumoGeral.total }}</strong>
         </div>
 
+        <div class="card andamento">
+          <span>Em andamento</span>
+          <strong>{{ resumoGeral.emAndamento }}</strong>
+        </div>
         <div class="card aprovado">
           <span>Aprovados</span>
           <strong>{{ resumoGeral.aprovado }}</strong>
@@ -114,7 +118,8 @@
               <div>
                 <strong>{{ igreja.nomeComum }}</strong>
                 <span>
-                  Total: {{ igreja.total }} | Aprovados: {{ igreja.aprovado }} |
+                  Total: {{ igreja.total }} | Em andamento:
+                  {{ igreja.emAndamento }} | Aprovados: {{ igreja.aprovado }} |
                   Recuperação: {{ igreja.recuperacao }} | Reprovados:
                   {{ igreja.reprovado }} | Cancelados: {{ igreja.cancelado }}
                 </span>
