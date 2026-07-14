@@ -470,6 +470,7 @@ export class RelatorioNotasGrupoExameComponent implements OnInit {
       solicitado: 'SOLICITADO',
       agendado: 'AGENDADO',
       emAndamento: 'EM ANDAMENTO',
+      recuperacao: 'RECUPERAÇÃO',
       aprovado: 'APROVADO',
       reprovado: 'REPROVADO',
       cancelado: 'CANCELADO',
