@@ -67,6 +67,11 @@
   /* font-weight: bold; */
 }
 
+.tabela tbody tr.linha-recuperacao td {
+  background-color: #fff3cd !important;
+  color: #b33a3a;
+}
+
 .tabela tbody tr.linha-sucesso td {
   background-color: #e6ffea !important;
   color: #2e7d32;
