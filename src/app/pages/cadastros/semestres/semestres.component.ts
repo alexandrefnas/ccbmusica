@@ -141,7 +141,7 @@ export class SemestresComponent {
     grupoExame: { width: '15%', minWidth: '150px' },
     descricao: { width: '25%', minWidth: '200px' },
     tipoExameLabel: { width: '10%', minWidth: '120px' },
-    datasLabel: { width: '25%', minWidth: '200px' },
+    datasLabel: { width: '25%', minWidth: '300px' },
     comumLabel: { width: '20%', minWidth: '200px' },
     // qtdPeriodos: { width: '5%' },
     concluidoLabel: { width: '5%', minWidth: '80px' },
@@ -149,23 +149,30 @@ export class SemestresComponent {
 
   acoes = [
     {
-      label: '✏️',
+      label: '',
       descricao: 'Editar',
-      classe: 'acao-editar',
+      classe: 'acao-editar bi bi-pencil',
       visivel: (item: GrupoExames) => this.liberaEditar && !item.concluido,
       callback: (item: GrupoExames) => this.editar(item),
     },
     {
-      label: '✅',
+      label: '',
       descricao: 'Concluir grupo',
-      classe: 'acao-editar',
+      classe: 'acao-editar bi bi-check-square',
       visivel: (item: GrupoExames) => this.liberaEditar && !item.concluido,
       callback: (item: GrupoExames) => this.concluirGrupoExame(item),
     },
     {
-      label: '🗑️',
+      label: '',
+      descricao: 'Reabrir grupo de avaliação',
+      classe: 'acao-editar bi bi-arrow-counterclockwise',
+      visivel: (item: GrupoExames) => item.concluido,
+      callback: (item: GrupoExames) => this.reabrirGrupoExame(item),
+    },
+    {
+      label: '',
       descricao: 'Excluir',
-      classe: 'acao-excluir',
+      classe: 'acao-excluir bi bi-trash3',
       visivel: (item: GrupoExames) => this.liberaDeletar && !item.concluido,
       callback: (item: GrupoExames) => this.excluir(item),
     },
@@ -712,6 +719,22 @@ export class SemestresComponent {
     });
 
     this.snackBar.open('Grupo de avaliação concluído com sucesso!', 'Fechar', {
+      duration: 4000,
+    });
+  }
+
+  async reabrirGrupoExame(item: GrupoExames): Promise<void> {
+    if (!item.id) return;
+
+    const mensagem = `Deseja realmente reabrir ${item.grupoExame}?`;
+
+    if (!(await this.alertService.confirmar(mensagem))) return;
+
+    await this.firestoreService.updateSemestres(item.id, {
+      concluido: false,
+    });
+
+    this.snackBar.open('Grupo de avaliação reaberto com sucesso!', 'Fechar', {
       duration: 4000,
     });
   }

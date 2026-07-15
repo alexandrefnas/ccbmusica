@@ -199,6 +199,15 @@ tr.linha-selecionada:hover td {
 }
 /* // */
 
+.acao-editar {
+  padding: 5px;
+}
+
+.acao-excluir{
+  padding: 5px;
+  background-color: #f26d6d;
+}
+
 /* Responsividade */
 @media (max-width: 575px) {
   .tabela {
