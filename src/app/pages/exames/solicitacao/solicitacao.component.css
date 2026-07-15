@@ -166,6 +166,11 @@ p {
   font-weight: bold;
 }
 
+.status-recuperacao {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
 .status-reprovado {
   color: red;
   font-weight: bold;

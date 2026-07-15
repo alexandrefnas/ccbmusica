@@ -257,6 +257,10 @@ export class ExamesComponent implements OnInit {
       estiloClasse: 'linha-vermelha',
     },
     {
+      condicao: (item: any) => item.status === 'recuperacao',
+      estiloClasse: 'linha-recuperacao',
+    },
+    {
       condicao: (item: any) => item.status === 'aprovado',
       estiloClasse: 'linha-sucesso',
     },

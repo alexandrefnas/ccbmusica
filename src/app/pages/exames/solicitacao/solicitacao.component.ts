@@ -178,6 +178,10 @@ export class SolicitacaoComponent {
       estiloClasse: 'linha-vermelha',
     },
     {
+      condicao: (item: any) => item.status === 'recuperacao',
+      estiloClasse: 'linha-recuperacao',
+    },
+    {
       condicao: (item: any) => item.status === 'aprovado',
       estiloClasse: 'linha-sucesso',
     },
@@ -189,7 +193,7 @@ export class SolicitacaoComponent {
       condicao: (item: any) => item.status === 'solicitado',
       estiloClasse: 'linha-aviso',
     },
-   {
+    {
       condicao: (item: any) => item.status === 'emAndamento',
       estiloClasse: 'linha-andamento',
     },
@@ -493,9 +497,15 @@ export class SolicitacaoComponent {
 
           return {
             ...exame,
+            // dataAgendada: converterISOParaBR(
+            //   avaliacaoGrupo?.dataAvaliacao || '',
+            // ),
             dataAgendada: converterISOParaBR(
-              avaliacaoGrupo?.dataAvaliacao || '',
+              exame.status === 'recuperacao'
+                ? avaliacaoGrupo?.dataRecuperacao || ''
+                : avaliacaoGrupo?.dataAvaliacao || '',
             ),
+
             dataSolicitacao: converterISOParaBR(exame.dataSolicitacao || ''),
             nomeAluno:
               alunoFiltro?.nomeAluno?.toLocaleUpperCase('pt-BR') ||
@@ -508,24 +518,40 @@ export class SolicitacaoComponent {
               exame.categoriaExame || '',
             ),
             statusLabel: this.formatarStatus(exame.status),
+            // etapaAtualLabel:
+            //   exame.status === 'aprovado'
+            //     ? 'CONCLUÍDO'
+            //     : exame.status === 'reprovado'
+            //       ? 'REPROVADO'
+            //       : avaliacaoGrupo?.nome || 'AGUARDANDO',
             etapaAtualLabel:
               exame.status === 'aprovado'
                 ? 'CONCLUÍDO'
                 : exame.status === 'reprovado'
                   ? 'REPROVADO'
-                  : avaliacaoGrupo?.nome || 'AGUARDANDO',
+                  : exame.status === 'recuperacao'
+                    ? `${avaliacaoGrupo?.nome || ''}`
+                    : avaliacaoGrupo?.nome || 'AGUARDANDO',
           };
         });
 
+      // const ordemStatus: Record<string, number> = {
+      //   solicitado: 1,
+      //   agendado: 2,
+      //   emAndamento: 3,
+      //   aprovado: 4,
+      //   reprovado: 5,
+      //   cancelado: 6,
+      // };
       const ordemStatus: Record<string, number> = {
         solicitado: 1,
         agendado: 2,
         emAndamento: 3,
-        aprovado: 4,
-        reprovado: 5,
-        cancelado: 6,
+        recuperacao: 4,
+        aprovado: 5,
+        reprovado: 6,
+        cancelado: 7,
       };
-
       this.dadosTodos = [...dadosExames].sort((a, b) => {
         const statusA = ordemStatus[a.status] || 999;
         const statusB = ordemStatus[b.status] || 999;
@@ -778,11 +804,25 @@ export class SolicitacaoComponent {
     });
   }
 
+  // formatarStatus(status: string): string {
+  //   const mapa: any = {
+  //     solicitado: 'SOLICITADO',
+  //     agendado: 'AGENDADO',
+  //     emAndamento: 'EM ANDAMENTO',
+  //     aprovado: 'APROVADO',
+  //     reprovado: 'REPROVADO',
+  //     cancelado: 'CANCELADO',
+  //   };
+
+  //   return mapa[status] || status;
+  // }
+
   formatarStatus(status: string): string {
     const mapa: any = {
       solicitado: 'SOLICITADO',
       agendado: 'AGENDADO',
       emAndamento: 'EM ANDAMENTO',
+      recuperacao: 'RECUPERAÇÃO',
       aprovado: 'APROVADO',
       reprovado: 'REPROVADO',
       cancelado: 'CANCELADO',
