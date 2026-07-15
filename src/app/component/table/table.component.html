@@ -70,11 +70,20 @@
               >
                 <button
                   class="buttons-stile"
-                  [title]="isFuncao(acao.descricao) ? acao.descricao(item) : acao.descricao || ''"
+                  [title]="
+                    isFuncao(acao.descricao)
+                      ? acao.descricao(item)
+                      : acao.descricao || ''
+                  "
                   *ngIf="!acao.visivel || acao.visivel(item)"
-                  [ngClass]="acao.classe || ''"
+                  [ngClass]="
+                    isFuncao(acao.classe)
+                      ? acao.classe(item)
+                      : acao.classe || ''
+                  "
                   (click)="acao.callback(item)"
                 >
+                  <!-- /* [ngClass]="acao.classe || ''" */ -->
                   {{ isFuncao(acao.label) ? acao.label(item) : acao.label }}
                 </button>
               </div>

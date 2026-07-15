@@ -103,16 +103,16 @@ export class InstrumentosComponent {
   // Buttons
   acoes = [
     {
-      label: '✏️',
+      label: '',
       descricao: 'Editar',
-      classe: 'acao-editar',
+      classe: 'acao-editar bi bi-pencil',
       visivel: () => this.liberaEditar,
       callback: (item: any) => this.editar(item),
     },
     {
-      label: '🗑️',
+      label: '',
       descricao: 'Excluir',
-      classe: 'acao-excluir',
+      classe: 'acao-excluir bi bi-trash3',
       visivel: () => this.liberaDeletar,
       callback: (item: any) => this.excluir(item),
     },

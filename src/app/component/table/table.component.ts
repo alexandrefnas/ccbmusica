@@ -62,7 +62,8 @@ export class TableComponent implements OnInit, OnChanges {
 @Input() acoesTabela: {
   label: string | ((item: any) => string);
   descricao?: string | ((item: any) => string);
-  classe?: string;
+  // classe?: string;
+classe?: string | ((item: any) => string);
   callback: (item: any) => void | Promise<void>;
   visivel?: (item: any) => boolean;
 }[] = [];

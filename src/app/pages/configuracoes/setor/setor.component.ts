@@ -68,16 +68,16 @@ export class SetorComponent implements OnInit {
   // Buttons
   acoes = [
     {
-      label: '✏️',
+      label: '',
       descricao: 'Editar',
-      classe: 'acao-editar',
+      classe: 'acao-editar bi bi-pencil',
       visivel: (item: any) => true,
       callback: (item: any) => this.editar(item),
     },
     {
-      label: '🗑️',
+      label: '',
       descricao: 'Excluir',
-      classe: 'acao-excluir',
+      classe: 'acao-excluir bi bi-trash3',
       visivel: (item: any) => true,
       callback: (item: any) => this.excluir(item),
     },

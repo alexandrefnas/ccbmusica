@@ -158,31 +158,34 @@ export class AlunosComponent implements OnInit {
   // Buttons
   acoes = [
     {
-      label: '✏️',
+      label: '',
       descricao: 'Editar',
-      classe: 'acao-editar',
+      classe: 'acao-editar bi bi-pencil',
       visivel: (item: any) => this.liberaEditar && !item.desativado,
       callback: (item: any) => this.editar(item),
     },
+{
+  label: '',
+  descricao: (item: Candidatos) =>
+    item.desativado ? 'Ativar Candidato.' : 'Desativar Candidato.',
+  classe: (item: Candidatos) =>
+    item.desativado
+      ? 'bi bi-check-square acao-editar'
+      : 'bi bi-dash-circle acao-editar',
+  visivel: (item: Candidatos) => !this.isMobile && this.liberaEditar,
+  callback: (item: Candidatos) => this.statusCandidato(item),
+},
     {
-      label: (item: Candidatos) => (item.desativado ? '✅' : '⛔'),
-      descricao: (item: Candidatos) =>
-        item.desativado ? 'Ativar Candidado.' : 'Desativar Candidato.',
-      classe: 'acao-editar',
-      visivel: (item: Candidatos) => !this.isMobile && this.liberaEditar,
-      callback: (item: Candidatos) => this.statusCandidato(item),
-    },
-    {
-      label: '📜',
+      label: '',
       descricao: 'Histórico',
-      classe: 'acao-editar',
+      classe: 'acao-editar bi bi-journal-text',
       visivel: (item: Candidatos) => this.liberaHistorico && !item.desativado,
       callback: (item: Candidatos) => this.abrirHistoricoAluno(item),
     },
     {
-      label: '🗑️',
+      label: '',
       descricao: 'Excluir',
-      classe: 'acao-excluir',
+      classe: 'acao-excluir bi bi-trash3',
       visivel: (item: any) => !this.isMobile && this.liberaDeletar,
       callback: (item: any) => this.excluir(item),
     },

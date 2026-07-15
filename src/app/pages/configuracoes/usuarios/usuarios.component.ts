@@ -132,9 +132,9 @@ export class UsuariosComponent implements OnInit {
   // Buttons
   acoes = [
     {
-      label: '✏️',
+      label: '',
       descricao: 'Editar',
-      classe: 'acao-editar',
+      classe: 'acao-editar bi bi-pencil',
       visivel: (item: any) => this.podeEditarUsuario(item),
       callback: (item: any) => this.editar(item),
     },
