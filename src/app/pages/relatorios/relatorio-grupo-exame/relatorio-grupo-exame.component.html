@@ -288,16 +288,28 @@
                     {{ igreja.total }}
                   </td>
 
-                  <td><strong>{{ igreja.aprovado }}</strong></td>
+                  <td>
+                    <strong>{{ igreja.aprovado }}</strong>
+                  </td>
 
-                  <td><strong>{{ igreja.recuperacao }}</strong></td>
+                  <td>
+                    <strong>{{ igreja.recuperacao }}</strong>
+                  </td>
 
-                  <td><strong>{{ igreja.reprovado }}</strong></td>
+                  <td>
+                    <strong>{{ igreja.reprovado }}</strong>
+                  </td>
 
-                  <td><strong>{{ igreja.emAndamento }}</strong></td>
+                  <td>
+                    <strong>{{ igreja.emAndamento }}</strong>
+                  </td>
 
-                  <td><strong>{{ igreja.ausente }}</strong></td>
-                  <td><strong>{{ igreja.cancelado }}</strong></td>
+                  <td>
+                    <strong>{{ igreja.ausente }}</strong>
+                  </td>
+                  <td>
+                    <strong>{{ igreja.cancelado }}</strong>
+                  </td>
 
                   <td class="percentual-aprovado">
                     {{ formatarPercentual(igreja.aprovado, igreja.total) }}
@@ -471,7 +483,15 @@
           <div class="accordion-item" *ngFor="let igreja of resumoPorIgreja">
             <div class="accordion-header" (click)="alternarIgreja(igreja)">
               <div>
-                <strong>{{ igreja.nomeComum }}</strong>
+                <strong
+                  style="
+                    display: flex;
+                    flex-direction: row;
+                    align-items: baseline;
+                    gap: 12px;
+                  "
+                  ><i class="bi bi-bank2"></i> {{ igreja.nomeComum }}</strong
+                >
                 <span>
                   Total: {{ igreja.total }} | Em andamento:
                   {{ igreja.emAndamento }} | Aprovados: {{ igreja.aprovado }} |
