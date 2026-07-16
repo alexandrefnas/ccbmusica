@@ -167,6 +167,8 @@ gap: 5px;
 .accordion-item {
   border: 1px solid #ddd;
   background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .accordion-header {
