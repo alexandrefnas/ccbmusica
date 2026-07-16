@@ -435,8 +435,10 @@
       </div> -->
 
       <div class="bloco-relatorio">
-        <h3>Resultado por nível</h3>
-
+        <div class="dashboard-subtitulo maiusculo">
+          Resultado por nível
+        </div>
+<div style="border-radius: 8px; overflow: hidden;">
         <tcx-table
           [colunas]="colunasNivel"
           [colunasLabels]="labels"
@@ -447,12 +449,15 @@
           [mostrarAcoes]="false"
         />
       </div>
+      </div>
 
       <div class="bloco-relatorio">
-        <h3>Resultado por faixa de idade</h3>
-
-        <tcx-table
-          [colunas]="colunasFaixaEtaria"
+        <div class="dashboard-subtitulo maiusculo">
+          Resultado por faixa de idade
+        </div>
+<div style="border-radius: 8px; overflow: hidden;">
+  <tcx-table
+  [colunas]="colunasFaixaEtaria"
           [colunasLabels]="labels"
           [dados]="resumoPorFaixaEtaria"
           [tamanhosColunas]="tamanhosFaixaEtaria"
@@ -460,6 +465,7 @@
           [alinhamentosColunas]="alinhamentoColuna"
           [mostrarAcoes]="false"
         />
+        </div>
       </div>
 
       <!-- <div class="bloco-relatorio">
@@ -477,7 +483,9 @@
       </div> -->
 
       <div class="bloco-relatorio">
-        <h3>Detalhamento por comum e nível</h3>
+        <div class="dashboard-subtitulo maiusculo">
+          Detalhamento por comum e nível
+        </div>
 
         <div class="accordion">
           <div class="accordion-item" *ngFor="let igreja of resumoPorIgreja">

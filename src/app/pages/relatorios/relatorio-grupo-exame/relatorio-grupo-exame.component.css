@@ -90,6 +90,10 @@
   font-size: 14px;
 }
 
+.maiusculo {
+    text-transform: uppercase;
+}
+
 .button-container {
   display: flex;
   flex-direction: row;
@@ -145,6 +149,7 @@
   flex-direction: column;
   min-height: 60px;
   margin-bottom: 25px;
+gap: 5px;
 }
 
 .bloco-relatorio h3 {
@@ -172,8 +177,9 @@
   padding: 12px;
   cursor: pointer;
   border-radius: 5px;
+background: #f3f6fa;
   /* background: #f4f6f9; */
-  background: linear-gradient(90deg, #d8e8fb, #c8daf2);
+  /* background: linear-gradient(90deg, #d8e8fb, #c8daf2); */
 
   color: #1f2937;
 }
