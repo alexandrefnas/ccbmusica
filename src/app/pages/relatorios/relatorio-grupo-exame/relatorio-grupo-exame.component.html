@@ -41,8 +41,349 @@
         <strong>{{ grupoSelecionado.grupoExame }}</strong>
         <span>{{ grupoSelecionado.descricao }}</span>
       </div>
+      <!-- DESHBOARD -->
+      <div class="dashboard-resumo">
+        <div class="dashboard-titulo">
+          <div class="dashboard-titulo-principal">
+            <i class="bi bi-bar-chart-fill"></i>
 
-      <div class="cards-resumo">
+            <span>RESUMO: DESEMPENHO DE AVALIAÇÕES</span>
+          </div>
+
+          <i class="bi bi-people-fill dashboard-icone-usuarios"></i>
+        </div>
+
+        <div class="dashboard-subtitulo">VISÃO GERAL DO GRUPO DE EXAME</div>
+
+        <div class="dashboard-cards">
+          <div class="dashboard-card total">
+            <span>AVALIAÇÕES APLICADAS</span>
+            <strong>{{ resumoGeral.total }}</strong>
+          </div>
+
+          <div class="dashboard-card aprovado">
+            <span>TOTAL APROVADOS</span>
+            <strong>{{ resumoGeral.aprovado }}</strong>
+          </div>
+
+          <div class="dashboard-card recuperacao">
+            <span>TOTAL RECUPERAÇÃO</span>
+            <strong>{{ resumoGeral.recuperacao }}</strong>
+          </div>
+
+          <div class="dashboard-card reprovado">
+            <span>TOTAL REPROVADOS</span>
+            <strong>{{ resumoGeral.reprovado }}</strong>
+          </div>
+
+          <div class="dashboard-card andamento">
+            <span>EM ANDAMENTO</span>
+            <strong>{{ resumoGeral.emAndamento }}</strong>
+          </div>
+
+          <div class="dashboard-card ausente">
+            <span>TOTAL AUSENTES</span>
+            <strong>{{ resumoGeral.ausente }}</strong>
+          </div>
+
+          <div class="dashboard-card cancelado">
+            <span>CANCELADOS</span>
+            <strong>{{ resumoGeral.cancelado }}</strong>
+          </div>
+        </div>
+
+        <div class="dashboard-bloco">
+          <div class="dashboard-bloco-titulo">TOTAIS DO GRUPO</div>
+
+          <div class="barra-geral-linha">
+            <!-- <span class="barra-geral-label">Grupo</span> -->
+
+            <div class="barra-geral">
+              <div
+                class="barra-segmento barra-aprovado"
+                [style.width.%]="percentualGeralAprovado()"
+                *ngIf="resumoGeral.aprovado > 0"
+              >
+                <span>
+                  {{
+                    formatarPercentual(resumoGeral.aprovado, resumoGeral.total)
+                  }}
+                </span>
+              </div>
+
+              <div
+                class="barra-segmento barra-recuperacao"
+                [style.width.%]="percentualGeralRecuperacao()"
+                *ngIf="resumoGeral.recuperacao > 0"
+              >
+                <span>
+                  {{
+                    formatarPercentual(
+                      resumoGeral.recuperacao,
+                      resumoGeral.total
+                    )
+                  }}
+                </span>
+              </div>
+
+              <div
+                class="barra-segmento barra-reprovado"
+                [style.width.%]="percentualGeralReprovado()"
+                *ngIf="resumoGeral.reprovado > 0"
+              >
+                <span>
+                  {{
+                    formatarPercentual(resumoGeral.reprovado, resumoGeral.total)
+                  }}
+                </span>
+              </div>
+
+              <div
+                class="barra-segmento barra-andamento"
+                [style.width.%]="percentualGeralEmAndamento()"
+                *ngIf="resumoGeral.emAndamento > 0"
+              >
+                <span>
+                  {{
+                    formatarPercentual(
+                      resumoGeral.emAndamento,
+                      resumoGeral.total
+                    )
+                  }}
+                </span>
+              </div>
+
+              <div
+                class="barra-segmento barra-ausente"
+                [style.width.%]="percentualGeralAusente()"
+                *ngIf="resumoGeral.ausente > 0"
+              >
+                <span>
+                  {{
+                    formatarPercentual(resumoGeral.ausente, resumoGeral.total)
+                  }}
+                </span>
+              </div>
+
+              <div
+                class="barra-segmento barra-cancelado"
+                [style.width.%]="percentualGeralCancelado()"
+                *ngIf="resumoGeral.cancelado > 0"
+              >
+                <span>
+                  {{
+                    formatarPercentual(resumoGeral.cancelado, resumoGeral.total)
+                  }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="legenda-status">
+            <span>
+              <i class="legenda-cor aprovado"></i>
+              Aprovados
+            </span>
+
+            <span>
+              <i class="legenda-cor recuperacao"></i>
+              Recuperação
+            </span>
+
+            <span>
+              <i class="legenda-cor reprovado"></i>
+              Reprovados
+            </span>
+
+            <span>
+              <i class="legenda-cor andamento"></i>
+              Em andamento
+            </span>
+
+            <span>
+              <i class="legenda-cor ausente"></i>
+              Ausentes
+            </span>
+
+            <span>
+              <i class="legenda-cor cancelado"></i>
+              Cancelados
+            </span>
+          </div>
+        </div>
+
+        <div class="dashboard-detalhado">
+          <div class="dashboard-subtitulo">ANÁLISE DETALHADA POR COMUM</div>
+
+          <div class="dashboard-tabela-wrapper">
+            <table class="dashboard-tabela">
+              <thead>
+                <tr>
+                  <th class="coluna-comum">COMUM</th>
+                  <th>TOTAL</th>
+                  <th>AP</th>
+                  <th>REC</th>
+                  <th>RP</th>
+                  <th>AND.</th>
+                  <th>AUS.</th>
+                  <th>CANC.</th>
+                  <th>% AP</th>
+                  <th>% REC</th>
+                  <th>% RP</th>
+                  <th>% AUS</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr *ngFor="let igreja of resumoPorIgreja">
+                  <td class="coluna-comum">
+                    <div class="comum-conteudo">
+                      <span>{{ igreja.nomeComum }}</span>
+
+                      <div class="mini-barra">
+                        <div
+                          class="mini-barra-aprovado"
+                          [style.width.%]="
+                            calcularPercentual(igreja.aprovado, igreja.total)
+                          "
+                        ></div>
+
+                        <div
+                          class="mini-barra-recuperacao"
+                          [style.width.%]="
+                            calcularPercentual(igreja.recuperacao, igreja.total)
+                          "
+                        ></div>
+
+                        <div
+                          class="mini-barra-reprovado"
+                          [style.width.%]="
+                            calcularPercentual(igreja.reprovado, igreja.total)
+                          "
+                        ></div>
+
+                        <div
+                          class="mini-barra-andamento"
+                          [style.width.%]="
+                            calcularPercentual(igreja.emAndamento, igreja.total)
+                          "
+                        ></div>
+                        <div
+                          class="mini-barra-ausente"
+                          [style.width.%]="
+                            calcularPercentual(igreja.ausente, igreja.total)
+                          "
+                        ></div>
+                        <div
+                          class="mini-barra-cancelado"
+                          [style.width.%]="
+                            calcularPercentual(igreja.cancelado, igreja.total)
+                          "
+                        ></div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="valor-total">
+                    {{ igreja.total }}
+                  </td>
+
+                  <td><strong>{{ igreja.aprovado }}</strong></td>
+
+                  <td><strong>{{ igreja.recuperacao }}</strong></td>
+
+                  <td><strong>{{ igreja.reprovado }}</strong></td>
+
+                  <td><strong>{{ igreja.emAndamento }}</strong></td>
+
+                  <td><strong>{{ igreja.ausente }}</strong></td>
+                  <td><strong>{{ igreja.cancelado }}</strong></td>
+
+                  <td class="percentual-aprovado">
+                    {{ formatarPercentual(igreja.aprovado, igreja.total) }}
+                  </td>
+
+                  <td class="percentual-recuperacao">
+                    {{ formatarPercentual(igreja.recuperacao, igreja.total) }}
+                  </td>
+
+                  <td class="percentual-reprovado">
+                    {{ formatarPercentual(igreja.reprovado, igreja.total) }}
+                  </td>
+                  <td class="percentual-ausente">
+                    {{ formatarPercentual(igreja.ausente, igreja.total) }}
+                  </td>
+                </tr>
+              </tbody>
+
+              <tfoot>
+                <tr>
+                  <td>TOTAL</td>
+
+                  <td>
+                    {{ resumoGeral.total }}
+                  </td>
+
+                  <td>
+                    {{ resumoGeral.aprovado }}
+                  </td>
+
+                  <td>
+                    {{ resumoGeral.recuperacao }}
+                  </td>
+
+                  <td>
+                    {{ resumoGeral.reprovado }}
+                  </td>
+
+                  <td>
+                    {{ resumoGeral.emAndamento }}
+                  </td>
+                  <td>{{ resumoGeral.ausente }}</td>
+
+                  <td>
+                    {{ resumoGeral.cancelado }}
+                  </td>
+
+                  <td class="percentual-aprovado">
+                    {{
+                      formatarPercentual(
+                        resumoGeral.aprovado,
+                        resumoGeral.total
+                      )
+                    }}
+                  </td>
+
+                  <td class="percentual-recuperacao">
+                    {{
+                      formatarPercentual(
+                        resumoGeral.recuperacao,
+                        resumoGeral.total
+                      )
+                    }}
+                  </td>
+
+                  <td class="percentual-reprovado">
+                    {{
+                      formatarPercentual(
+                        resumoGeral.reprovado,
+                        resumoGeral.total
+                      )
+                    }}
+                  </td>
+                  <td class="percentual-ausente">
+                    {{
+                      formatarPercentual(resumoGeral.ausente, resumoGeral.total)
+                    }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- FIM -->
+      <!-- <div class="cards-resumo">
         <div class="card">
           <span>Total</span>
           <strong>{{ resumoGeral.total }}</strong>
@@ -79,7 +420,7 @@
           <span>% Aprovação</span>
           <strong>{{ percentualAprovacao() }}</strong>
         </div>
-      </div>
+      </div> -->
 
       <div class="bloco-relatorio">
         <h3>Resultado por nível</h3>
@@ -96,6 +437,20 @@
       </div>
 
       <div class="bloco-relatorio">
+        <h3>Resultado por faixa de idade</h3>
+
+        <tcx-table
+          [colunas]="colunasFaixaEtaria"
+          [colunasLabels]="labels"
+          [dados]="resumoPorFaixaEtaria"
+          [tamanhosColunas]="tamanhosFaixaEtaria"
+          [alinhamentosColunasTitulo]="alinhamentoTitulo"
+          [alinhamentosColunas]="alinhamentoColuna"
+          [mostrarAcoes]="false"
+        />
+      </div>
+
+      <!-- <div class="bloco-relatorio">
         <h3>Resultado por comum</h3>
 
         <tcx-table
@@ -107,7 +462,7 @@
           [alinhamentosColunas]="alinhamentoColuna"
           [mostrarAcoes]="false"
         />
-      </div>
+      </div> -->
 
       <div class="bloco-relatorio">
         <h3>Detalhamento por comum e nível</h3>
@@ -135,7 +490,7 @@
               ></i>
             </div>
 
-            <div
+            <!-- <div
               class="accordion-body"
               *ngIf="igrejaExpandida === igreja.idComum"
             >
@@ -148,6 +503,40 @@
                 [alinhamentosColunas]="alinhamentoColuna"
                 [mostrarAcoes]="false"
               />
+            </div> -->
+
+            <div
+              class="accordion-body"
+              *ngIf="igrejaExpandida === igreja.idComum"
+            >
+              <div class="accordion-secao">
+                <h4>Resultado por nível</h4>
+
+                <tcx-table
+                  [colunas]="colunasNivel"
+                  [colunasLabels]="labels"
+                  [dados]="igreja.niveis"
+                  [tamanhosColunas]="tamanhosNivel"
+                  [alinhamentosColunasTitulo]="alinhamentoTitulo"
+                  [alinhamentosColunas]="alinhamentoColuna"
+                  [mostrarAcoes]="false"
+                />
+              </div>
+
+              <div class="accordion-secao">
+                <h4>Alunos e avaliações</h4>
+
+                <tcx-table
+                  [colunas]="colunasAlunos"
+                  [colunasLabels]="labels"
+                  [dados]="igreja.alunos"
+                  [tamanhosColunas]="tamanhosAlunos"
+                  [alinhamentosColunasTitulo]="alinhamentoTitulo"
+                  [alinhamentosColunas]="alinhamentoColuna"
+                  [mostrarAcoes]="false"
+                  mensagemVazio="Nenhum aluno encontrado nesta comum."
+                />
+              </div>
             </div>
           </div>
         </div>
