@@ -435,36 +435,34 @@
       </div> -->
 
       <div class="bloco-relatorio">
-        <div class="dashboard-subtitulo maiusculo">
-          Resultado por nível
+        <div class="dashboard-subtitulo maiusculo">Resultado por nível</div>
+        <div style="border-radius: 8px; overflow: hidden">
+          <tcx-table
+            [colunas]="colunasNivel"
+            [colunasLabels]="labels"
+            [dados]="resumoPorNivel"
+            [tamanhosColunas]="tamanhosNivel"
+            [alinhamentosColunasTitulo]="alinhamentoTitulo"
+            [alinhamentosColunas]="alinhamentoColuna"
+            [mostrarAcoes]="false"
+          />
         </div>
-<div style="border-radius: 8px; overflow: hidden;">
-        <tcx-table
-          [colunas]="colunasNivel"
-          [colunasLabels]="labels"
-          [dados]="resumoPorNivel"
-          [tamanhosColunas]="tamanhosNivel"
-          [alinhamentosColunasTitulo]="alinhamentoTitulo"
-          [alinhamentosColunas]="alinhamentoColuna"
-          [mostrarAcoes]="false"
-        />
-      </div>
       </div>
 
       <div class="bloco-relatorio">
         <div class="dashboard-subtitulo maiusculo">
           Resultado por faixa de idade
         </div>
-<div style="border-radius: 8px; overflow: hidden;">
-  <tcx-table
-  [colunas]="colunasFaixaEtaria"
-          [colunasLabels]="labels"
-          [dados]="resumoPorFaixaEtaria"
-          [tamanhosColunas]="tamanhosFaixaEtaria"
-          [alinhamentosColunasTitulo]="alinhamentoTitulo"
-          [alinhamentosColunas]="alinhamentoColuna"
-          [mostrarAcoes]="false"
-        />
+        <div style="border-radius: 8px; overflow: hidden">
+          <tcx-table
+            [colunas]="colunasFaixaEtaria"
+            [colunasLabels]="labels"
+            [dados]="resumoPorFaixaEtaria"
+            [tamanhosColunas]="tamanhosFaixaEtaria"
+            [alinhamentosColunasTitulo]="alinhamentoTitulo"
+            [alinhamentosColunas]="alinhamentoColuna"
+            [mostrarAcoes]="false"
+          />
         </div>
       </div>
 
