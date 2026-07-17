@@ -202,7 +202,7 @@
           </tr>
         </table>
 
-        <table class="ficha-tabela">
+        <!-- <table class="ficha-tabela">
           <tr>
             <th colspan="8" class="titulo-cinza">Preenchido pelo Avaliador</th>
           </tr>
@@ -438,8 +438,111 @@
               />
             </td>
           </tr>
-        </table>
+        </table> -->
+<div
+  class="bloco-licao"
+  *ngFor="let licao of licoesAvaliadas; let indiceLicao = index"
+>
+  <div class="cabecalho-licao">
+    <div class="input-licao">
+      <label>
+        Lição avaliada {{ indiceLicao + 1 }}
+      </label>
 
+      <input
+        type="text"
+        class="campo-licao"
+        placeholder="Informe a lição avaliada"
+        [(ngModel)]="licao.nomeLicao"
+        [ngModelOptions]="{ standalone: true }"
+      />
+    </div>
+
+    <button
+      type="button"
+      class="buttons"
+      title="Remover lição"
+      *ngIf="licoesAvaliadas.length > 1"
+      (click)="removerLicao(indiceLicao)"
+    >
+      <i class="bi bi-trash"></i>
+    </button>
+  </div>
+
+  <table class="ficha-tabela">
+    <tr>
+      <th colspan="8" class="titulo-cinza">
+        Preenchido pelo Avaliador
+      </th>
+    </tr>
+
+    <tr class="titulo-verde">
+      <th>Critério</th>
+
+      <th *ngFor="let nota of notasDisponiveis">
+        ({{ nota }})
+      </th>
+    </tr>
+
+    <tr
+      *ngFor="
+        let criterio of licao.criterios;
+        let indiceCriterio = index
+      "
+    >
+      <td>
+        {{ criterio.nomeCriterio }}
+      </td>
+
+      <td *ngFor="let nota of notasDisponiveis">
+        <input
+          type="radio"
+          [name]="
+            'criterio-' +
+            licao.id +
+            '-' +
+            criterio.idCriterio
+          "
+          [value]="nota"
+          [(ngModel)]="criterio.nota"
+          [ngModelOptions]="{ standalone: true }"
+          (change)="calcularNotaFicha()"
+        />
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="6" class="label">
+        Soma da lição
+      </td>
+
+      <td colspan="2">
+        {{ licao.somaPontos }}
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="6" class="label">
+        Média da lição
+      </td>
+
+      <td colspan="2">
+        {{ licao.pontuacaoFinal | number: "1.2-2" }}
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="adicionar-licao">
+  <button
+    type="button"
+    class="buttons"
+    (click)="adicionarLicao()"
+  >
+    <i class="bi bi-plus-circle"></i>
+    Adicionar lição
+  </button>
+</div>
         <div class="ficha-grid">
           <table class="ficha-tabela">
             <tr>

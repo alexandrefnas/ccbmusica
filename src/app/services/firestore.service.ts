@@ -48,6 +48,26 @@ export interface Criterio {
   nomeCriterio: string;
 }
 
+export interface AvaliacaoCriterio {
+  idCriterio: string;
+  nomeCriterio: string;
+  nota: number | null;
+}
+
+export interface LicaoAvaliada {
+  id: string;
+  nomeLicao: string;
+  criterios: AvaliacaoCriterio[];
+  somaPontos: number;
+  pontuacaoFinal: number;
+}
+
+export interface Criterio {
+  id?: string;
+  avaliacao: string;
+  nomeCriterio: string;
+}
+
 export type StatusExame =
   | 'solicitado'
   | 'agendado'
@@ -83,6 +103,8 @@ export interface EtapaExame {
   dataLancamento: string;
   professorLancamento: string;
   observacaoLancamento: string;
+
+licoesAvaliadas?: LicaoAvaliada[];
 
   // Dados da recuperação
   notaRecuperacao?: number | null;
