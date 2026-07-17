@@ -34,11 +34,18 @@ export interface GrupoExames {
   descricao: string;
   idSetor: string;
   idComum: string;
+  criteriosSelecionados: string[];
   tipoExame: string;
   concluido: boolean;
   criadoEm?: string;
   periodos: any[];
   usuarioCriador: string;
+}
+
+export interface Criterio {
+  id?: string;
+  tipoExame: string;
+  nomeCriterio: string;
 }
 
 export type StatusExame =
@@ -267,6 +274,19 @@ export class FirestoreService {
     return this.excluirComLog('grupoExames', id);
   }
   // FIM
+
+
+// CRITÉRIOS
+
+getCriterios(): Observable<Criterio[]> {
+  const criteriosCollection = collection(this.firestore, 'criterios');
+
+  return collectionData(criteriosCollection, {
+    idField: 'id',
+  }) as Observable<Criterio[]>;
+}
+
+// FIM CRITÉRIOS
 
   //// Exames
   // async addExame(dados: Exames) {

@@ -11,6 +11,7 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import {
+  Criterio,
   FirestoreService,
   GrupoExames,
   Igrejas,
@@ -33,6 +34,7 @@ import { ButtonComponent } from '../../../component/button/button.component';
 import { DataComponent } from '../../../component/inputs/data/data.component';
 import { TableComponent } from '../../../component/table/table.component';
 import { AlertService } from '../../../services/alert.service';
+import { MultiSelectComponent } from '../../../component/inputs/multi-select/multi-select';
 
 @Component({
   selector: 'tcx-semestres',
@@ -46,6 +48,7 @@ import { AlertService } from '../../../services/alert.service';
     ButtonComponent,
     DataComponent,
     TableComponent,
+    MultiSelectComponent,
   ],
   templateUrl: './semestres.component.html',
   styleUrl: './semestres.component.css',
@@ -66,7 +69,7 @@ export class SemestresComponent {
       dataTeorica: [''],
       dataPratica: [''],
       dataRecuperacao: [''],
-
+      criteriosSelecionados: [[] as string[]],
       tipoExame: ['', Validators.required],
       avaliacoes: this.fb.array([]),
       concluido: [false],
@@ -81,6 +84,7 @@ export class SemestresComponent {
   liberaCriar: boolean = false;
   liberaEditar: boolean = false;
   liberaDeletar: boolean = false;
+  tabelaVisivel: boolean = true;
 
   listaTipoExame = listaTipoExame;
   listaPeriodo = listaPeriodo;
@@ -89,6 +93,10 @@ export class SemestresComponent {
   listaIgreja: { value: string; label: string; idSetor: string }[] = [];
   listaSetor: { value: string; label: string }[] = [];
   listaIgrejaTodas: { value: string; label: string; idSetor: string }[] = [];
+
+  listaCriteriosTodos: Criterio[] = [];
+  criteriosSelecionados: string[] = [];
+  listaSelect: { value: string; label: string }[] = [];
 
   dados: any[] = [];
 
@@ -189,6 +197,7 @@ export class SemestresComponent {
 
   ngOnInit(): void {
     const usuario = this.auth.usuario;
+    this.carregarCriterios();
 
     // SOMENTE ADMIN
     if (usuario?.perfil === 'admin') {
@@ -237,6 +246,16 @@ export class SemestresComponent {
     this.liberaDeletar = this.permissao('delete');
 
     this.escutarMudancaIgreja();
+  }
+
+  aoSelecionarFiltro(criterios: string[]): void {
+    const criteriosIds = criterios ?? [];
+
+    this.criteriosSelecionados = criteriosIds;
+
+    this.getControl('criteriosSelecionados').setValue(criteriosIds, {
+      emitEvent: false,
+    });
   }
 
   carregarDados(): void {
@@ -297,6 +316,42 @@ export class SemestresComponent {
         };
       });
     });
+  }
+
+  carregarCriterios(): void {
+    this.firestoreService.getCriterios().subscribe({
+      next: (criterios: Criterio[]) => {
+        this.listaCriteriosTodos = criterios;
+
+        this.filtrarCriteriosPorTipoExame();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar critérios:', error);
+        this.listaCriteriosTodos = [];
+        this.listaSelect = [];
+      },
+    });
+  }
+
+  filtrarCriteriosPorTipoExame(): void {
+    const tipoExame = this.getControl('tipoExame').value;
+
+    if (!tipoExame) {
+      this.listaSelect = [];
+      return;
+    }
+
+    this.listaSelect = this.listaCriteriosTodos
+      .filter((criterio) => criterio.tipoExame === tipoExame)
+      .map((criterio) => ({
+        value: criterio.id!,
+        label: criterio.nomeCriterio.toLocaleUpperCase('pt-BR'),
+      }))
+      .sort((a, b) =>
+        a.label.localeCompare(b.label, 'pt-BR', {
+          sensitivity: 'base',
+        }),
+      );
   }
 
   escutarMudancaSetor(): void {
@@ -469,8 +524,66 @@ export class SemestresComponent {
     return [];
   }
 
+  // onTipoExameChange(): void {
+  //   this.avaliacoesArray.clear();
+  //   this.dadosForms.patchValue(
+  //     {
+  //       dataTeorica: '',
+  //       dataPratica: '',
+  //       dataRecuperacao: '',
+  //     },
+  //     {
+  //       emitEvent: false,
+  //     },
+  //   );
+  //   const tipoExame = this.dadosForms.get('tipoExame')?.value;
+
+  //   if (tipoExame === '001') {
+  //     this.listaPeriodo.forEach((periodo) => {
+  //       this.avaliacoesArray.push(
+  //         this.fb.group({
+  //           tipo: [periodo.value],
+  //           label: [periodo.label],
+  //           dataTeorica: [''],
+
+  //           teoricaRecuperacao: [null],
+  //           teoricaNotaMinima: [null, Validators.required],
+  //           teoricaNotaMaxima: [null, Validators.required],
+
+  //           dataPratica: [''],
+  //           praticaNotaMinima: [null, Validators.required],
+  //           praticaNotaMaxima: [null, Validators.required],
+  //         }),
+  //       );
+  //     });
+  //   }
+
+  //   if (tipoExame === '002') {
+  //     this.listaPratico.forEach((periodo) => {
+  //       this.avaliacoesArray.push(
+  //         this.fb.group({
+  //           tipo: [periodo.value],
+  //           label: [periodo.label],
+  //           dataPratica: [''],
+  //           praticaNotaMinima: [null, Validators.required],
+  //           praticaNotaMaxima: [null, Validators.required],
+  //         }),
+  //       );
+  //     });
+  //   }
+  // }
+
   onTipoExameChange(): void {
+    this.criteriosSelecionados = [];
+
+    this.getControl('criteriosSelecionados')?.setValue([], {
+      emitEvent: false,
+    });
+
+    this.filtrarCriteriosPorTipoExame();
+
     this.avaliacoesArray.clear();
+
     this.dadosForms.patchValue(
       {
         dataTeorica: '',
@@ -481,6 +594,7 @@ export class SemestresComponent {
         emitEvent: false,
       },
     );
+
     const tipoExame = this.dadosForms.get('tipoExame')?.value;
 
     if (tipoExame === '001') {
@@ -520,7 +634,8 @@ export class SemestresComponent {
 
   buttonClick(): void {
     this.title = 'Criar Grupo de Avaliações';
-    this.mostrarModal = true;
+    // this.mostrarModal = true;
+    this.tabelaVisivel = false;
     this.dadosParaEditar = null;
     this.dadosForms.reset();
   }
@@ -546,6 +661,7 @@ export class SemestresComponent {
       idComum: this.dadosForms.value.idComum || '',
       tipoExame: this.dadosForms.value.tipoExame,
       // categoriaExame: this.dadosForms.value.categoriaExame,
+      criteriosSelecionados: this.dadosForms.value.criteriosSelecionados ?? [],
       concluido: this.dadosForms.value.concluido || false,
       criadoEm:
         this.dadosParaEditar?.criadoEm || formatarDataString(new Date()),
@@ -598,9 +714,13 @@ export class SemestresComponent {
   // }
 
   editar(item: GrupoExames): void {
-    this.title = 'Editar Grupo de Avaliações';
-    this.mostrarModal = true;
+    // this.title = 'Editar Grupo de Avaliações';
+    // this.mostrarModal = true;
+    this.tabelaVisivel = false;
     this.dadosParaEditar = { ...item };
+    const criterios = item.criteriosSelecionados ?? [];
+
+    this.criteriosSelecionados = criterios;
 
     this.dadosForms.patchValue({
       grupoExame: item.grupoExame || '',
@@ -608,8 +728,11 @@ export class SemestresComponent {
       idSetor: item.idSetor || '',
       idComum: item.idComum || '',
       tipoExame: item.tipoExame || '',
+      criteriosSelecionados: criterios,
+
       concluido: item.concluido || false,
     });
+    this.filtrarCriteriosPorTipoExame();
 
     this.montarAvaliacoesEdicao(item);
   }
@@ -755,7 +878,8 @@ export class SemestresComponent {
   }
 
   fecharModal() {
-    this.mostrarModal = false;
+    // this.mostrarModal = false;
+    this.tabelaVisivel = true;
     this.dadosForms.reset();
   }
 }
