@@ -1229,6 +1229,61 @@
 .resultado-status--reprovado .resultado-status__icone {
   background: #f8dddd;
 }
+
+.escala-pontuacao {
+  display: block;
+}
+
+.escala-pontuacao > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.escala-pontuacao > summary::-webkit-details-marker {
+  display: none;
+}
+
+.escala-pontuacao__acao {
+  display: none;
+  align-items: center;
+  gap: 6px;
+
+  color: #4f6d49;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.texto-fechar {
+  display: none;
+}
+
+.escala-pontuacao[open] .texto-abrir {
+  display: none;
+}
+
+.escala-pontuacao[open] .texto-fechar {
+  display: inline;
+}
+
+.escala-pontuacao[open] .escala-pontuacao__acao i {
+  transform: rotate(180deg);
+}
+
+.escala-pontuacao__acao i {
+  transition: transform 0.2s ease;
+}
+
+.escala-pontuacao__acao {
+    display: flex;
+  }
+
+  .escala-pontuacao:not([open]) .lista-pontuacao {
+    display: none;
+  }
+
+  .escala-pontuacao .card-pontuacao__titulo {
+    cursor: pointer;
+  }
 /* RESPONSIVIDADE */
 
 /* MOBILE */
@@ -1482,6 +1537,10 @@
     margin: 0 10px 10px;
     padding: 10px;
   }
+
+
+
+
 }
 
 /* TABLET */
