@@ -173,7 +173,7 @@
         </div>
       </div>
       <form [formGroup]="notaForm" class="ficha-avaliacao">
-        <table class="ficha-tabela">
+        <!-- <table class="ficha-tabela">
           <tr>
             <th colspan="2" class="titulo-verde">
               FICHA DE AVALIAÇÃO – PRÁTICA DE SOLFEJO
@@ -200,7 +200,92 @@
               }}
             </td>
           </tr>
-        </table>
+        </table> -->
+
+        <section class="cabecalho-ficha">
+          <div class="cabecalho-ficha__topo">
+            <div class="cabecalho-ficha__icone">
+              <i class="bi bi-clipboard2-check"></i>
+            </div>
+
+            <div class="cabecalho-ficha__titulo">
+              <span class="cabecalho-ficha__subtitulo">
+                Ficha de avaliação
+              </span>
+
+              <h1>Prática de Solfejo</h1>
+
+              <p>Registro da avaliação prática do candidato.</p>
+            </div>
+
+            <div class="cabecalho-ficha__status">
+              <i class="bi bi-music-note-beamed"></i>
+              Avaliação prática
+            </div>
+          </div>
+
+          <div class="dados-candidato">
+            <div class="dado-candidato dado-candidato--principal">
+              <span class="dado-candidato__icone">
+                <i class="bi bi-person"></i>
+              </span>
+
+              <div>
+                <small>Candidato</small>
+
+                <strong>
+                  {{ exameSelecionado?.nomeAluno || "Não informado" }}
+                </strong>
+              </div>
+            </div>
+
+            <div class="dado-candidato">
+              <span class="dado-candidato__icone">
+                <i class="bi bi-building"></i>
+              </span>
+
+              <div>
+                <small>Comum / Congregação</small>
+
+                <strong>
+                  {{ exameSelecionado?.comum || "Não informado" }}
+                </strong>
+              </div>
+            </div>
+
+            <div class="dado-candidato">
+              <span class="dado-candidato__icone">
+                <i class="bi bi-bookmark"></i>
+              </span>
+
+              <div>
+                <small>Período</small>
+
+                <strong>
+                  {{ exameSelecionado?.categoriaExameLabel || "Não informado" }}
+                </strong>
+              </div>
+            </div>
+
+            <div class="dado-candidato">
+              <span class="dado-candidato__icone">
+                <i class="bi bi-calendar3"></i>
+              </span>
+
+              <div>
+                <small>Data da avaliação</small>
+
+                <strong>
+                  {{
+                    exameSelecionado?.dataAgendada ||
+                      exameSelecionado?.dataSolicitacao ||
+                      "Não informada"
+                  }}
+                </strong>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <!-- <table class="ficha-tabela">
           <tr>
@@ -439,111 +524,256 @@
             </td>
           </tr>
         </table> -->
-<div
-  class="bloco-licao"
-  *ngFor="let licao of licoesAvaliadas; let indiceLicao = index"
->
-  <div class="cabecalho-licao">
-    <div class="input-licao">
-      <label>
-        Lição avaliada {{ indiceLicao + 1 }}
-      </label>
 
-      <input
-        type="text"
-        class="campo-licao"
-        placeholder="Informe a lição avaliada"
-        [(ngModel)]="licao.nomeLicao"
-        [ngModelOptions]="{ standalone: true }"
-      />
-    </div>
+        <!-- <div
+          class="bloco-licao"
+          *ngFor="let licao of licoesAvaliadas; let indiceLicao = index"
+        >
+          <div class="cabecalho-licao">
+            <div class="input-licao">
+              <label> Lição avaliada {{ indiceLicao + 1 }} </label>
 
-    <button
-      type="button"
-      class="buttons"
-      title="Remover lição"
-      *ngIf="licoesAvaliadas.length > 1"
-      (click)="removerLicao(indiceLicao)"
-    >
-      <i class="bi bi-trash"></i>
-    </button>
-  </div>
+              <input
+                type="text"
+                class="campo-licao"
+                placeholder="Informe a lição avaliada"
+                [(ngModel)]="licao.nomeLicao"
+                [ngModelOptions]="{ standalone: true }"
+              />
+            </div>
 
-  <table class="ficha-tabela">
-    <tr>
-      <th colspan="8" class="titulo-cinza">
-        Preenchido pelo Avaliador
-      </th>
-    </tr>
+            <button
+              type="button"
+              class="buttons"
+              title="Remover lição"
+              *ngIf="licoesAvaliadas.length > 1"
+              (click)="removerLicao(indiceLicao)"
+            >
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
 
-    <tr class="titulo-verde">
-      <th>Critério</th>
+          <table class="ficha-tabela">
+            <tr>
+              <th colspan="8" class="titulo-cinza">
+                Preenchido pelo Avaliador
+              </th>
+            </tr>
 
-      <th *ngFor="let nota of notasDisponiveis">
-        ({{ nota }})
-      </th>
-    </tr>
+            <tr class="titulo-verde">
+              <th>Critério</th>
 
-    <tr
-      *ngFor="
-        let criterio of licao.criterios;
-        let indiceCriterio = index
-      "
-    >
-      <td>
-        {{ criterio.nomeCriterio }}
-      </td>
+              <th *ngFor="let nota of notasDisponiveis">({{ nota }})</th>
+            </tr>
 
-      <td *ngFor="let nota of notasDisponiveis">
-        <input
-          type="radio"
-          [name]="
-            'criterio-' +
-            licao.id +
-            '-' +
-            criterio.idCriterio
-          "
-          [value]="nota"
-          [(ngModel)]="criterio.nota"
-          [ngModelOptions]="{ standalone: true }"
-          (change)="calcularNotaFicha()"
-        />
-      </td>
-    </tr>
+            <tr
+              *ngFor="
+                let criterio of licao.criterios;
+                let indiceCriterio = index
+              "
+            >
+              <td>
+                {{ criterio.nomeCriterio }}
+              </td>
 
-    <tr>
-      <td colspan="6" class="label">
-        Soma da lição
-      </td>
+              <td *ngFor="let nota of notasDisponiveis">
+                <input
+                  type="radio"
+                  [name]="'criterio-' + licao.id + '-' + criterio.idCriterio"
+                  [value]="nota"
+                  [(ngModel)]="criterio.nota"
+                  [ngModelOptions]="{ standalone: true }"
+                  (change)="calcularNotaFicha()"
+                />
+              </td>
+            </tr>
 
-      <td colspan="2">
-        {{ licao.somaPontos }}
-      </td>
-    </tr>
+            <tr>
+              <td colspan="6" class="label">Soma da lição</td>
 
-    <tr>
-      <td colspan="6" class="label">
-        Média da lição
-      </td>
+              <td colspan="2">
+                {{ licao.somaPontos }}
+              </td>
+            </tr>
 
-      <td colspan="2">
-        {{ licao.pontuacaoFinal | number: "1.2-2" }}
-      </td>
-    </tr>
-  </table>
-</div>
+            <tr>
+              <td colspan="6" class="label">Média da lição</td>
 
-<div class="adicionar-licao">
-  <button
-    type="button"
-    class="buttons"
-    (click)="adicionarLicao()"
-  >
-    <i class="bi bi-plus-circle"></i>
-    Adicionar lição
-  </button>
-</div>
-        <div class="ficha-grid">
+              <td colspan="2">
+                {{ licao.pontuacaoFinal | number: "1.2-2" }}
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="adicionar-licao">
+          <button type="button" class="buttons" (click)="adicionarLicao()">
+            <i class="bi bi-plus-circle"></i>
+            Adicionar lição
+          </button>
+        </div> -->
+
+        <section class="secao-licoes">
+          <div class="secao-licoes__cabecalho">
+            <div>
+              <h3>Avaliação das lições</h3>
+              <p>
+                Informe a lição avaliada e selecione uma nota para cada
+                critério.
+              </p>
+            </div>
+
+            <span class="contador-licoes">
+              {{ licoesAvaliadas.length }}
+              {{ licoesAvaliadas.length === 1 ? "lição" : "lições" }}
+            </span>
+          </div>
+
+          <div
+            class="card-licao"
+            *ngFor="let licao of licoesAvaliadas; let indiceLicao = index"
+          >
+            <div class="card-licao__cabecalho">
+              <div class="identificacao-licao">
+                <span class="numero-licao">
+                  {{ indiceLicao + 1 }}
+                </span>
+
+                <div class="titulo-licao">
+                  <strong>Lição avaliada</strong>
+                  <small>
+                    Preencha a identificação e avalie todos os critérios.
+                  </small>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="botao-remover-licao"
+                title="Remover esta lição"
+                aria-label="Remover esta lição"
+                *ngIf="licoesAvaliadas.length > 1"
+                (click)="removerLicao(indiceLicao)"
+              >
+                <i class="bi bi-trash"></i>
+                <span>Remover</span>
+              </button>
+            </div>
+
+            <div class="campo-identificacao-licao">
+              <label [for]="'nome-licao-' + licao.id">
+                Nome, número ou página da lição
+              </label>
+
+              <input
+                [id]="'nome-licao-' + licao.id"
+                type="text"
+                class="campo-licao"
+                placeholder="Ex.: Lição 54 — página 30"
+                [(ngModel)]="licao.nomeLicao"
+                [ngModelOptions]="{ standalone: true }"
+              />
+            </div>
+
+            <div class="tabela-avaliacao-wrapper">
+              <table class="tabela-avaliacao-licao">
+                <thead>
+                  <tr>
+                    <th class="coluna-criterio">Critério</th>
+
+                    <th
+                      class="coluna-nota"
+                      *ngFor="let nota of notasDisponiveis"
+                    >
+                      {{ nota }}
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr
+                    *ngFor="
+                      let criterio of licao.criterios;
+                      let indiceCriterio = index
+                    "
+                  >
+                    <td class="nome-criterio">
+                      {{ criterio.nomeCriterio }}
+                    </td>
+
+                    <td
+                      class="celula-nota"
+                      *ngFor="let nota of notasDisponiveis"
+                    >
+                      <label
+                        class="opcao-nota"
+                        [class.opcao-nota--selecionada]="criterio.nota === nota"
+                        [attr.title]="criterio.nomeCriterio + ': nota ' + nota"
+                      >
+                        <input
+                          type="radio"
+                          [name]="
+                            'criterio-' + licao.id + '-' + criterio.idCriterio
+                          "
+                          [value]="nota"
+                          [(ngModel)]="criterio.nota"
+                          [ngModelOptions]="{ standalone: true }"
+                          (change)="calcularNotaFicha()"
+                        />
+
+                        <span>{{ nota }}</span>
+                      </label>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="resumo-licao">
+              <div class="resumo-licao__item">
+                <span>Soma dos pontos</span>
+                <strong>{{ licao.somaPontos }}</strong>
+              </div>
+
+              <div class="resumo-licao__divisor"></div>
+
+              <div class="resumo-licao__item">
+                <span>Média da lição</span>
+                <strong>
+                  {{ licao.pontuacaoFinal | number: "1.2-2" }}
+                </strong>
+              </div>
+
+              <!-- <div
+        class="status-preenchimento"
+        [class.status-preenchimento--completo]="
+          licao.criterios.length > 0 &&
+          licao.criterios.every
+        "
+      >
+        <i class="bi bi-check-circle"></i>
+        Avaliação da lição
+      </div> -->
+
+              <div class="status-preenchimento">
+                <i class="bi bi-list-check"></i>
+                {{ licao.criterios.length }} critérios
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="botao-adicionar-licao"
+            (click)="adicionarLicao()"
+          >
+            <i class="bi bi-plus-circle"></i>
+
+            <span> Adicionar outra lição </span>
+          </button>
+        </section>
+
+        <!-- <div class="ficha-grid">
           <table class="ficha-tabela">
             <tr>
               <th colspan="3" class="titulo-verde">
@@ -588,11 +818,6 @@
           </table>
 
           <table class="ficha-tabela resultado">
-            <!-- <tr>
-              <th colspan="2" class="titulo-cinza">
-                Preenchido pelo Secretário
-              </th>
-            </tr> -->
             <tr>
               <th colspan="2" class="titulo-verde">RESULTADO</th>
             </tr>
@@ -601,7 +826,12 @@
               <td>{{ somaPontosFicha || "" }}</td>
             </tr>
             <tr>
-              <td class="label">Pontuação Final<br />(Soma ÷ 3)</td>
+              <!-- <td class="label">Pontuação Final<br />(Soma ÷ 3)</td> --
+              <td class="label">
+                Pontuação Final<br />
+                (Média dos critérios)
+              </td>
+
               <td>{{ pontuacaoFinalFicha || "" }}</td>
             </tr>
             <tr>
@@ -609,7 +839,167 @@
               <td>{{ resultadoFicha || "" }}</td>
             </tr>
           </table>
-        </div>
+        </div> -->
+
+        <section class="secao-consolidacao">
+          <div class="secao-consolidacao__cabecalho">
+            <div>
+              <h3>Consolidação da avaliação</h3>
+
+              <p>
+                Consulte a escala de desempenho e o resultado final da
+                avaliação.
+              </p>
+            </div>
+
+            <i class="bi bi-bar-chart-line"></i>
+          </div>
+
+          <div class="consolidacao-grid">
+            <div class="card-pontuacao">
+              <div class="card-pontuacao__titulo">
+                <div>
+                  <h4>Escala de pontuação</h4>
+
+                  <p>Referência utilizada para avaliar cada critério.</p>
+                </div>
+
+                <i class="bi bi-list-stars"></i>
+              </div>
+
+              <div class="lista-pontuacao">
+                <div class="nivel-pontuacao nivel-pontuacao--baixo">
+                  <span class="nivel-pontuacao__nota">0</span>
+
+                  <div>
+                    <strong>Não atingido</strong>
+
+                    <p>Não demonstrou domínio mínimo.</p>
+                  </div>
+                </div>
+
+                <div class="nivel-pontuacao nivel-pontuacao--baixo">
+                  <span class="nivel-pontuacao__nota">5</span>
+
+                  <div>
+                    <strong>Inicial</strong>
+
+                    <p>Apresentou conceitos básicos, mas com muitas lacunas.</p>
+                  </div>
+                </div>
+
+                <div class="nivel-pontuacao nivel-pontuacao--medio">
+                  <span class="nivel-pontuacao__nota">6</span>
+
+                  <div>
+                    <strong>Em desenvolvimento</strong>
+
+                    <p>Próximo do mínimo exigido, necessitando de ajustes.</p>
+                  </div>
+                </div>
+
+                <div class="nivel-pontuacao nivel-pontuacao--medio">
+                  <span class="nivel-pontuacao__nota">7</span>
+
+                  <div>
+                    <strong>Regular</strong>
+
+                    <p>Desempenho suficiente, mas ainda pode aprimorar.</p>
+                  </div>
+                </div>
+
+                <div class="nivel-pontuacao nivel-pontuacao--bom">
+                  <span class="nivel-pontuacao__nota">8</span>
+
+                  <div>
+                    <strong>Bom</strong>
+
+                    <p>Bom domínio do conteúdo avaliado.</p>
+                  </div>
+                </div>
+
+                <div class="nivel-pontuacao nivel-pontuacao--otimo">
+                  <span class="nivel-pontuacao__nota">9</span>
+
+                  <div>
+                    <strong>Muito bom</strong>
+
+                    <p>Ótimo domínio e execução consistente.</p>
+                  </div>
+                </div>
+
+                <div class="nivel-pontuacao nivel-pontuacao--otimo">
+                  <span class="nivel-pontuacao__nota">10</span>
+
+                  <div>
+                    <strong>Excelente</strong>
+
+                    <p>Desempenho acima da média.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="card-resultado">
+              <div class="card-resultado__titulo">
+                <div>
+                  <span>Resultado consolidado</span>
+
+                  <h4>Avaliação prática</h4>
+                </div>
+
+                <i class="bi bi-clipboard-check"></i>
+              </div>
+
+              <div class="resultado-indicadores">
+                <div class="resultado-indicador">
+                  <span>Soma dos pontos</span>
+
+                  <strong>
+                    {{ somaPontosFicha || "—" }}
+                  </strong>
+                </div>
+
+                <div class="resultado-indicador resultado-indicador--principal">
+                  <span>Pontuação final</span>
+
+                  <strong>
+                    {{ pontuacaoFinalFicha || "—" }}
+                  </strong>
+
+                  <small> Média geral dos critérios </small>
+                </div>
+              </div>
+
+              <div
+                class="resultado-status"
+                [class.resultado-status--aprovado]="
+                  resultadoFicha === 'Aprovado'
+                "
+                [class.resultado-status--reprovado]="
+                  resultadoFicha === 'Reprovado'
+                "
+              >
+                <div class="resultado-status__icone">
+                  <i
+                    class="bi"
+                    [class.bi-check-circle-fill]="resultadoFicha === 'Aprovado'"
+                    [class.bi-x-circle-fill]="resultadoFicha === 'Reprovado'"
+                    [class.bi-hourglass-split]="!resultadoFicha"
+                  ></i>
+                </div>
+
+                <div>
+                  <span>Resultado</span>
+
+                  <strong>
+                    {{ resultadoFicha || "Aguardando preenchimento" }}
+                  </strong>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
 
         <div class="linha">
           <div class="input-text">

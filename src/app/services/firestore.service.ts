@@ -62,11 +62,6 @@ export interface LicaoAvaliada {
   pontuacaoFinal: number;
 }
 
-export interface Criterio {
-  id?: string;
-  avaliacao: string;
-  nomeCriterio: string;
-}
 
 export type StatusExame =
   | 'solicitado'
