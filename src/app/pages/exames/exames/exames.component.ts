@@ -45,6 +45,7 @@ import {
 import { TableComponentSelect } from '../../../component/table-select/table.component';
 import { AlertService } from '../../../services/alert.service';
 import { MultiSelectComponent } from '../../../component/inputs/multi-select/multi-select';
+import { RespostaLida, LeitorGabaritoComponent } from '../../../component/leitor-gabarito/leitor-gabarito.component';
 
 // type ExameTabela = Exames & {
 //   idadeAluno?: string;
@@ -84,7 +85,8 @@ type ExameTabela = Exames & {
     // DecimalComponent,
     TableComponentSelect,
     MultiSelectComponent,
-  ],
+    LeitorGabaritoComponent
+],
   templateUrl: './exames.component.html',
   styleUrl: './exames.component.css',
 })
@@ -192,11 +194,22 @@ export class ExamesComponent implements OnInit {
   listaPeriodo = listaPeriodo;
   listaPratico = listaPeriodoPratico;
 
+  abrirModalLeitor = false;
   criteriosCadastrados: Criterio[] = [];
 
   criteriosDaFicha: Criterio[] = [];
 
   licoesAvaliadas: LicaoAvaliada[] = [];
+
+  respostas: RespostaLida[] = [];
+
+  recebeuLeitura(respostas: RespostaLida[]) {
+
+    this.respostas = respostas;
+
+    console.log(respostas);
+
+  }
 
   modoFichaAvaliacao = false;
   notasDisponiveis: number[] = [0, 5, 6, 7, 8, 9, 10];
@@ -1078,6 +1091,10 @@ export class ExamesComponent implements OnInit {
 
   //   this.tabelaVisivel = false;
   // }
+
+lancarNotaGabarito(): void{
+  this.abrirModalLeitor = !this.abrirModalLeitor;
+}
 
   abrirFichaAvaliacao(exame: ExameTabela): void {
     this.modoFichaAvaliacao = true;

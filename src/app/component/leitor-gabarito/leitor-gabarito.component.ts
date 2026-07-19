@@ -2,8 +2,10 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   Inject,
   OnDestroy,
+  Output,
   PLATFORM_ID,
   ViewChild,
 } from '@angular/core';
@@ -37,6 +39,8 @@ interface CoordenadaBolha {
   styleUrl: './leitor-gabarito.component.css',
 })
 export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
+  @Output() leituraConcluida = new EventEmitter<RespostaLida[]>();
+
   @ViewChild('videoCamera')
   private videoRef!: ElementRef<HTMLVideoElement>;
 
@@ -48,6 +52,10 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
 
   private readonly isBrowser: boolean;
   private stream: MediaStream | null = null;
+
+  private cv: any = null;
+
+  private carregamentoOpenCv: Promise<any> | null = null;
 
   carregandoOpenCv = true;
   cameraAtiva = false;
@@ -82,7 +90,13 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    await this.aguardarOpenCv();
+    try {
+      await this.carregarOpenCv();
+    } catch (erro) {
+      console.error('Erro ao carregar o OpenCV:', erro);
+
+      this.mensagem = 'Não foi possível inicializar o leitor de gabarito.';
+    }
   }
 
   ngOnDestroy(): void {
@@ -147,6 +161,15 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+
+  try {
+    await this.carregarOpenCv();
+  } catch (erro) {
+    console.error(erro);
+    this.mensagem = 'O OpenCV não está disponível.';
+    return;
+  }
+
     this.processando = true;
     this.mensagem = 'Analisando gabarito...';
 
@@ -157,8 +180,9 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
 
       try {
         this.respostas = this.lerRespostas(imagemCorrigida);
+        this.leituraConcluida.emit(this.respostas);
 
-        cv.imshow(this.canvasProcessadoRef.nativeElement, imagemCorrigida);
+        this.cv.imshow(this.canvasProcessadoRef.nativeElement, imagemCorrigida);
       } finally {
         imagemCorrigida.delete();
       }
@@ -181,6 +205,17 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
     const arquivo = input.files?.[0];
 
     if (!arquivo) {
+      return;
+    }
+
+    try {
+      await this.carregarOpenCv();
+    } catch (erro) {
+      console.error(erro);
+
+      this.mensagem = 'O leitor ainda não está disponível.';
+
+      input.value = '';
       return;
     }
 
@@ -226,8 +261,8 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
 
       try {
         this.respostas = this.lerRespostas(imagemCorrigida);
-
-        cv.imshow(this.canvasProcessadoRef.nativeElement, imagemCorrigida);
+        this.leituraConcluida.emit(this.respostas);
+        this.cv.imshow(this.canvasProcessadoRef.nativeElement, imagemCorrigida);
       } finally {
         imagemCorrigida.delete();
       }
@@ -264,14 +299,14 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
   }
 
   private prepararImagem(): any {
-    const origem = cv.imread(this.canvasRef.nativeElement);
+    const origem = this.cv.imread(this.canvasRef.nativeElement);
 
-    const cinza = new cv.Mat();
-    const binaria = new cv.Mat();
-    const redimensionada = new cv.Mat();
+    const cinza = new this.cv.Mat();
+    const binaria = new this.cv.Mat();
+    const redimensionada = new this.cv.Mat();
 
     try {
-      cv.cvtColor(origem, cinza, cv.COLOR_RGBA2GRAY);
+      this.cv.cvtColor(origem, cinza, this.cv.COLOR_RGBA2GRAY);
 
       /**
        * No primeiro protótipo, redimensionamos diretamente.
@@ -279,23 +314,28 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
        * Depois, esta etapa será substituída pela detecção dos
        * quatro marcadores e correção de perspectiva.
        */
-      cv.resize(
+      this.cv.resize(
         cinza,
         redimensionada,
-        new cv.Size(this.larguraPadrao, this.alturaPadrao),
+        new this.cv.Size(this.larguraPadrao, this.alturaPadrao),
         0,
         0,
-        cv.INTER_AREA,
+        this.cv.INTER_AREA,
       );
 
-      cv.GaussianBlur(redimensionada, redimensionada, new cv.Size(3, 3), 0);
+      this.cv.GaussianBlur(
+        redimensionada,
+        redimensionada,
+        new this.cv.Size(3, 3),
+        0,
+      );
 
-      cv.adaptiveThreshold(
+      this.cv.adaptiveThreshold(
         redimensionada,
         binaria,
         255,
-        cv.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv.THRESH_BINARY_INV,
+        this.cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+        this.cv.THRESH_BINARY_INV,
         31,
         12,
       );
@@ -355,21 +395,23 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
       return 0;
     }
 
-    const area = imagem.roi(new cv.Rect(inicioX, inicioY, largura, altura));
+    const area = imagem.roi(
+      new this.cv.Rect(inicioX, inicioY, largura, altura),
+    );
 
-    const mascara = cv.Mat.zeros(altura, largura, cv.CV_8UC1);
+    const mascara = this.cv.Mat.zeros(altura, largura, this.cv.CV_8UC1);
 
     const areaMascarada = this.aplicarMascara(area, mascara);
     try {
-      cv.circle(
+      this.cv.circle(
         mascara,
-        new cv.Point(Math.round(largura / 2), Math.round(altura / 2)),
+        new this.cv.Point(Math.round(largura / 2), Math.round(altura / 2)),
         raioInterno,
-        new cv.Scalar(255),
+        new this.cv.Scalar(255),
         -1,
       );
 
-      const pixelsMarcados = cv.countNonZero(areaMascarada);
+      const pixelsMarcados = this.cv.countNonZero(areaMascarada);
 
       const pixelsPossiveis = Math.PI * raioInterno * raioInterno;
 
@@ -382,9 +424,9 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
   }
 
   private aplicarMascara(area: any, mascara: any): any {
-    const resultado = new cv.Mat();
+    const resultado = new this.cv.Mat();
 
-    cv.bitwise_and(area, area, resultado, mascara);
+    this.cv.bitwise_and(area, area, resultado, mascara);
 
     return resultado;
   }
@@ -492,32 +534,189 @@ export class LeitorGabaritoComponent implements AfterViewInit, OnDestroy {
     return coordenadas;
   }
 
-  private aguardarOpenCv(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const inicio = Date.now();
-      const tempoLimite = 20_000;
+private carregarOpenCv(): Promise<any> {
+  if (!this.isBrowser) {
+    return Promise.reject(
+      new Error('O OpenCV só pode ser carregado no navegador.'),
+    );
+  }
 
-      const verificar = () => {
-        if (typeof cv !== 'undefined' && cv.Mat) {
-          this.carregandoOpenCv = false;
-          this.mensagem = 'Leitor pronto.';
-          resolve();
-          return;
+  if (this.cv?.Mat) {
+    return Promise.resolve(this.cv);
+  }
+
+  if (this.carregamentoOpenCv) {
+    return this.carregamentoOpenCv;
+  }
+
+  this.carregandoOpenCv = true;
+  this.mensagem = 'Carregando OpenCV...';
+
+  this.carregamentoOpenCv = new Promise<any>((resolve, reject) => {
+    let finalizado = false;
+    let intervalo: number | null = null;
+
+    const limparVerificacoes = (): void => {
+      if (intervalo !== null) {
+        window.clearInterval(intervalo);
+        intervalo = null;
+      }
+
+      window.clearTimeout(timeout);
+    };
+
+    const concluir = (): void => {
+      if (finalizado) {
+        return;
+      }
+
+      const instanciaCv = (globalThis as any).cv;
+
+      if (!instanciaCv?.Mat) {
+        return;
+      }
+
+      finalizado = true;
+      limparVerificacoes();
+
+      this.cv = instanciaCv;
+      this.carregandoOpenCv = false;
+      this.mensagem = 'Leitor pronto.';
+
+      console.log('OpenCV inicializado com sucesso.');
+
+      resolve(instanciaCv);
+    };
+
+    const falhar = (mensagem: string): void => {
+      if (finalizado) {
+        return;
+      }
+
+      finalizado = true;
+      limparVerificacoes();
+
+      this.carregamentoOpenCv = null;
+      this.carregandoOpenCv = false;
+      this.mensagem = mensagem;
+
+      reject(new Error(mensagem));
+    };
+
+    const timeout = window.setTimeout(() => {
+      falhar(
+        'Tempo excedido ao inicializar o OpenCV.',
+      );
+    }, 60_000);
+
+    /*
+     * Verifica periodicamente se cv.Mat já está disponível.
+     *
+     * Não use await window.cv e não chame window.cv.then(),
+     * pois esta versão possui um then() próprio que retorna
+     * o próprio Module.
+     */
+    const iniciarVerificacao = (): void => {
+      concluir();
+
+      if (finalizado) {
+        return;
+      }
+
+      intervalo = window.setInterval(() => {
+        concluir();
+      }, 100);
+    };
+
+    /*
+     * Se o OpenCV já estiver carregado ao voltar para a tela.
+     */
+    const cvExistente = (globalThis as any).cv;
+
+    if (cvExistente) {
+      /*
+       * Nesta versão, onRuntimeInitialized pode ser substituído
+       * antes de o runtime terminar.
+       */
+      const callbackAnterior =
+        cvExistente.onRuntimeInitialized;
+
+      cvExistente.onRuntimeInitialized = () => {
+        if (typeof callbackAnterior === 'function') {
+          callbackAnterior();
         }
 
-        if (Date.now() - inicio > tempoLimite) {
-          this.carregandoOpenCv = false;
-          this.mensagem = 'Não foi possível carregar o OpenCV.';
-
-          reject(new Error('Tempo excedido ao carregar o OpenCV.'));
-
-          return;
-        }
-
-        window.setTimeout(verificar, 200);
+        concluir();
       };
 
-      verificar();
-    });
-  }
+      iniciarVerificacao();
+      return;
+    }
+
+    const scriptExistente =
+      document.querySelector<HTMLScriptElement>(
+        'script[data-opencv-loader="true"]',
+      );
+
+    if (scriptExistente) {
+      /*
+       * Remove uma tag antiga que pode ter falhado.
+       */
+      scriptExistente.remove();
+    }
+
+    const script = document.createElement('script');
+
+    script.dataset['opencvLoader'] = 'true';
+
+    script.src = new URL(
+      'opencv/opencv.js',
+      document.baseURI,
+    ).href;
+
+    script.async = true;
+
+    script.onload = () => {
+      console.log(
+        'Arquivo OpenCV carregado:',
+        script.src,
+      );
+
+      const instanciaCv = (globalThis as any).cv;
+
+      if (!instanciaCv) {
+        falhar(
+          'O arquivo opencv.js foi carregado, mas window.cv não foi criado.',
+        );
+        return;
+      }
+
+      /*
+       * Preserva um callback que possa existir no OpenCV.
+       */
+      const callbackAnterior =
+        instanciaCv.onRuntimeInitialized;
+
+      instanciaCv.onRuntimeInitialized = () => {
+        if (typeof callbackAnterior === 'function') {
+          callbackAnterior();
+        }
+
+        concluir();
+      };
+
+      iniciarVerificacao();
+    };
+
+    script.onerror = () => {
+      falhar(
+        `Falha ao carregar o OpenCV em: ${script.src}`,
+      );
+    };
+
+    document.head.appendChild(script);
+  });
+
+  return this.carregamentoOpenCv;
+}
 }

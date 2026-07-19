@@ -28,6 +28,15 @@
         >
           <i class="bi bi-repeat"></i>
         </button>
+        <button
+          class="buttons"
+          type="button"
+          title="Lançar Nota pelo Gabarito."
+          *ngIf="podeAlterarNota"
+          (click)="lancarNotaGabarito()"
+        >
+          <i class="bi bi-repeat"></i>
+        </button>
 
         <button
           class="buttons"
@@ -856,85 +865,85 @@
           </div>
 
           <div class="consolidacao-grid">
-<details class="card-pontuacao escala-pontuacao">
-  <summary class="card-pontuacao__titulo">
-    <div>
-      <h4>Escala de pontuação</h4>
-      <p>Referência utilizada para avaliação dos critérios.</p>
-    </div>
+            <details class="card-pontuacao escala-pontuacao">
+              <summary class="card-pontuacao__titulo">
+                <div>
+                  <h4>Escala de pontuação</h4>
+                  <p>Referência utilizada para avaliação dos critérios.</p>
+                </div>
 
-    <span class="escala-pontuacao__acao">
-      <span class="texto-abrir">Abrir</span>
-      <span class="texto-fechar">Recolher</span>
-      <i class="bi bi-chevron-down"></i>
-    </span>
-  </summary>
+                <span class="escala-pontuacao__acao">
+                  <span class="texto-abrir">Abrir</span>
+                  <span class="texto-fechar">Recolher</span>
+                  <i class="bi bi-chevron-down"></i>
+                </span>
+              </summary>
 
-<div class="lista-pontuacao">
-  <div class="nivel-pontuacao nivel-pontuacao--zero">
-    <span class="nivel-pontuacao__nota">0</span>
+              <div class="lista-pontuacao">
+                <div class="nivel-pontuacao nivel-pontuacao--zero">
+                  <span class="nivel-pontuacao__nota">0</span>
 
-    <div>
-      <strong>Não atingido</strong>
-      <p>Não demonstrou domínio mínimo.</p>
-    </div>
-  </div>
+                  <div>
+                    <strong>Não atingido</strong>
+                    <p>Não demonstrou domínio mínimo.</p>
+                  </div>
+                </div>
 
-  <div class="nivel-pontuacao">
-    <span class="nivel-pontuacao__nota">5</span>
+                <div class="nivel-pontuacao">
+                  <span class="nivel-pontuacao__nota">5</span>
 
-    <div>
-      <strong>Inicial</strong>
-      <p>Apresentou conceitos básicos, mas com muitas lacunas.</p>
-    </div>
-  </div>
+                  <div>
+                    <strong>Inicial</strong>
+                    <p>Apresentou conceitos básicos, mas com muitas lacunas.</p>
+                  </div>
+                </div>
 
-  <div class="nivel-pontuacao">
-    <span class="nivel-pontuacao__nota">6</span>
+                <div class="nivel-pontuacao">
+                  <span class="nivel-pontuacao__nota">6</span>
 
-    <div>
-      <strong>Em desenvolvimento</strong>
-      <p>Próximo do mínimo, necessitando ajustes pontuais.</p>
-    </div>
-  </div>
+                  <div>
+                    <strong>Em desenvolvimento</strong>
+                    <p>Próximo do mínimo, necessitando ajustes pontuais.</p>
+                  </div>
+                </div>
 
-  <div class="nivel-pontuacao">
-    <span class="nivel-pontuacao__nota">7</span>
+                <div class="nivel-pontuacao">
+                  <span class="nivel-pontuacao__nota">7</span>
 
-    <div>
-      <strong>Regular</strong>
-      <p>Desempenho suficiente, mas ainda pode aprimorar.</p>
-    </div>
-  </div>
+                  <div>
+                    <strong>Regular</strong>
+                    <p>Desempenho suficiente, mas ainda pode aprimorar.</p>
+                  </div>
+                </div>
 
-  <div class="nivel-pontuacao">
-    <span class="nivel-pontuacao__nota">8</span>
+                <div class="nivel-pontuacao">
+                  <span class="nivel-pontuacao__nota">8</span>
 
-    <div>
-      <strong>Bom</strong>
-      <p>Bom domínio do conteúdo avaliado.</p>
-    </div>
-  </div>
+                  <div>
+                    <strong>Bom</strong>
+                    <p>Bom domínio do conteúdo avaliado.</p>
+                  </div>
+                </div>
 
-  <div class="nivel-pontuacao nivel-pontuacao--destaque">
-    <span class="nivel-pontuacao__nota">9</span>
+                <div class="nivel-pontuacao nivel-pontuacao--destaque">
+                  <span class="nivel-pontuacao__nota">9</span>
 
-    <div>
-      <strong>Muito bom</strong>
-      <p>Ótimo domínio e execução consistente.</p>
-    </div>
-  </div>
+                  <div>
+                    <strong>Muito bom</strong>
+                    <p>Ótimo domínio e execução consistente.</p>
+                  </div>
+                </div>
 
-  <div class="nivel-pontuacao nivel-pontuacao--destaque">
-    <span class="nivel-pontuacao__nota">10</span>
+                <div class="nivel-pontuacao nivel-pontuacao--destaque">
+                  <span class="nivel-pontuacao__nota">10</span>
 
-    <div>
-      <strong>Excelente</strong>
-      <p>Desempenho acima da média.</p>
-    </div>
-  </div>
-</div>
-</details>
+                  <div>
+                    <strong>Excelente</strong>
+                    <p>Desempenho acima da média.</p>
+                  </div>
+                </div>
+              </div>
+            </details>
 
             <aside class="card-resultado">
               <div class="card-resultado__titulo">
@@ -1320,5 +1329,14 @@
         </div>
       </form>
     </div>
+  </tcx-modal>
+
+  <tcx-modal
+    [title]="'Leitor de Gabarito'"
+    [visible]="abrirModalLeitor"
+    (onClose)="lancarNotaGabarito()"
+  >
+    <tcx-leitor-gabarito (leituraConcluida)="recebeuLeitura($event)">
+    </tcx-leitor-gabarito>
   </tcx-modal>
 </div>
