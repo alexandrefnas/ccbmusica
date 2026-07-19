@@ -1,0 +1,119 @@
+<div class="leitor-container">
+  <div class="cabecalho">
+    <div>
+      <h2>LEITOR DE GABARITO</h2>
+      <p>{{ mensagem }}</p>
+    </div>
+
+    <div class="acoes">
+      <button
+        type="button"
+        class="buttons"
+        [disabled]="carregandoOpenCv || cameraAtiva"
+        (click)="iniciarCamera()"
+      >
+        <i class="bi bi-camera-video"></i>
+        Abrir câmera
+      </button>
+
+      <button
+        type="button"
+        class="buttons"
+        [disabled]="!cameraAtiva || processando"
+        (click)="capturarEProcessar()"
+      >
+        <i class="bi bi-camera"></i>
+        Capturar
+      </button>
+
+      <button
+        type="button"
+        class="buttons buttons-secundario"
+        [disabled]="!cameraAtiva"
+        (click)="pararCamera()"
+      >
+        <i class="bi bi-stop-circle"></i>
+        Fechar câmera
+      </button>
+
+      <label
+        class="buttons upload-button"
+        [class.desabilitado]="carregandoOpenCv"
+      >
+        <i class="bi bi-image"></i>
+        Escolher imagem
+
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          [disabled]="carregandoOpenCv"
+          (change)="carregarImagem($event)"
+        />
+      </label>
+    </div>
+  </div>
+
+  <div class="area-camera">
+    <div class="camera-wrapper">
+      <video
+        #videoCamera
+        playsinline
+        muted
+      ></video>
+
+      <div
+        class="guia-folha"
+        *ngIf="cameraAtiva"
+      >
+        <span class="guia-texto">
+          Alinhe a folha dentro da moldura
+        </span>
+
+        <span class="canto canto-superior-esquerdo"></span>
+        <span class="canto canto-superior-direito"></span>
+        <span class="canto canto-inferior-esquerdo"></span>
+        <span class="canto canto-inferior-direito"></span>
+      </div>
+    </div>
+
+    <canvas
+      #canvasCaptura
+      class="canvas-oculto"
+    ></canvas>
+
+    <canvas
+      #canvasProcessado
+      class="canvas-processado"
+    ></canvas>
+  </div>
+
+  <div
+    class="resultado"
+    *ngIf="respostas.length > 0"
+  >
+    <h3>Respostas identificadas</h3>
+
+    <div class="respostas-grid">
+      <div
+        class="resposta-card"
+        *ngFor="let item of respostas"
+        [class.resposta-duvidosa]="item.status === 'duvidosa'"
+        [class.resposta-multipla]="item.status === 'multipla'"
+        [class.resposta-vazia]="item.status === 'em-branco'"
+      >
+        <strong>{{ item.questao }}</strong>
+
+        <span class="alternativa">
+          {{ item.resposta ?? "-" }}
+        </span>
+
+        <small>
+          {{ item.status }}
+        </small>
+      </div>
+    </div>
+
+    <pre>{{ respostas | json }}</pre>
+  </div>
+</div>
