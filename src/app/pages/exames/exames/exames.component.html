@@ -28,15 +28,16 @@
         >
           <i class="bi bi-repeat"></i>
         </button>
-        <button
+        <!-- <button
           class="buttons"
           type="button"
           title="Lançar Nota pelo Gabarito."
           *ngIf="podeAlterarNota"
           (click)="lancarNotaGabarito()"
         >
-          <i class="bi bi-repeat"></i>
-        </button>
+            <i class="bi bi-upc-scan"></i>
+
+        </button> -->
 
         <button
           class="buttons"
@@ -1330,13 +1331,13 @@
       </form>
     </div>
   </tcx-modal>
-
-  <tcx-modal
-    [title]="'Leitor de Gabarito'"
-    [visible]="abrirModalLeitor"
-    (onClose)="lancarNotaGabarito()"
-  >
-    <tcx-leitor-gabarito (leituraConcluida)="recebeuLeitura($event)">
-    </tcx-leitor-gabarito>
-  </tcx-modal>
 </div>
+<tcx-modal
+  [title]="'Leitor de Gabarito'"
+  [visible]="abrirModalLeitor"
+  (onClose)="lancarNotaGabarito()"
+>
+  <div class="conteudo-leitor-modal">
+    <tcx-leitor-gabarito (leituraConcluida)="recebeuLeitura($event)" />
+  </div>
+</tcx-modal>

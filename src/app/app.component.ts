@@ -18,7 +18,7 @@ export class AppComponent {
   ) {
     this.authService.currentUser$.subscribe((user) => {
       this.logado = !!user;
-      this.email = user.email;
+      this.email = user.email ?? '';
       // console.log('usuaro', user)
       // console.log('URL REAL AO INICIAR:', window.location.href);
     });
