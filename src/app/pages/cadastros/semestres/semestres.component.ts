@@ -422,6 +422,12 @@ export class SemestresComponent {
     return this.dadosForms.get('avaliacoes') as FormArray;
   }
 
+  mostrarExameBasico(): boolean {
+    const tipo = this.getControl('tipoExame').value;
+    // console.log('tipo:',tipo);
+    return tipo === '001' || tipo === '002';
+  }
+
   formatarDataFormulario(data: any): string {
     if (!data) return '';
 
@@ -881,5 +887,6 @@ export class SemestresComponent {
     // this.mostrarModal = false;
     this.tabelaVisivel = true;
     this.dadosForms.reset();
+ this.avaliacoesArray.clear();
   }
 }

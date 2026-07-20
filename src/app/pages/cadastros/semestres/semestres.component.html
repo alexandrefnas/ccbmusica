@@ -3,16 +3,17 @@
     <div id="barra-titulo__container">
       <h2>Grupo de Avaliações</h2>
     </div>
-
-    <div class="button-container" *ngIf="liberaCriar">
-      <button
-        class="buttons"
-        title="Criar um novo Grupo de Exames"
-        (click)="buttonClick()"
-      >
-        <i class="bi bi-file-earmark-plus"></i> Novo
-      </button>
-    </div>
+    @if (tabelaVisivel) {
+      <div class="button-container" *ngIf="liberaCriar">
+        <button
+          class="buttons"
+          title="Criar um novo Grupo de Exames"
+          (click)="buttonClick()"
+        >
+          <i class="bi bi-file-earmark-plus"></i> Novo
+        </button>
+      </div>
+    }
   </div>
   @if (tabelaVisivel) {
     <div id="tela__container-tabela">
@@ -28,275 +29,280 @@
       />
     </div>
   } @else {
-    <div class="templates__form-tela">
-      <form
-        [formGroup]="dadosForms"
-        (ngSubmit)="onSalvar()"
-        style="width: 100%"
-      >
-        <h3 style="padding-bottom: 5px">Cadastro de Grupo de Exame</h3>
-        <div class="linha">
-          <div class="input-text" id="input-nomeAluno">
-            <tcx-text
-              label="Nome do Exame"
-              type="name"
-              formControlName="grupoExame"
-              [required]="true"
-              errorMessage="Campo obrigatório"
-            />
-          </div>
-        </div>
-        <div class="linha">
-          <div class="input-text">
-            <tcx-text
-              label="Descrição do Exame."
-              type="text"
-              formControlName="descricao"
-              [required]="false"
-            />
-          </div>
-        </div>
+    <div class="templates__form-tela" >
+      <form class="form-exame" [formGroup]="dadosForms" (ngSubmit)="onSalvar()">
+        <header class="form-header">
+          <h3>Cadastro de Grupo de Exame</h3>
+          <p>Informe os dados gerais, as notas e as datas das avaliações.</p>
+        </header>
 
-        <div class="linha" *ngIf="usuarioEhAdmin()">
-          <div class="input-select">
-            <tcx-select
-              [label]="'Setor'"
-              [placeholder]="''"
-              [niveisLimitados]="listaSetor"
-              [formControl]="getControl('idSetor')"
+        <!-- DADOS GERAIS -->
+        <section class="form-section">
+          <div class="section-header">
+            <h4>Dados gerais</h4>
+          </div>
+
+          <div class="form-grid">
+            <div class="campo campo-full">
+              <tcx-text
+                label="Nome do Exame"
+                type="text"
+                formControlName="grupoExame"
+                [required]="true"
+                errorMessage="Campo obrigatório"
+              />
+            </div>
+
+            <div class="campo campo-full">
+              <tcx-text
+                label="Descrição do Exame"
+                type="text"
+                formControlName="descricao"
+                [required]="false"
+              />
+            </div>
+
+            <div class="campo" *ngIf="usuarioEhAdmin()">
+              <tcx-select
+                [label]="'Setor'"
+                [placeholder]="''"
+                [niveisLimitados]="listaSetor"
+                [formControl]="getControl('idSetor')"
+              />
+            </div>
+
+            <div class="campo">
+              <tcx-select
+                [label]="'Comum Congregação'"
+                [placeholder]="''"
+                [niveisLimitados]="listaIgreja"
+                [formControl]="getControl('idComum')"
+                [required]="true"
+                errorMessage="Campo obrigatório"
+              />
+            </div>
+
+            <div class="campo">
+              <tcx-select
+                [label]="'Tipo de Exame'"
+                [placeholder]="''"
+                [niveisLimitados]="listaTipoExame"
+                [formControl]="getControl('tipoExame')"
+                [required]="true"
+                errorMessage="Campo obrigatório"
+                (valorMudou)="onTipoExameChange()"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- CONFIGURAÇÃO DAS NOTAS -->
+        <section class="form-section" *ngIf="avaliacoesArray.length > 0">
+          <div class="section-header">
+            <h4>Configuração das notas</h4>
+            <span>Defina as notas mínimas e máximas de cada avaliação.</span>
+          </div>
+
+          <div class="avaliacoes-scroll">
+            <div class="avaliacoes-lista" formArrayName="avaliacoes">
+              <article
+                class="avaliacao-card"
+                *ngFor="
+                  let avaliacao of avaliacoesArray.controls;
+                  let i = index
+                "
+                [formGroupName]="i"
+              >
+                <div class="avaliacao-titulo">
+                  <h5>{{ avaliacao.get("label")?.value }}</h5>
+                </div>
+
+                <!-- TIPO 001 -->
+                <div
+                  class="avaliacao-grid"
+                  *ngIf="getControl('tipoExame').value === '001'"
+                >
+                  <div class="grupo-nota">
+                    <p class="grupo-nota-titulo">Parte Teórica</p>
+
+                    <div class="notas-grid">
+                      <tcx-text
+                        label="Nota mín."
+                        type="number"
+                        formControlName="teoricaNotaMinima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+
+                      <tcx-text
+                        label="Nota máx."
+                        type="number"
+                        formControlName="teoricaNotaMaxima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="grupo-nota">
+                    <p class="grupo-nota-titulo">Parte Prática</p>
+
+                    <div class="notas-grid">
+                      <tcx-text
+                        label="Nota mín."
+                        type="number"
+                        formControlName="praticaNotaMinima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+
+                      <tcx-text
+                        label="Nota máx."
+                        type="number"
+                        formControlName="praticaNotaMaxima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+                    </div>
+                  </div>
+
+                  <div
+                    class="grupo-nota grupo-recuperacao"
+                    *ngIf="selectRecuperacao"
+                  >
+                    <p class="grupo-nota-titulo">Recuperação</p>
+
+                    <div class="notas-grid notas-grid-unica">
+                      <tcx-text
+                        label="Nota mín."
+                        type="number"
+                        formControlName="teoricaRecuperacao"
+                        [required]="false"
+                        errorMessage="Campo obrigatório"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TIPO 002 -->
+                <div
+                  class="avaliacao-grid avaliacao-grid-pratica"
+                  *ngIf="getControl('tipoExame').value === '002'"
+                >
+                  <div class="grupo-nota">
+                    <p class="grupo-nota-titulo">Parte Prática</p>
+
+                    <div class="notas-grid">
+                      <tcx-text
+                        label="Nota mínima"
+                        type="number"
+                        formControlName="praticaNotaMinima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+
+                      <tcx-text
+                        label="Nota máxima"
+                        type="number"
+                        formControlName="praticaNotaMaxima"
+                        [required]="true"
+                        errorMessage="Campo obrigatório"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- CRITÉRIOS -->
+        <section class="form-section" *ngIf="avaliacoesArray.length > 0">
+          <div class="section-header">
+            <h4>Critérios de avaliação prática</h4>
+            <span>Selecione os critérios aplicados durante a avaliação.</span>
+          </div>
+
+          <div class="campo campo-full">
+            <tcx-multi-select
+              [label]="''"
+              [placeholder]="'Selecione os critérios de avaliação prática'"
+              [niveisLimitados]="listaSelect"
+              [formControl]="getControl('criteriosSelecionados')"
+              (valorMudou)="aoSelecionarFiltro($event)"
             />
           </div>
-        </div>
+        </section>
 
-        <div class="linha">
-          <div class="input-select" id="input-congregacao">
-            <tcx-select
-              [label]="'Comum Congregação'"
-              [placeholder]="''"
-              [niveisLimitados]="listaIgreja"
-              [formControl]="getControl('idComum')"
-              [required]="true"
-              errorMessage="Campo obrigatório"
-            />
+        <!-- DATAS -->
+        <section class="form-section" *ngIf="avaliacoesArray.length > 0">
+          <div class="section-header" *ngIf="getLiberaData()">
+            <h4>Datas das avaliações</h4>
+            <span>Informe quando cada etapa será realizada.</span>
           </div>
-        </div>
 
-        <div class="linha">
-          <div class="input-select">
-            <tcx-select
-              [label]="'Tipo de Exame'"
-              [placeholder]="''"
-              [niveisLimitados]="listaTipoExame"
-              [formControl]="getControl('tipoExame')"
-              [required]="true"
-              errorMessage="Campo obrigatório"
-              (valorMudou)="onTipoExameChange()"
-            />
-          </div>
-        </div>
-
-        <!-- // INICIO // -->
-        <div class="container__notas">
           <div
-            class="avaliacoes-container"
-            formArrayName="avaliacoes"
-            *ngIf="avaliacoesArray.length > 0"
+            class="datas-grid"
+            *ngIf="getControl('tipoExame').value === '001'"
           >
-            <div
-              class="avaliacao-card"
-              *ngFor="let avaliacao of avaliacoesArray.controls; let i = index"
-              [formGroupName]="i"
-            >
-              <ng-container *ngIf="getControl('tipoExame').value === '001'">
-                <h4>{{ avaliacao.get("label")?.value }}</h4>
-                <div class="linhaOff container__avaliacao">
-                  <div style="width: auto">
-                    <p>Parte Teórica</p>
-                    <div style="display: flex; flex-direction: row; gap: 5px">
-                      <div class="input-text input-mine">
-                        <tcx-text
-                          label="Nota mín"
-                          type="number"
-                          formControlName="teoricaNotaMinima"
-                          [required]="true"
-                          errorMessage="Campo obrigatório"
-                        />
-                      </div>
+            <div class="grupo-data">
+              <p>Parte Teórica</p>
 
-                      <div class="input-text input-mine">
-                        <tcx-text
-                          label="Nota máx"
-                          type="number"
-                          formControlName="teoricaNotaMaxima"
-                          [required]="true"
-                          errorMessage="Campo obrigatório"
-                        />
-                      </div>
-                    </div>
-                  </div>
+              <tcx-data
+                label="Data da Etapa"
+                type="data"
+                formControlName="dataTeorica"
+                [required]="true"
+              />
+            </div>
 
-                  <div style="width: auto">
-                    <p>Parte Prática</p>
-                    <div style="display: flex; flex-direction: row; gap: 5px">
-                      <div class="input-text input-mine">
-                        <tcx-text
-                          label="Nota mín"
-                          type="number"
-                          formControlName="praticaNotaMinima"
-                          [required]="true"
-                          errorMessage="Campo obrigatório"
-                        />
-                      </div>
+            <div class="grupo-data">
+              <p>Parte Prática</p>
 
-                      <div class="input-text input-mine">
-                        <tcx-text
-                          label="Nota máx"
-                          type="number"
-                          formControlName="praticaNotaMaxima"
-                          [required]="true"
-                          errorMessage="Campo obrigatório"
-                        />
-                      </div>
-                    </div>
-                  </div>
+              <tcx-data
+                label="Data da Etapa"
+                type="data"
+                formControlName="dataPratica"
+                [required]="true"
+              />
+            </div>
 
-                  <div style="width: 100px" *ngIf="selectRecuperacao">
-                    <p>Recuperação</p>
-                    <div
-                      style="
-                        display: flex;
-                        flex-direction: row;
-                        gap: 5px;
-                        min-width: 80px;
-                      "
-                    >
-                      <div class="input-text input-recuperacao">
-                        <tcx-text
-                          label="Nota mín"
-                          type="number"
-                          formControlName="teoricaRecuperacao"
-                          [required]="false"
-                          errorMessage="Campo obrigatório"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </ng-container>
+            <div class="grupo-data" *ngIf="selectRecuperacao">
+              <p>Recuperação</p>
 
-              <ng-container *ngIf="getControl('tipoExame').value === '002'">
-                <h4>{{ avaliacao.get("label")?.value }}</h4>
-                <!-- <p>Parte Prática</p> -->
-
-                <div class="linhaOff container__avaliacao">
-                  <div class="input-text">
-                    <tcx-text
-                      label="Nota mínima"
-                      type="number"
-                      formControlName="praticaNotaMinima"
-                      [required]="true"
-                      errorMessage="Campo obrigatório"
-                    />
-                  </div>
-
-                  <div class="input-text">
-                    <tcx-text
-                      label="Nota máxima"
-                      type="number"
-                      formControlName="praticaNotaMaxima"
-                      [required]="true"
-                      errorMessage="Campo obrigatório"
-                    />
-                  </div>
-                </div>
-              </ng-container>
+              <tcx-data
+                label="Data da Recuperação"
+                type="data"
+                formControlName="dataRecuperacao"
+                [required]="false"
+              />
             </div>
           </div>
-          <!-- // FIM // -->
-          <div class="avaliacoes-container">
-            <div
-              class="container__avaliacao"
-              style="
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                margin-bottom: 20px;
-              "
-            >
-              <h4>Critérios de Avaliação Prática</h4>
-              <div style="width: 100%">
-                <div class="input-select">
-                  <tcx-multi-select
-                    [label]="''"
-                    [placeholder]="'Selecione os Critérios Avaliação Prática'"
-                    [niveisLimitados]="listaSelect"
-                    [formControl]="getControl('criteriosSelecionados')"
-                    (valorMudou)="aoSelecionarFiltro($event)"
-                  />
-                </div>
-              </div>
-            </div>
-            <h4 *ngIf="getLiberaData()">DATA AVALIAÇÃO</h4>
-            <div class="linha" *ngIf="getControl('tipoExame').value === '001'">
-              <div class="input-data">
-                <p>Parte Teórica</p>
-                <tcx-data
-                  label="Data da Etapa"
-                  type="data"
-                  formControlName="dataTeorica"
-                  [required]="true"
-                />
-              </div>
-              <div class="input-data">
-                <p>Parte Prática</p>
-                <tcx-data
-                  label="Data da Etapa"
-                  type="data"
-                  formControlName="dataPratica"
-                  [required]="true"
-                />
-              </div>
-              <div class="input-data" *ngIf="selectRecuperacao">
-                <p>Recuperação</p>
 
-                <tcx-data
-                  label="Data da Recuperação"
-                  type="data"
-                  formControlName="dataRecuperacao"
-                  [required]="false"
-                />
-              </div>
-            </div>
-            <div class="linha" *ngIf="getControl('tipoExame').value === '002'">
-              <div class="input-data">
-                <!-- <p>Parte Prática</p> -->
-                <tcx-data
-                  label="Data da Etapa"
-                  type="data"
-                  formControlName="dataPratica"
-                  [required]="true"
-                />
-              </div>
+          <div
+            class="datas-grid datas-grid-unica"
+            *ngIf="getControl('tipoExame').value === '002'"
+          >
+            <div class="grupo-data">
+              <p>Parte Prática</p>
+
+              <tcx-data
+                label="Data da Etapa"
+                type="data"
+                formControlName="dataPratica"
+                [required]="true"
+              />
             </div>
           </div>
-        </div>
-        <div class="linhaButton">
-          <div class="form__button">
-            <tcx-button
-              label="Cancelar"
-              type="button"
-              (click)="fecharModal()"
-            ></tcx-button>
-          </div>
-          <div class="form__button">
-            <tcx-button
-              label="Salvar"
-              type="button"
-              (click)="onSalvar()"
-            ></tcx-button>
-          </div>
-        </div>
+        </section>
+
       </form>
+      <!-- BOTÕES -->
+      <footer class="form-actions">
+        <tcx-button label="Cancelar" type="button" (click)="fecharModal()" />
+
+        <tcx-button label="Salvar" type="submit"    (click)="onSalvar()" />
+      </footer>
     </div>
   }
   <!-- SOLICITAR/EDITAR EXAME -->
