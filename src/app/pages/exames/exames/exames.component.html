@@ -28,16 +28,16 @@
         >
           <i class="bi bi-repeat"></i>
         </button>
-        <!-- <button
+        <button
           class="buttons"
           type="button"
           title="Lançar Nota pelo Gabarito."
-          *ngIf="podeAlterarNota"
+          *ngIf="podeAlterarNota && usuarioEhAdmin()"
           (click)="lancarNotaGabarito()"
         >
             <i class="bi bi-upc-scan"></i>
 
-        </button> -->
+        </button>
 
         <button
           class="buttons"

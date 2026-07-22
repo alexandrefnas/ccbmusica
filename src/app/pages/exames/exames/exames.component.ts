@@ -45,7 +45,10 @@ import {
 import { TableComponentSelect } from '../../../component/table-select/table.component';
 import { AlertService } from '../../../services/alert.service';
 import { MultiSelectComponent } from '../../../component/inputs/multi-select/multi-select';
-import { RespostaLida, LeitorGabaritoComponent } from '../../../component/leitor-gabarito/leitor-gabarito.component';
+import {
+  RespostaLida,
+  LeitorGabaritoComponent,
+} from '../../../component/leitor-gabarito/leitor-gabarito.component';
 
 // type ExameTabela = Exames & {
 //   idadeAluno?: string;
@@ -85,8 +88,8 @@ type ExameTabela = Exames & {
     // DecimalComponent,
     TableComponentSelect,
     MultiSelectComponent,
-    LeitorGabaritoComponent
-],
+    LeitorGabaritoComponent,
+  ],
   templateUrl: './exames.component.html',
   styleUrl: './exames.component.css',
 })
@@ -204,11 +207,9 @@ export class ExamesComponent implements OnInit {
   respostas: RespostaLida[] = [];
 
   recebeuLeitura(respostas: RespostaLida[]) {
-
     this.respostas = respostas;
 
     console.log(respostas);
-
   }
 
   modoFichaAvaliacao = false;
@@ -348,6 +349,10 @@ export class ExamesComponent implements OnInit {
       // this.carregarGrupoExames();
       this.carregarDados();
     });
+  }
+
+  usuarioEhAdmin(): boolean {
+    return this.auth.usuario?.perfil === 'admin';
   }
 
   permissao(tipo: keyof PermissoesCRUD): boolean {
@@ -1092,9 +1097,9 @@ export class ExamesComponent implements OnInit {
   //   this.tabelaVisivel = false;
   // }
 
-lancarNotaGabarito(): void{
-  this.abrirModalLeitor = !this.abrirModalLeitor;
-}
+  lancarNotaGabarito(): void {
+    this.abrirModalLeitor = !this.abrirModalLeitor;
+  }
 
   abrirFichaAvaliacao(exame: ExameTabela): void {
     this.modoFichaAvaliacao = true;
@@ -1666,102 +1671,86 @@ lancarNotaGabarito(): void{
   //   );
   // }
 
-calcularNotaFicha(): void {
-  let somaGeral = 0;
-  let quantidadeNotas = 0;
+  calcularNotaFicha(): void {
+    let somaGeral = 0;
+    let quantidadeNotas = 0;
 
-  this.licoesAvaliadas.forEach((licao) => {
-    const notasPreenchidas = licao.criterios
-      .map((criterio) => criterio.nota)
-      .filter(
-        (nota): nota is number =>
-          nota !== null &&
-          nota !== undefined &&
-          !isNaN(Number(nota)),
+    this.licoesAvaliadas.forEach((licao) => {
+      const notasPreenchidas = licao.criterios
+        .map((criterio) => criterio.nota)
+        .filter(
+          (nota): nota is number =>
+            nota !== null && nota !== undefined && !isNaN(Number(nota)),
+        );
+
+      licao.somaPontos = notasPreenchidas.reduce(
+        (total, nota) => total + Number(nota),
+        0,
       );
 
-    licao.somaPontos = notasPreenchidas.reduce(
-      (total, nota) => total + Number(nota),
-      0,
-    );
+      /*
+       * Média da lição continua na escala de 0 a 10.
+       */
+      licao.pontuacaoFinal = notasPreenchidas.length
+        ? licao.somaPontos / notasPreenchidas.length
+        : 0;
+
+      somaGeral += licao.somaPontos;
+      quantidadeNotas += notasPreenchidas.length;
+    });
+
+    const notaMaxima = Number(this.configEtapaSelecionada?.notaMaxima ?? 0);
+
+    const notaMinima = Number(this.configEtapaSelecionada?.notaMinima ?? 0);
 
     /*
-     * Média da lição continua na escala de 0 a 10.
+     * Média bruta dos critérios na escala de 0 a 10.
      */
-    licao.pontuacaoFinal = notasPreenchidas.length
-      ? licao.somaPontos / notasPreenchidas.length
-      : 0;
+    const mediaCriterios = quantidadeNotas ? somaGeral / quantidadeNotas : 0;
 
-    somaGeral += licao.somaPontos;
-    quantidadeNotas += notasPreenchidas.length;
-  });
+    /*
+     * Converte proporcionalmente a média de 0–10
+     * para a escala configurada da etapa.
+     *
+     * Exemplo:
+     * média 10 e nota máxima 25 = 25
+     * média 8 e nota máxima 25 = 20
+     */
+    const notaFinal =
+      quantidadeNotas && notaMaxima > 0
+        ? (mediaCriterios / 10) * notaMaxima
+        : 0;
 
-  const notaMaxima = Number(
-    this.configEtapaSelecionada?.notaMaxima ?? 0,
-  );
+    const notaFinalArredondada = Number(notaFinal.toFixed(2));
 
-  const notaMinima = Number(
-    this.configEtapaSelecionada?.notaMinima ?? 0,
-  );
+    this.somaPontosFicha = quantidadeNotas ? String(somaGeral) : '';
 
-  /*
-   * Média bruta dos critérios na escala de 0 a 10.
-   */
-  const mediaCriterios = quantidadeNotas
-    ? somaGeral / quantidadeNotas
-    : 0;
+    this.pontuacaoFinalFicha = quantidadeNotas
+      ? notaFinalArredondada.toFixed(2).replace('.', ',')
+      : '';
 
-  /*
-   * Converte proporcionalmente a média de 0–10
-   * para a escala configurada da etapa.
-   *
-   * Exemplo:
-   * média 10 e nota máxima 25 = 25
-   * média 8 e nota máxima 25 = 20
-   */
-  const notaFinal =
-    quantidadeNotas && notaMaxima > 0
-      ? (mediaCriterios / 10) * notaMaxima
-      : 0;
+    this.resultadoFicha = quantidadeNotas
+      ? notaFinalArredondada >= notaMinima
+        ? 'Aprovado'
+        : 'Reprovado'
+      : '';
 
-  const notaFinalArredondada = Number(
-    notaFinal.toFixed(2),
-  );
+    this.notaForm.patchValue(
+      {
+        nota: quantidadeNotas ? notaFinalArredondada : '',
+      },
+      {
+        emitEvent: false,
+      },
+    );
 
-  this.somaPontosFicha = quantidadeNotas
-    ? String(somaGeral)
-    : '';
-
-  this.pontuacaoFinalFicha = quantidadeNotas
-    ? notaFinalArredondada
-        .toFixed(2)
-        .replace('.', ',')
-    : '';
-
-  this.resultadoFicha = quantidadeNotas
-    ? notaFinalArredondada >= notaMinima
-      ? 'Aprovado'
-      : 'Reprovado'
-    : '';
-
-  this.notaForm.patchValue(
-    {
-      nota: quantidadeNotas
-        ? notaFinalArredondada
-        : '',
-    },
-    {
-      emitEvent: false,
-    },
-  );
-
-  console.log('Quantidade de notas:', quantidadeNotas);
-  console.log('Soma dos critérios:', somaGeral);
-  console.log('Média dos critérios (0 a 10):', mediaCriterios);
-  console.log('Nota máxima da etapa:', notaMaxima);
-  console.log('Nota mínima da etapa:', notaMinima);
-  console.log('Nota final convertida:', notaFinalArredondada);
-}
+    console.log('Quantidade de notas:', quantidadeNotas);
+    console.log('Soma dos critérios:', somaGeral);
+    console.log('Média dos critérios (0 a 10):', mediaCriterios);
+    console.log('Nota máxima da etapa:', notaMaxima);
+    console.log('Nota mínima da etapa:', notaMinima);
+    console.log('Nota final convertida:', notaFinalArredondada);
+  }
 
   // async salvarNota(): Promise<void> {
   //   if (!this.exameSelecionado || !this.etapaSelecionada) {
@@ -2954,7 +2943,7 @@ calcularNotaFicha(): void {
           dataRecuperacao: '',
           professorRecuperacao: '',
           observacaoRecuperacao: '',
-    licoesAvaliadas: [],
+          licoesAvaliadas: [],
         };
       }
 
@@ -2973,8 +2962,7 @@ calcularNotaFicha(): void {
           dataRecuperacao: '',
           professorRecuperacao: '',
           observacaoRecuperacao: '',
-    licoesAvaliadas: [],
-
+          licoesAvaliadas: [],
         };
       }
 
