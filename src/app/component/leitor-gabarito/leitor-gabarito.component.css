@@ -295,6 +295,16 @@ pre {
   border-radius: 5px;
 }
 
+
+.status-perspectiva {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+.status-perspectiva strong {
+  color: #087c25;
+}
+
 @media (max-width: 900px) {
   .leitor-container {
     padding: 15px;

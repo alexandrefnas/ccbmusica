@@ -3,6 +3,15 @@
     <div>
       <h2>LEITOR DE GABARITO</h2>
       <p>{{ mensagem }}</p>
+<p
+  class="status-perspectiva"
+  *ngIf="respostas.length > 0"
+>
+  Correção pelos marcadores:
+  <strong>
+    {{ usouCorrecaoPerspectiva ? "SIM" : "NÃO" }}
+  </strong>
+</p>
     </div>
 
     <div class="acoes">
@@ -76,6 +85,11 @@
         <span class="canto canto-inferior-direito"></span>
       </div>
     </div>
+
+<canvas
+  #canvasMarcadores
+  class="canvas-processado"
+></canvas>
 
     <canvas
       #canvasCaptura

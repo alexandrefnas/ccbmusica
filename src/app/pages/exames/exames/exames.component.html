@@ -28,16 +28,7 @@
         >
           <i class="bi bi-repeat"></i>
         </button>
-        <button
-          class="buttons"
-          type="button"
-          title="Lançar Nota pelo Gabarito."
-          *ngIf="podeAlterarNota && usuarioEhAdmin()"
-          (click)="lancarNotaGabarito()"
-        >
-            <i class="bi bi-upc-scan"></i>
 
-        </button>
 
         <button
           class="buttons"
@@ -74,6 +65,16 @@
           (click)="excluirSelecionado()"
         >
           <i class="bi bi-trash"></i>
+        </button>
+        <button
+          class="buttons"
+          type="button"
+          title="Lançar Nota pelo Gabarito."
+          *ngIf="usuarioEhAdmin()"
+          (click)="lancarNotaGabarito()"
+        >
+            <i class="bi bi-upc-scan"></i>
+
         </button>
         <button
           class="buttons"
