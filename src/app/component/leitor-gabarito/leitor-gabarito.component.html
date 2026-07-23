@@ -3,15 +3,12 @@
     <div>
       <h2>LEITOR DE GABARITO</h2>
       <p>{{ mensagem }}</p>
-<p
-  class="status-perspectiva"
-  *ngIf="respostas.length > 0"
->
-  Correção pelos marcadores:
-  <strong>
-    {{ usouCorrecaoPerspectiva ? "SIM" : "NÃO" }}
-  </strong>
-</p>
+      <p class="status-perspectiva" *ngIf="respostas.length > 0">
+        Correção pelos marcadores:
+        <strong>
+          {{ usouCorrecaoPerspectiva ? "SIM" : "NÃO" }}
+        </strong>
+      </p>
     </div>
 
     <div class="acoes">
@@ -65,19 +62,10 @@
 
   <div class="area-camera">
     <div class="camera-wrapper">
-      <video
-        #videoCamera
-        playsinline
-        muted
-      ></video>
+      <video #videoCamera playsinline muted></video>
 
-      <div
-        class="guia-folha"
-        *ngIf="cameraAtiva"
-      >
-        <span class="guia-texto">
-          Alinhe a folha dentro da moldura
-        </span>
+      <div class="guia-folha" *ngIf="cameraAtiva">
+        <span class="guia-texto"> Alinhe a folha dentro da moldura </span>
 
         <span class="canto canto-superior-esquerdo"></span>
         <span class="canto canto-superior-direito"></span>
@@ -86,26 +74,14 @@
       </div>
     </div>
 
-<canvas
-  #canvasMarcadores
-  class="canvas-processado"
-></canvas>
+    <!-- <canvas #canvasMarcadores class="canvas-processado"></canvas> -->
 
-    <canvas
-      #canvasCaptura
-      class="canvas-oculto"
-    ></canvas>
+    <canvas #canvasCaptura class="canvas-oculto"></canvas>
 
-    <canvas
-      #canvasProcessado
-      class="canvas-processado"
-    ></canvas>
+    <canvas #canvasProcessado class="canvas-processado"></canvas>
   </div>
 
-  <div
-    class="resultado"
-    *ngIf="respostas.length > 0"
-  >
+  <div class="resultado" *ngIf="respostas.length > 0">
     <h3>Respostas identificadas</h3>
 
     <div class="respostas-grid">

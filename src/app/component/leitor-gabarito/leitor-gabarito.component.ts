@@ -54,6 +54,12 @@ interface CandidatoMarcador {
   areaRetangulo: number;
 }
 
+interface ImagemBuscaMarcadores {
+  imagem: any;
+  escalaX: number;
+  escalaY: number;
+}
+
 @Component({
   selector: 'tcx-leitor-gabarito',
   standalone: true,
@@ -111,6 +117,11 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
    */
   private readonly marcadorDestinoX = 30;
   private readonly marcadorDestinoY = 25;
+
+  private readonly larguraBuscaA4 = 900;
+  private readonly alturaBuscaA4 = 1273;
+  private readonly maximoCandidatosMarcadores = 12;
+  private readonly debugLeitor = false;
 
   private coordenadasBolhas: CoordenadaBolha[] = [];
 
@@ -483,14 +494,19 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     // const destinoX = 30;
     // const destinoY = 25;
 
-    const imagemMarcadores = origem.clone();
+    if (this.debugLeitor) {
+      const imagemMarcadores = origem.clone();
 
-    try {
-      this.desenharMarcadoresDetectados(imagemMarcadores);
+      try {
+        this.desenharMarcadoresDetectados(imagemMarcadores);
 
-      this.cv.imshow(this.canvasMarcadoresRef.nativeElement, imagemMarcadores);
-    } finally {
-      imagemMarcadores.delete();
+        this.cv.imshow(
+          this.canvasMarcadoresRef.nativeElement,
+          imagemMarcadores,
+        );
+      } finally {
+        imagemMarcadores.delete();
+      }
     }
 
     const pontosOrigem = this.cv.matFromArray(4, 1, this.cv.CV_32FC2, [
@@ -559,51 +575,100 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     }
   }
 
-  private localizarMarcadoresDeCanto(origem: any): {
-    superiorEsquerdo: PontoMarcador;
-    superiorDireito: PontoMarcador;
-    inferiorEsquerdo: PontoMarcador;
-    inferiorDireito: PontoMarcador;
-  } | null {
-    /*
-     * Primeira tentativa:
-     * procura os quatro quadrados na imagem inteira.
-     *
-     * A posição e a dimensão da folha somente serão
-     * determinadas depois que os marcadores forem encontrados.
-     */
-    const marcadoresGlobais = this.localizarMarcadoresGlobalmente(origem);
+  private criarImagemParaBuscaDeMarcadores(origem: any): ImagemBuscaMarcadores {
+    const larguraOriginal = origem.cols;
+    const alturaOriginal = origem.rows;
 
-    if (marcadoresGlobais) {
-      console.log(
-        'Marcadores encontrados pela busca global.',
-        marcadoresGlobais,
-      );
+    const fatorLargura = this.larguraBuscaA4 / larguraOriginal;
 
-      return marcadoresGlobais;
+    const fatorAltura = this.alturaBuscaA4 / alturaOriginal;
+
+    const fator = Math.min(fatorLargura, fatorAltura, 1);
+
+    if (fator === 1) {
+      return {
+        imagem: origem.clone(),
+        escalaX: 1,
+        escalaY: 1,
+      };
     }
 
-    /*
-     * Fallback:
-     * mantém o método antigo que já funciona quando a folha
-     * ocupa praticamente toda a fotografia.
-     */
-    console.warn(
-      'Busca global não encontrou os quatro marcadores. Tentando busca próxima das bordas.',
+    const larguraBusca = Math.max(Math.round(larguraOriginal * fator), 1);
+
+    const alturaBusca = Math.max(Math.round(alturaOriginal * fator), 1);
+
+    const imagemBusca = new this.cv.Mat();
+
+    this.cv.resize(
+      origem,
+      imagemBusca,
+      new this.cv.Size(larguraBusca, alturaBusca),
+      0,
+      0,
+      this.cv.INTER_AREA,
     );
 
-    const marcadoresProximos =
-      this.localizarMarcadoresProximosDasBordas(origem);
+    return {
+      imagem: imagemBusca,
+      escalaX: larguraOriginal / larguraBusca,
+      escalaY: alturaOriginal / alturaBusca,
+    };
+  }
 
-    if (marcadoresProximos) {
+private localizarMarcadoresDeCanto(
+  origem: any,
+): {
+  superiorEsquerdo: PontoMarcador;
+  superiorDireito: PontoMarcador;
+  inferiorEsquerdo: PontoMarcador;
+  inferiorDireito: PontoMarcador;
+} | null {
+  /*
+   * Usa a fotografia original, sem redução.
+   *
+   * Essa é a detecção que já estava reconhecendo
+   * corretamente os quadrados pretos de 7 mm.
+   */
+  const marcadoresGlobais =
+    this.localizarMarcadoresNaImagemReduzida(
+      origem,
+    );
+
+  if (marcadoresGlobais) {
+    if (this.debugLeitor) {
       console.log(
-        'Marcadores encontrados pela busca próxima das bordas.',
-        marcadoresProximos,
+        'Marcadores encontrados na imagem original.',
+        marcadoresGlobais,
       );
     }
 
-    return marcadoresProximos;
+    this.ultimosMarcadores =
+      marcadoresGlobais;
+
+    return marcadoresGlobais;
   }
+
+  /*
+   * Mantém o fallback antigo.
+   */
+  if (this.debugLeitor) {
+    console.warn(
+      'Busca global falhou. Tentando busca próxima das bordas.',
+    );
+  }
+
+  const marcadoresProximos =
+    this.localizarMarcadoresProximosDasBordas(
+      origem,
+    );
+
+  if (marcadoresProximos) {
+    this.ultimosMarcadores =
+      marcadoresProximos;
+  }
+
+  return marcadoresProximos;
+}
 
   private localizarMarcadoresProximosDasBordas(origem: any): {
     superiorEsquerdo: PontoMarcador;
@@ -708,8 +773,87 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
 
     return null;
   }
-
   private localizarMarcadoresGlobalmente(origem: any): {
+    superiorEsquerdo: PontoMarcador;
+    superiorDireito: PontoMarcador;
+    inferiorEsquerdo: PontoMarcador;
+    inferiorDireito: PontoMarcador;
+  } | null {
+    /*
+     * Cria uma cópia reduzida somente para localizar
+     * os quatro quadrados pretos.
+     *
+     * A imagem original continua sendo usada posteriormente
+     * pelo warpPerspective.
+     */
+    const busca = this.criarImagemParaBuscaDeMarcadores(origem);
+
+    try {
+      if (this.debugLeitor) {
+        console.time('Busca dos marcadores');
+        console.log('Imagem original:', {
+          largura: origem.cols,
+          altura: origem.rows,
+        });
+
+        console.log('Imagem usada na busca:', {
+          largura: busca.imagem.cols,
+          altura: busca.imagem.rows,
+          escalaX: busca.escalaX,
+          escalaY: busca.escalaY,
+        });
+      }
+
+      const marcadoresReduzidos = this.localizarMarcadoresNaImagemReduzida(
+        busca.imagem,
+      );
+
+      if (!marcadoresReduzidos) {
+        return null;
+      }
+
+      /*
+       * As coordenadas encontradas pertencem à imagem reduzida.
+       * Converte novamente para a resolução da fotografia original.
+       */
+      const converterMarcador = (marcador: PontoMarcador): PontoMarcador => ({
+        x: marcador.x * busca.escalaX,
+        y: marcador.y * busca.escalaY,
+
+        area: marcador.area * busca.escalaX * busca.escalaY,
+      });
+
+      const marcadoresOriginais = {
+        superiorEsquerdo: converterMarcador(
+          marcadoresReduzidos.superiorEsquerdo,
+        ),
+
+        superiorDireito: converterMarcador(marcadoresReduzidos.superiorDireito),
+
+        inferiorEsquerdo: converterMarcador(
+          marcadoresReduzidos.inferiorEsquerdo,
+        ),
+
+        inferiorDireito: converterMarcador(marcadoresReduzidos.inferiorDireito),
+      };
+
+      /*
+       * A partir daqui os pontos voltaram a representar
+       * a imagem original.
+       */
+      this.ultimosMarcadores = marcadoresOriginais;
+
+      return marcadoresOriginais;
+    } finally {
+      if (this.debugLeitor) {
+        console.timeEnd('Busca dos marcadores');
+      }
+
+      busca.imagem.delete();
+    }
+  }
+
+  private localizarMarcadoresNaImagemReduzida(origem: any): {
     superiorEsquerdo: PontoMarcador;
     superiorDireito: PontoMarcador;
     inferiorEsquerdo: PontoMarcador;
@@ -953,24 +1097,25 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
       const candidatosSemDuplicidade =
         this.removerCandidatosDuplicados(candidatos);
 
-      console.table(
-        candidatosSemDuplicidade.map((item) => ({
-          x: Math.round(item.marcador.x),
+      if (this.debugLeitor) {
+        console.table(
+          candidatosSemDuplicidade.map((item) => ({
+            x: Math.round(item.marcador.x),
 
-          y: Math.round(item.marcador.y),
+            y: Math.round(item.marcador.y),
 
-          largura: item.largura,
+            largura: item.largura,
 
-          altura: item.altura,
+            altura: item.altura,
 
-          proporcao: item.proporcao.toFixed(2),
+            proporcao: item.proporcao.toFixed(2),
 
-          preenchimento: item.preenchimento.toFixed(2),
+            preenchimento: item.preenchimento.toFixed(2),
 
-          area: Math.round(item.areaRetangulo),
-        })),
-      );
-
+            area: Math.round(item.areaRetangulo),
+          })),
+        );
+      }
       /*
        * Ordena por qualidade geométrica.
        */
@@ -988,10 +1133,16 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
         return qualidadeB - qualidadeA;
       });
 
-      const candidatosPrincipais = candidatosSemDuplicidade.slice(0, 24);
-
-      console.log('Quadrados pretos confirmados:', candidatosPrincipais.length);
-
+      const candidatosPrincipais = candidatosSemDuplicidade.slice(
+        0,
+        this.maximoCandidatosMarcadores,
+      );
+      if (this.debugLeitor) {
+        console.log(
+          'Quadrados pretos confirmados:',
+          candidatosPrincipais.length,
+        );
+      }
       if (candidatosPrincipais.length < 4) {
         return null;
       }
@@ -1706,6 +1857,23 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     const alturaEsquerda = Math.hypot(ie.x - se.x, ie.y - se.y);
 
     const alturaDireita = Math.hypot(id.x - sd.x, id.y - sd.y);
+
+    const larguraMedia = (larguraSuperior + larguraInferior) / 2;
+
+    const alturaMedia = (alturaEsquerda + alturaDireita) / 2;
+
+    const proporcaoEncontrada = alturaMedia / larguraMedia;
+
+    /*
+     * Folha A4 em retrato:
+     * 297 / 210 ≈ 1,414.
+     *
+     * A fotografia pode possuir perspectiva, por isso
+     * mantemos uma tolerância razoável.
+     */
+    if (proporcaoEncontrada < 1.15 || proporcaoEncontrada > 1.75) {
+      return false;
+    }
 
     /*
      * Os marcadores devem formar uma região suficientemente grande.
