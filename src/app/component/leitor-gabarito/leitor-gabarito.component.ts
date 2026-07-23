@@ -42,6 +42,18 @@ interface ImagensProcessadas {
   binaria: any;
 }
 
+interface CandidatoMarcador {
+  marcador: PontoMarcador;
+
+  largura: number;
+  altura: number;
+
+  proporcao: number;
+  preenchimento: number;
+
+  areaRetangulo: number;
+}
+
 @Component({
   selector: 'tcx-leitor-gabarito',
   standalone: true,
@@ -428,7 +440,7 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
       this.cv.circle(
         imagem,
         new this.cv.Point(Math.round(marcador.x), Math.round(marcador.y)),
-        20,
+        80,
         new this.cv.Scalar(255, 0, 0, 255),
         5,
       );
@@ -758,22 +770,97 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     }
   }
 
-  private localizarMarcadoresDeCanto(origem: any): {
-    superiorEsquerdo: PontoMarcador;
-    superiorDireito: PontoMarcador;
-    inferiorEsquerdo: PontoMarcador;
-    inferiorDireito: PontoMarcador;
-  } | null {
-    const largura = origem.cols;
-    const altura = origem.rows;
+private localizarMarcadoresDeCanto(
+  origem: any,
+): {
+  superiorEsquerdo: PontoMarcador;
+  superiorDireito: PontoMarcador;
+  inferiorEsquerdo: PontoMarcador;
+  inferiorDireito: PontoMarcador;
+} | null {
+  /*
+   * Primeira tentativa:
+   * procura os quatro quadrados na imagem inteira.
+   *
+   * A posição e a dimensão da folha somente serão
+   * determinadas depois que os marcadores forem encontrados.
+   */
+  const marcadoresGlobais =
+    this.localizarMarcadoresGlobalmente(origem);
 
-    /*
-     * Analisa somente 18% da largura e 14% da altura
-     * de cada extremidade da fotografia.
-     */
-    const larguraRegiao = Math.round(largura * 0.22);
+  if (marcadoresGlobais) {
+    console.log(
+      'Marcadores encontrados pela busca global.',
+      marcadoresGlobais,
+    );
 
-    const alturaRegiao = Math.round(altura * 0.18);
+    return marcadoresGlobais;
+  }
+
+  /*
+   * Fallback:
+   * mantém o método antigo que já funciona quando a folha
+   * ocupa praticamente toda a fotografia.
+   */
+  console.warn(
+    'Busca global não encontrou os quatro marcadores. Tentando busca próxima das bordas.',
+  );
+
+  const marcadoresProximos =
+    this.localizarMarcadoresProximosDasBordas(origem);
+
+  if (marcadoresProximos) {
+    console.log(
+      'Marcadores encontrados pela busca próxima das bordas.',
+      marcadoresProximos,
+    );
+  }
+
+  return marcadoresProximos;
+}
+
+
+private localizarMarcadoresProximosDasBordas(
+  origem: any,
+): {
+  superiorEsquerdo: PontoMarcador;
+  superiorDireito: PontoMarcador;
+  inferiorEsquerdo: PontoMarcador;
+  inferiorDireito: PontoMarcador;
+} | null {
+  const largura = origem.cols;
+  const altura = origem.rows;
+
+  const tentativas = [
+    {
+      larguraPercentual: 0.22,
+      alturaPercentual: 0.18,
+    },
+    {
+      larguraPercentual: 0.32,
+      alturaPercentual: 0.27,
+    },
+    {
+      larguraPercentual: 0.42,
+      alturaPercentual: 0.36,
+    },
+  ];
+
+  for (let tentativa = 0; tentativa < tentativas.length; tentativa++) {
+    const configuracao = tentativas[tentativa];
+
+    const larguraRegiao = Math.round(
+      largura * configuracao.larguraPercentual,
+    );
+
+    const alturaRegiao = Math.round(
+      altura * configuracao.alturaPercentual,
+    );
+
+    console.log(`Tentativa de marcadores ${tentativa + 1}:`, {
+      larguraRegiao,
+      alturaRegiao,
+    });
 
     const superiorEsquerdo = this.localizarBlocoPretoNoCanto(
       origem,
@@ -784,14 +871,24 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
 
     const superiorDireito = this.localizarBlocoPretoNoCanto(
       origem,
-      new this.cv.Rect(largura - larguraRegiao, 0, larguraRegiao, alturaRegiao),
+      new this.cv.Rect(
+        largura - larguraRegiao,
+        0,
+        larguraRegiao,
+        alturaRegiao,
+      ),
       'superior direito',
       'superior-direito',
     );
 
     const inferiorEsquerdo = this.localizarBlocoPretoNoCanto(
       origem,
-      new this.cv.Rect(0, altura - alturaRegiao, larguraRegiao, alturaRegiao),
+      new this.cv.Rect(
+        0,
+        altura - alturaRegiao,
+        larguraRegiao,
+        alturaRegiao,
+      ),
       'inferior esquerdo',
       'inferior-esquerdo',
     );
@@ -808,27 +905,13 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
       'inferior-direito',
     );
 
-    console.log('Marcadores selecionados:', {
-      superiorEsquerdo,
-      superiorDireito,
-      inferiorEsquerdo,
-      inferiorDireito,
-    });
-
     if (
       !superiorEsquerdo ||
       !superiorDireito ||
       !inferiorEsquerdo ||
       !inferiorDireito
     ) {
-      console.error('Não foram encontrados os quatro marcadores.', {
-        superiorEsquerdo,
-        superiorDireito,
-        inferiorEsquerdo,
-        inferiorDireito,
-      });
-
-      return null;
+      continue;
     }
 
     const marcadores = {
@@ -838,72 +921,84 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
       inferiorDireito,
     };
 
+    if (!this.validarMarcadores(marcadores, largura, altura)) {
+      continue;
+    }
+
     this.ultimosMarcadores = marcadores;
 
     return marcadores;
   }
 
-private localizarBlocoPretoNoCanto(
-  origem: any,
-  regiao: any,
-  nome: string,
-  canto:
-    | 'superior-esquerdo'
-    | 'superior-direito'
-    | 'inferior-esquerdo'
-    | 'inferior-direito',
-): PontoMarcador | null {
-  const recorte = origem.roi(regiao);
+  return null;
+}
 
+private localizarMarcadoresGlobalmente(
+  origem: any,
+): {
+  superiorEsquerdo: PontoMarcador;
+  superiorDireito: PontoMarcador;
+  inferiorEsquerdo: PontoMarcador;
+  inferiorDireito: PontoMarcador;
+} | null {
   const cinza = new this.cv.Mat();
   const suavizada = new this.cv.Mat();
   const binaria = new this.cv.Mat();
-  const fechada = new this.cv.Mat();
-  const distancia = new this.cv.Mat();
 
-  /*
-   * Evita considerar sombras ou faixas pretas que estejam
-   * exatamente na extremidade da fotografia.
-   */
-  const margemExterna = Math.max(
-    Math.round(
-      Math.min(origem.cols, origem.rows) * 0.006,
-    ),
-    6,
+  const linhasHorizontais = new this.cv.Mat();
+  const linhasVerticais = new this.cv.Mat();
+  const linhas = new this.cv.Mat();
+  const semLinhas = new this.cv.Mat();
+  const fechada = new this.cv.Mat();
+
+  const contornos = new this.cv.MatVector();
+  const hierarquia = new this.cv.Mat();
+
+  const menorDimensao = Math.min(
+    origem.cols,
+    origem.rows,
   );
 
-  const larguraBusca =
-    regiao.width - margemExterna * 2;
+  /*
+   * As linhas da moldura são longas e finas.
+   * Os marcadores são blocos compactos.
+   */
+  let comprimentoLinha = Math.round(
+    menorDimensao * 0.035,
+  );
 
-  const alturaBusca =
-    regiao.height - margemExterna * 2;
+  comprimentoLinha = Math.max(
+    comprimentoLinha,
+    25,
+  );
 
-  if (
-    larguraBusca <= 0 ||
-    alturaBusca <= 0
-  ) {
-    recorte.delete();
-    cinza.delete();
-    suavizada.delete();
-    binaria.delete();
-    fechada.delete();
-    distancia.delete();
+  const kernelHorizontal =
+    this.cv.getStructuringElement(
+      this.cv.MORPH_RECT,
+      new this.cv.Size(
+        comprimentoLinha,
+        1,
+      ),
+    );
 
-    return null;
-  }
+  const kernelVertical =
+    this.cv.getStructuringElement(
+      this.cv.MORPH_RECT,
+      new this.cv.Size(
+        1,
+        comprimentoLinha,
+      ),
+    );
 
   const kernelFechamento =
     this.cv.getStructuringElement(
       this.cv.MORPH_RECT,
-      new this.cv.Size(7, 7),
+      new this.cv.Size(5, 5),
     );
-
-  let areaBusca: any = null;
-  let binariaBusca: any = null;
 
   try {
     this.cv.cvtColor(
-      recorte,
+      origem,
       cinza,
       this.cv.COLOR_RGBA2GRAY,
     );
@@ -916,8 +1011,7 @@ private localizarBlocoPretoNoCanto(
     );
 
     /*
-     * O OTSU adapta o limite à iluminação da fotografia.
-     * As regiões escuras passam a ser brancas.
+     * Marcadores e demais regiões escuras ficam brancos.
      */
     this.cv.threshold(
       suavizada,
@@ -929,146 +1023,1319 @@ private localizarBlocoPretoNoCanto(
     );
 
     /*
-     * Fecha pequenas falhas no preenchimento do quadrado.
-     * Não usamos MORPH_OPEN, pois ele pode deformar ou
-     * apagar marcadores ligados à moldura.
+     * Extrai somente linhas horizontais longas.
      */
     this.cv.morphologyEx(
       binaria,
+      linhasHorizontais,
+      this.cv.MORPH_OPEN,
+      kernelHorizontal,
+    );
+
+    /*
+     * Extrai somente linhas verticais longas.
+     */
+    this.cv.morphologyEx(
+      binaria,
+      linhasVerticais,
+      this.cv.MORPH_OPEN,
+      kernelVertical,
+    );
+
+    this.cv.bitwise_or(
+      linhasHorizontais,
+      linhasVerticais,
+      linhas,
+    );
+
+    /*
+     * Remove as linhas da moldura.
+     *
+     * Isso é importante principalmente no marcador
+     * inferior esquerdo, que aparece ligado à linha
+     * inferior e à borda lateral.
+     */
+    this.cv.subtract(
+      binaria,
+      linhas,
+      semLinhas,
+    );
+
+    /*
+     * Reconecta pequenas falhas dentro dos marcadores.
+     */
+    this.cv.morphologyEx(
+      semLinhas,
       fechada,
       this.cv.MORPH_CLOSE,
       kernelFechamento,
     );
 
     /*
-     * Remove apenas uma pequena faixa externa do recorte.
-     * O marcador continua dentro da área de busca.
+     * RETR_LIST também recupera contornos que ficaram
+     * internos ou parcialmente ligados a outros elementos.
      */
-    areaBusca = fechada.roi(
-      new this.cv.Rect(
-        margemExterna,
-        margemExterna,
-        larguraBusca,
-        alturaBusca,
+    this.cv.findContours(
+      fechada,
+      contornos,
+      hierarquia,
+      this.cv.RETR_LIST,
+      this.cv.CHAIN_APPROX_SIMPLE,
+    );
+
+    /*
+     * Ainda não sabemos quantos pixels correspondem a 7 mm,
+     * porque primeiro precisamos saber quanto da foto é folha.
+     *
+     * Por isso usamos uma faixa ampla. A semelhança entre
+     * os quatro marcadores será validada depois.
+     */
+    const ladoMinimo =
+      menorDimensao * 0.006;
+
+    const ladoMaximo =
+      menorDimensao * 0.10;
+
+    const candidatos: CandidatoMarcador[] = [];
+
+    for (
+      let indice = 0;
+      indice < contornos.size();
+      indice++
+    ) {
+      const contorno =
+        contornos.get(indice);
+
+      const aproximado =
+        new this.cv.Mat();
+
+      try {
+        const area =
+          this.cv.contourArea(contorno);
+
+        if (area <= 0) {
+          continue;
+        }
+
+        const retangulo =
+          this.cv.boundingRect(contorno);
+
+        if (
+          retangulo.width <
+            ladoMinimo ||
+          retangulo.height <
+            ladoMinimo ||
+          retangulo.width >
+            ladoMaximo ||
+          retangulo.height >
+            ladoMaximo
+        ) {
+          continue;
+        }
+
+        const proporcao =
+          retangulo.width /
+          retangulo.height;
+
+        /*
+         * Tolerância para deformação de perspectiva.
+         */
+        if (
+          proporcao < 0.68 ||
+          proporcao > 1.47
+        ) {
+          continue;
+        }
+
+        const perimetro =
+          this.cv.arcLength(
+            contorno,
+            true,
+          );
+
+        this.cv.approxPolyDP(
+          contorno,
+          aproximado,
+          perimetro * 0.035,
+          true,
+        );
+
+        /*
+         * O marcador precisa realmente possuir quatro lados.
+         */
+        if (aproximado.rows !== 4) {
+          continue;
+        }
+
+        if (
+          !this.cv.isContourConvex(
+            aproximado,
+          )
+        ) {
+          continue;
+        }
+
+        const pontos =
+          this.extrairPontosContorno(
+            aproximado,
+          );
+
+        /*
+         * Os quatro ângulos precisam ser próximos de 90°.
+         */
+        if (
+          !this.validarAngulosQuadrado(
+            pontos,
+          )
+        ) {
+          continue;
+        }
+
+        const areaRetangulo =
+          retangulo.width *
+          retangulo.height;
+
+        const preenchimento =
+          area /
+          areaRetangulo;
+
+        /*
+         * Círculos ficam normalmente próximos de 0,78.
+         * O quadrado preenchido tende a ficar mais próximo de 1.
+         */
+        if (preenchimento < 0.82) {
+          continue;
+        }
+
+        /*
+         * Compara a área do contorno com a área do
+         * quadrilátero aproximado.
+         */
+        const areaAproximada =
+          Math.abs(
+            this.cv.contourArea(
+              aproximado,
+            ),
+          );
+
+        const solidezQuadrilateral =
+          area /
+          Math.max(
+            areaAproximada,
+            1,
+          );
+
+        if (
+          solidezQuadrilateral < 0.82 ||
+          solidezQuadrilateral > 1.18
+        ) {
+          continue;
+        }
+
+        const momentos =
+          this.cv.moments(
+            contorno,
+            false,
+          );
+
+        if (
+          Math.abs(momentos.m00) <
+          0.0001
+        ) {
+          continue;
+        }
+
+        /*
+         * Usa o centro real do contorno, não apenas
+         * o centro do boundingRect.
+         */
+        const centroX =
+          momentos.m10 /
+          momentos.m00;
+
+        const centroY =
+          momentos.m01 /
+          momentos.m00;
+
+        candidatos.push({
+          marcador: {
+            x: centroX,
+            y: centroY,
+            area,
+          },
+
+          largura:
+            retangulo.width,
+
+          altura:
+            retangulo.height,
+
+          proporcao,
+          preenchimento,
+          areaRetangulo,
+        });
+      } finally {
+        aproximado.delete();
+        contorno.delete();
+      }
+    }
+
+    const candidatosSemDuplicidade =
+      this.removerCandidatosDuplicados(
+        candidatos,
+      );
+
+    console.table(
+      candidatosSemDuplicidade.map(
+        (item) => ({
+          x: Math.round(
+            item.marcador.x,
+          ),
+
+          y: Math.round(
+            item.marcador.y,
+          ),
+
+          largura:
+            item.largura,
+
+          altura:
+            item.altura,
+
+          proporcao:
+            item.proporcao.toFixed(2),
+
+          preenchimento:
+            item.preenchimento.toFixed(2),
+
+          area:
+            Math.round(
+              item.areaRetangulo,
+            ),
+        }),
       ),
     );
 
     /*
-     * A distância transformada mede quanto cada pixel preto
-     * está distante do fundo branco.
-     *
-     * Linhas finas e textos:
-     * distância pequena.
-     *
-     * Centro do quadrado preto de 7 mm:
-     * distância grande.
+     * Ordena por qualidade geométrica.
      */
-    this.cv.distanceTransform(
-      areaBusca,
-      distancia,
-      this.cv.DIST_L2,
-      5,
-    );
+    candidatosSemDuplicidade.sort(
+      (a, b) => {
+        const erroA =
+          Math.abs(
+            1 - a.proporcao,
+          );
 
-    const resultado =
-      this.cv.minMaxLoc(distancia);
+        const erroB =
+          Math.abs(
+            1 - b.proporcao,
+          );
 
-    const distanciaMaxima =
-      resultado.maxVal;
+        const qualidadeA =
+          a.areaRetangulo *
+          a.preenchimento *
+          (1 - erroA * 0.5);
 
-    const pontoMaximo =
-      resultado.maxLoc;
+        const qualidadeB =
+          b.areaRetangulo *
+          b.preenchimento *
+          (1 - erroB * 0.5);
 
-    /*
-     * O raio interno esperado do marcador deve ocupar pelo
-     * menos cerca de 0,6% da menor dimensão da fotografia.
-     */
-    const distanciaMinima =
-      Math.min(
-        origem.cols,
-        origem.rows,
-      ) * 0.006;
-
-    console.log(
-      `Marcador ${nome}:`,
-      {
-        canto,
-        xLocal:
-          pontoMaximo.x,
-        yLocal:
-          pontoMaximo.y,
-        distanciaMaxima,
-        distanciaMinima,
+        return (
+          qualidadeB -
+          qualidadeA
+        );
       },
     );
 
-    if (
-      distanciaMaxima <
-      distanciaMinima
-    ) {
-      console.warn(
-        `Nenhum bloco preto suficientemente espesso foi encontrado no canto ${nome}.`,
+    const candidatosPrincipais =
+      candidatosSemDuplicidade.slice(
+        0,
+        24,
       );
+
+    console.log(
+      'Quadrados pretos confirmados:',
+      candidatosPrincipais.length,
+    );
+
+    if (
+      candidatosPrincipais.length < 4
+    ) {
+      return null;
+    }
+
+    const marcadores =
+      this.encontrarMelhorConjuntoDeQuatroMarcadores(
+        candidatosPrincipais,
+        origem.cols,
+        origem.rows,
+      );
+
+    if (!marcadores) {
+      return null;
+    }
+
+    if (
+      !this.validarMarcadoresGlobais(
+        marcadores,
+        origem.cols,
+        origem.rows,
+      )
+    ) {
+      return null;
+    }
+
+    this.ultimosMarcadores =
+      marcadores;
+
+    return marcadores;
+  } finally {
+    cinza.delete();
+    suavizada.delete();
+    binaria.delete();
+
+    linhasHorizontais.delete();
+    linhasVerticais.delete();
+    linhas.delete();
+    semLinhas.delete();
+    fechada.delete();
+
+    kernelHorizontal.delete();
+    kernelVertical.delete();
+    kernelFechamento.delete();
+
+    contornos.delete();
+    hierarquia.delete();
+  }
+}
+
+private extrairPontosContorno(
+  contorno: any,
+): Array<{
+  x: number;
+  y: number;
+}> {
+  const pontos: Array<{
+    x: number;
+    y: number;
+  }> = [];
+
+  for (
+    let indice = 0;
+    indice < contorno.rows;
+    indice++
+  ) {
+    pontos.push({
+      x:
+        contorno.data32S[
+          indice * 2
+        ],
+
+      y:
+        contorno.data32S[
+          indice * 2 + 1
+        ],
+    });
+  }
+
+  return pontos;
+}
+
+
+private validarAngulosQuadrado(
+  pontos: Array<{
+    x: number;
+    y: number;
+  }>,
+): boolean {
+  if (pontos.length !== 4) {
+    return false;
+  }
+
+  const centro = {
+    x:
+      pontos.reduce(
+        (soma, ponto) =>
+          soma + ponto.x,
+        0,
+      ) / 4,
+
+    y:
+      pontos.reduce(
+        (soma, ponto) =>
+          soma + ponto.y,
+        0,
+      ) / 4,
+  };
+
+  /*
+   * Ordena os pontos ao redor do centro.
+   */
+  const ordenados =
+    [...pontos].sort(
+      (a, b) =>
+        Math.atan2(
+          a.y - centro.y,
+          a.x - centro.x,
+        ) -
+        Math.atan2(
+          b.y - centro.y,
+          b.x - centro.x,
+        ),
+    );
+
+  for (
+    let indice = 0;
+    indice < 4;
+    indice++
+  ) {
+    const anterior =
+      ordenados[
+        (indice + 3) % 4
+      ];
+
+    const atual =
+      ordenados[indice];
+
+    const proximo =
+      ordenados[
+        (indice + 1) % 4
+      ];
+
+    const vetor1 = {
+      x:
+        anterior.x -
+        atual.x,
+
+      y:
+        anterior.y -
+        atual.y,
+    };
+
+    const vetor2 = {
+      x:
+        proximo.x -
+        atual.x,
+
+      y:
+        proximo.y -
+        atual.y,
+    };
+
+    const produtoEscalar =
+      vetor1.x * vetor2.x +
+      vetor1.y * vetor2.y;
+
+    const modulo1 =
+      Math.hypot(
+        vetor1.x,
+        vetor1.y,
+      );
+
+    const modulo2 =
+      Math.hypot(
+        vetor2.x,
+        vetor2.y,
+      );
+
+    if (
+      modulo1 === 0 ||
+      modulo2 === 0
+    ) {
+      return false;
+    }
+
+    const cosseno =
+      Math.max(
+        -1,
+        Math.min(
+          1,
+          produtoEscalar /
+            (
+              modulo1 *
+              modulo2
+            ),
+        ),
+      );
+
+    const angulo =
+      Math.acos(cosseno) *
+      180 /
+      Math.PI;
+
+    /*
+     * Perspectiva pode deformar os 90°,
+     * mas não deve produzir ângulos extremos.
+     */
+    if (
+      angulo < 65 ||
+      angulo > 115
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+private removerCandidatosDuplicados(
+  candidatos: CandidatoMarcador[],
+): CandidatoMarcador[] {
+  const resultado: CandidatoMarcador[] = [];
+
+  const ordenados = [...candidatos].sort(
+    (a, b) =>
+      b.areaRetangulo -
+      a.areaRetangulo,
+  );
+
+  for (const candidato of ordenados) {
+    const distanciaMinima =
+      Math.max(
+        Math.min(
+          candidato.largura,
+          candidato.altura,
+        ) * 0.5,
+        5,
+      );
+
+    const jaExiste =
+      resultado.some((existente) => {
+        const distancia = Math.hypot(
+          candidato.marcador.x -
+            existente.marcador.x,
+
+          candidato.marcador.y -
+            existente.marcador.y,
+        );
+
+        return (
+          distancia <
+          distanciaMinima
+        );
+      });
+
+    if (!jaExiste) {
+      resultado.push(candidato);
+    }
+  }
+
+  return resultado;
+}
+
+private validarMarcadoresGlobais(
+  marcadores: {
+    superiorEsquerdo: PontoMarcador;
+    superiorDireito: PontoMarcador;
+    inferiorEsquerdo: PontoMarcador;
+    inferiorDireito: PontoMarcador;
+  },
+  larguraImagem: number,
+  alturaImagem: number,
+): boolean {
+  const {
+    superiorEsquerdo: se,
+    superiorDireito: sd,
+    inferiorEsquerdo: ie,
+    inferiorDireito: id,
+  } = marcadores;
+
+  /*
+   * Ordem lógica.
+   */
+  if (
+    se.x >= sd.x ||
+    ie.x >= id.x ||
+    se.y >= ie.y ||
+    sd.y >= id.y
+  ) {
+    return false;
+  }
+
+  const larguraSuperior =
+    Math.hypot(
+      sd.x - se.x,
+      sd.y - se.y,
+    );
+
+  const larguraInferior =
+    Math.hypot(
+      id.x - ie.x,
+      id.y - ie.y,
+    );
+
+  const alturaEsquerda =
+    Math.hypot(
+      ie.x - se.x,
+      ie.y - se.y,
+    );
+
+  const alturaDireita =
+    Math.hypot(
+      id.x - sd.x,
+      id.y - sd.y,
+    );
+
+  /*
+   * A folha precisa formar uma área relevante, mas não
+   * precisa ocupar quase toda a fotografia.
+   */
+  if (
+    larguraSuperior <
+      larguraImagem * 0.20 ||
+    larguraInferior <
+      larguraImagem * 0.20 ||
+    alturaEsquerda <
+      alturaImagem * 0.28 ||
+    alturaDireita <
+      alturaImagem * 0.28
+  ) {
+    return false;
+  }
+
+  const larguraMedia =
+    (
+      larguraSuperior +
+      larguraInferior
+    ) / 2;
+
+  const alturaMedia =
+    (
+      alturaEsquerda +
+      alturaDireita
+    ) / 2;
+
+  /*
+   * Relação aproximada da folha A4:
+   * altura/largura ≈ 1,414.
+   *
+   * A perspectiva pode alterar bastante essa relação,
+   * portanto usamos uma faixa tolerante.
+   */
+  const proporcaoFolha =
+    alturaMedia /
+    larguraMedia;
+
+  if (
+    proporcaoFolha < 0.9 ||
+    proporcaoFolha > 2.1
+  ) {
+    return false;
+  }
+
+  const diferencaLargura =
+    Math.abs(
+      larguraSuperior -
+        larguraInferior,
+    ) /
+    Math.max(
+      larguraSuperior,
+      larguraInferior,
+    );
+
+  const diferencaAltura =
+    Math.abs(
+      alturaEsquerda -
+        alturaDireita,
+    ) /
+    Math.max(
+      alturaEsquerda,
+      alturaDireita,
+    );
+
+  if (
+    diferencaLargura > 0.55 ||
+    diferencaAltura > 0.55
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+private encontrarMelhorConjuntoDeQuatroMarcadores(
+  candidatos: CandidatoMarcador[],
+  larguraImagem: number,
+  alturaImagem: number,
+): {
+  superiorEsquerdo: PontoMarcador;
+  superiorDireito: PontoMarcador;
+  inferiorEsquerdo: PontoMarcador;
+  inferiorDireito: PontoMarcador;
+} | null {
+  let melhorConjunto: {
+    superiorEsquerdo: PontoMarcador;
+    superiorDireito: PontoMarcador;
+    inferiorEsquerdo: PontoMarcador;
+    inferiorDireito: PontoMarcador;
+  } | null = null;
+
+  let melhorPontuacao =
+    Number.NEGATIVE_INFINITY;
+
+  for (
+    let a = 0;
+    a < candidatos.length - 3;
+    a++
+  ) {
+    for (
+      let b = a + 1;
+      b < candidatos.length - 2;
+      b++
+    ) {
+      for (
+        let c = b + 1;
+        c < candidatos.length - 1;
+        c++
+      ) {
+        for (
+          let d = c + 1;
+          d < candidatos.length;
+          d++
+        ) {
+          const grupo = [
+            candidatos[a],
+            candidatos[b],
+            candidatos[c],
+            candidatos[d],
+          ];
+
+          const ordenados =
+            this.ordenarMarcadoresPorCanto(
+              grupo,
+            );
+
+          if (!ordenados) {
+            continue;
+          }
+
+          const {
+            superiorEsquerdo: se,
+            superiorDireito: sd,
+            inferiorEsquerdo: ie,
+            inferiorDireito: id,
+          } = ordenados;
+
+          const larguraSuperior =
+            Math.hypot(
+              sd.marcador.x -
+                se.marcador.x,
+
+              sd.marcador.y -
+                se.marcador.y,
+            );
+
+          const larguraInferior =
+            Math.hypot(
+              id.marcador.x -
+                ie.marcador.x,
+
+              id.marcador.y -
+                ie.marcador.y,
+            );
+
+          const alturaEsquerda =
+            Math.hypot(
+              ie.marcador.x -
+                se.marcador.x,
+
+              ie.marcador.y -
+                se.marcador.y,
+            );
+
+          const alturaDireita =
+            Math.hypot(
+              id.marcador.x -
+                sd.marcador.x,
+
+              id.marcador.y -
+                sd.marcador.y,
+            );
+
+          /*
+           * Os quatro marcadores devem formar uma região
+           * relevante da fotografia.
+           *
+           * O limite é menor que o usado na busca rápida
+           * porque a folha pode estar mais distante.
+           */
+          if (
+            larguraSuperior <
+              larguraImagem * 0.25 ||
+            larguraInferior <
+              larguraImagem * 0.25 ||
+            alturaEsquerda <
+              alturaImagem * 0.35 ||
+            alturaDireita <
+              alturaImagem * 0.35
+          ) {
+            continue;
+          }
+
+          const areas =
+            grupo.map(
+              (item) =>
+                item.areaRetangulo,
+            );
+
+          const menorArea =
+            Math.min(...areas);
+
+          const maiorArea =
+            Math.max(...areas);
+
+          /*
+           * Com perspectiva, o marcador mais próximo pode
+           * parecer maior, mas não deve ser absurdamente maior.
+           */
+          const proporcaoAreas =
+            maiorArea /
+            Math.max(menorArea, 1);
+
+if (proporcaoAreas > 2.1) {
+  continue;
+}
+
+const ladosMedios = grupo.map(
+  (item) =>
+    (
+      item.largura +
+      item.altura
+    ) / 2,
+);
+
+const menorLado =
+  Math.min(...ladosMedios);
+
+const maiorLado =
+  Math.max(...ladosMedios);
+
+if (
+  maiorLado /
+    Math.max(menorLado, 1) >
+  1.8
+) {
+  continue;
+}
+
+          const diferencaLargura =
+            Math.abs(
+              larguraSuperior -
+                larguraInferior,
+            ) /
+            Math.max(
+              larguraSuperior,
+              larguraInferior,
+            );
+
+          const diferencaAltura =
+            Math.abs(
+              alturaEsquerda -
+                alturaDireita,
+            ) /
+            Math.max(
+              alturaEsquerda,
+              alturaDireita,
+            );
+
+          if (
+            diferencaLargura >
+              0.55 ||
+            diferencaAltura >
+              0.55
+          ) {
+            continue;
+          }
+
+          const areaQuadrilatero =
+            this.calcularAreaQuadrilatero(
+              se.marcador,
+              sd.marcador,
+              id.marcador,
+              ie.marcador,
+            );
+
+          const areaNormalizada =
+            areaQuadrilatero /
+            (
+              larguraImagem *
+              alturaImagem
+            );
+
+          const mediaPreenchimento =
+            grupo.reduce(
+              (total, item) =>
+                total +
+                item.preenchimento,
+              0,
+            ) /
+            grupo.length;
+
+          const erroQuadradoMedio =
+            grupo.reduce(
+              (total, item) =>
+                total +
+                Math.abs(
+                  1 -
+                    item.proporcao,
+                ),
+              0,
+            ) /
+            grupo.length;
+
+          /*
+           * Maior pontuação é melhor.
+           *
+           * O tamanho do quadrilátero tem o maior peso.
+           * Dessa maneira, as bolhas de respostas não vencem:
+           * elas ficam próximas umas das outras e formam um
+           * quadrilátero muito menor.
+           */
+          const pontuacao =
+            areaNormalizada * 10 +
+            mediaPreenchimento * 2 -
+            erroQuadradoMedio * 2 -
+            diferencaLargura -
+            diferencaAltura -
+            Math.max(
+              proporcaoAreas - 1,
+              0,
+            ) *
+              0.25;
+
+          if (
+            pontuacao >
+            melhorPontuacao
+          ) {
+            melhorPontuacao =
+              pontuacao;
+
+            melhorConjunto = {
+              superiorEsquerdo:
+                se.marcador,
+
+              superiorDireito:
+                sd.marcador,
+
+              inferiorEsquerdo:
+                ie.marcador,
+
+              inferiorDireito:
+                id.marcador,
+            };
+          }
+        }
+      }
+    }
+  }
+
+  if (!melhorConjunto) {
+    return null;
+  }
+
+  console.log(
+    'Melhor conjunto global de marcadores:',
+    {
+      pontuacao:
+        melhorPontuacao,
+
+      marcadores:
+        melhorConjunto,
+    },
+  );
+
+  this.ultimosMarcadores =
+    melhorConjunto;
+
+  return melhorConjunto;
+}
+
+private ordenarMarcadoresPorCanto(
+  candidatos: CandidatoMarcador[],
+): {
+  superiorEsquerdo: CandidatoMarcador;
+  superiorDireito: CandidatoMarcador;
+  inferiorEsquerdo: CandidatoMarcador;
+  inferiorDireito: CandidatoMarcador;
+} | null {
+  if (candidatos.length !== 4) {
+    return null;
+  }
+
+  const porSoma = [
+    ...candidatos,
+  ].sort(
+    (a, b) =>
+      (
+        a.marcador.x +
+        a.marcador.y
+      ) -
+      (
+        b.marcador.x +
+        b.marcador.y
+      ),
+  );
+
+  const porDiferenca = [
+    ...candidatos,
+  ].sort(
+    (a, b) =>
+      (
+        a.marcador.y -
+        a.marcador.x
+      ) -
+      (
+        b.marcador.y -
+        b.marcador.x
+      ),
+  );
+
+  const superiorEsquerdo =
+    porSoma[0];
+
+  const inferiorDireito =
+    porSoma[
+      porSoma.length - 1
+    ];
+
+  const superiorDireito =
+    porDiferenca[0];
+
+  const inferiorEsquerdo =
+    porDiferenca[
+      porDiferenca.length - 1
+    ];
+
+  const unicos = new Set([
+    superiorEsquerdo,
+    superiorDireito,
+    inferiorEsquerdo,
+    inferiorDireito,
+  ]);
+
+  if (unicos.size !== 4) {
+    return null;
+  }
+
+  return {
+    superiorEsquerdo,
+    superiorDireito,
+    inferiorEsquerdo,
+    inferiorDireito,
+  };
+}
+
+private calcularAreaQuadrilatero(
+  superiorEsquerdo: PontoMarcador,
+  superiorDireito: PontoMarcador,
+  inferiorDireito: PontoMarcador,
+  inferiorEsquerdo: PontoMarcador,
+): number {
+  const pontos = [
+    superiorEsquerdo,
+    superiorDireito,
+    inferiorDireito,
+    inferiorEsquerdo,
+  ];
+
+  let area = 0;
+
+  for (
+    let indice = 0;
+    indice < pontos.length;
+    indice++
+  ) {
+    const atual =
+      pontos[indice];
+
+    const proximo =
+      pontos[
+        (indice + 1) %
+          pontos.length
+      ];
+
+    area +=
+      atual.x * proximo.y -
+      proximo.x * atual.y;
+  }
+
+  return Math.abs(area) / 2;
+}
+
+  private localizarBlocoPretoNoCanto(
+    origem: any,
+    regiao: any,
+    nome: string,
+    canto:
+      | 'superior-esquerdo'
+      | 'superior-direito'
+      | 'inferior-esquerdo'
+      | 'inferior-direito',
+  ): PontoMarcador | null {
+    const recorte = origem.roi(regiao);
+
+    const cinza = new this.cv.Mat();
+    const suavizada = new this.cv.Mat();
+    const binaria = new this.cv.Mat();
+    const fechada = new this.cv.Mat();
+    const distancia = new this.cv.Mat();
+
+    /*
+     * Evita considerar sombras ou faixas pretas que estejam
+     * exatamente na extremidade da fotografia.
+     */
+    const margemExterna = Math.max(
+      Math.round(Math.min(origem.cols, origem.rows) * 0.0025),
+      3,
+    );
+
+    const larguraBusca = regiao.width - margemExterna * 2;
+
+    const alturaBusca = regiao.height - margemExterna * 2;
+
+    if (larguraBusca <= 0 || alturaBusca <= 0) {
+      recorte.delete();
+      cinza.delete();
+      suavizada.delete();
+      binaria.delete();
+      fechada.delete();
+      distancia.delete();
 
       return null;
     }
 
-    const x =
-      regiao.x +
-      margemExterna +
-      pontoMaximo.x;
-
-    const y =
-      regiao.y +
-      margemExterna +
-      pontoMaximo.y;
-
-    /*
-     * Área estimada somente para diagnóstico.
-     * O warpPerspective usa apenas x e y.
-     */
-    const ladoEstimado =
-      distanciaMaxima * 2;
-
-    const areaEstimada =
-      ladoEstimado *
-      ladoEstimado;
-
-    console.log(
-      `Marcador confirmado — ${nome}:`,
-      {
-        x: Math.round(x),
-        y: Math.round(y),
-        distanciaMaxima:
-          Number(
-            distanciaMaxima.toFixed(2),
-          ),
-        ladoEstimado:
-          Number(
-            ladoEstimado.toFixed(2),
-          ),
-      },
+    const kernelFechamento = this.cv.getStructuringElement(
+      this.cv.MORPH_RECT,
+      new this.cv.Size(7, 7),
     );
 
-    return {
-      x,
-      y,
-      area: areaEstimada,
-    };
-  } finally {
-    areaBusca?.delete();
-    binariaBusca?.delete();
+    let areaBusca: any = null;
+    let binariaBusca: any = null;
 
-    recorte.delete();
-    cinza.delete();
-    suavizada.delete();
-    binaria.delete();
-    fechada.delete();
-    distancia.delete();
+    try {
+      this.cv.cvtColor(recorte, cinza, this.cv.COLOR_RGBA2GRAY);
 
-    kernelFechamento.delete();
+      this.cv.GaussianBlur(cinza, suavizada, new this.cv.Size(3, 3), 0);
+
+      /*
+       * O OTSU adapta o limite à iluminação da fotografia.
+       * As regiões escuras passam a ser brancas.
+       */
+      this.cv.threshold(
+        suavizada,
+        binaria,
+        0,
+        255,
+        this.cv.THRESH_BINARY_INV | this.cv.THRESH_OTSU,
+      );
+
+      /*
+       * Fecha pequenas falhas no preenchimento do quadrado.
+       * Não usamos MORPH_OPEN, pois ele pode deformar ou
+       * apagar marcadores ligados à moldura.
+       */
+      this.cv.morphologyEx(
+        binaria,
+        fechada,
+        this.cv.MORPH_CLOSE,
+        kernelFechamento,
+      );
+
+      /*
+       * Remove apenas uma pequena faixa externa do recorte.
+       * O marcador continua dentro da área de busca.
+       */
+      areaBusca = fechada.roi(
+        new this.cv.Rect(
+          margemExterna,
+          margemExterna,
+          larguraBusca,
+          alturaBusca,
+        ),
+      );
+
+      /*
+       * A distância transformada mede quanto cada pixel preto
+       * está distante do fundo branco.
+       *
+       * Linhas finas e textos:
+       * distância pequena.
+       *
+       * Centro do quadrado preto de 7 mm:
+       * distância grande.
+       */
+      this.cv.distanceTransform(areaBusca, distancia, this.cv.DIST_L2, 5);
+
+      const resultado = this.cv.minMaxLoc(distancia);
+
+      const distanciaMaxima = resultado.maxVal;
+
+      const pontoMaximo = resultado.maxLoc;
+
+      /*
+       * O raio interno esperado do marcador deve ocupar pelo
+       * menos cerca de 0,6% da menor dimensão da fotografia.
+       */
+      // const distanciaMinima = Math.min(origem.cols, origem.rows) * 0.006;
+
+      const menorDimensao = Math.min(origem.cols, origem.rows);
+
+      const distanciaMinima = Math.max(menorDimensao * 0.0035, 4);
+      console.log(`Marcador ${nome}:`, {
+        canto,
+        xLocal: pontoMaximo.x,
+        yLocal: pontoMaximo.y,
+        distanciaMaxima,
+        distanciaMinima,
+      });
+
+      if (distanciaMaxima < distanciaMinima) {
+        console.warn(
+          `Nenhum bloco preto suficientemente espesso foi encontrado no canto ${nome}.`,
+        );
+
+        return null;
+      }
+
+      const x = regiao.x + margemExterna + pontoMaximo.x;
+
+      const y = regiao.y + margemExterna + pontoMaximo.y;
+
+      /*
+       * Área estimada somente para diagnóstico.
+       * O warpPerspective usa apenas x e y.
+       */
+      const ladoEstimado = distanciaMaxima * 2;
+
+      const areaEstimada = ladoEstimado * ladoEstimado;
+
+      console.log(`Marcador confirmado — ${nome}:`, {
+        x: Math.round(x),
+        y: Math.round(y),
+        distanciaMaxima: Number(distanciaMaxima.toFixed(2)),
+        ladoEstimado: Number(ladoEstimado.toFixed(2)),
+      });
+
+      return {
+        x,
+        y,
+        area: areaEstimada,
+      };
+    } finally {
+      areaBusca?.delete();
+      binariaBusca?.delete();
+
+      recorte.delete();
+      cinza.delete();
+      suavizada.delete();
+      binaria.delete();
+      fechada.delete();
+      distancia.delete();
+
+      kernelFechamento.delete();
+    }
   }
-}
 
   private obterCantoLocal(
     canto:
@@ -1203,10 +2470,10 @@ private localizarBlocoPretoNoCanto(
      * Os marcadores devem formar uma região suficientemente grande.
      */
     if (
-      larguraSuperior < larguraImagem * 0.5 ||
-      larguraInferior < larguraImagem * 0.5 ||
-      alturaEsquerda < alturaImagem * 0.55 ||
-      alturaDireita < alturaImagem * 0.55
+      larguraSuperior < larguraImagem * 0.42 ||
+      larguraInferior < larguraImagem * 0.42 ||
+      alturaEsquerda < alturaImagem * 0.48 ||
+      alturaDireita < alturaImagem * 0.48
     ) {
       return false;
     }
@@ -1332,13 +2599,13 @@ private localizarBlocoPretoNoCanto(
      * bolhas vazias: aproximadamente 0.19 até 0.38
      * bolhas marcadas: aproximadamente 0.74 até 0.86
      */
-    const preenchimentoMinimo = 0.40;
+    const preenchimentoMinimo = 0.4;
 
     /*
      * Duas alternativas só serão consideradas realmente marcadas
      * quando ambas tiverem preenchimento alto.
      */
-    const preenchimentoMultiplo = 0.50;
+    const preenchimentoMultiplo = 0.5;
 
     /*
      * Diferença mínima para considerar uma alternativa predominante.
@@ -1448,77 +2715,64 @@ private localizarBlocoPretoNoCanto(
   //   return coordenadas;
   // }
 
-private gerarCoordenadasIniciais(): CoordenadaBolha[] {
-  const coordenadas: CoordenadaBolha[] = [];
+  private gerarCoordenadasIniciais(): CoordenadaBolha[] {
+    const coordenadas: CoordenadaBolha[] = [];
 
-  const alternativas: Alternativa[] = [
-    'A',
-    'B',
-    'C',
-    'D',
-  ];
+    const alternativas: Alternativa[] = ['A', 'B', 'C', 'D'];
 
-  /*
-   * Coordenadas calibradas na imagem já corrigida
-   * pelo warpPerspective para 1000 × 1414.
-   *
-   * Questões 1 até 20.
-   */
-  const colunaEsquerdaX = [
-    139, // A
-    202, // B
-    263, // C
-    324, // D
-  ];
-  // const colunaEsquerdaX = [
-  //   151, // A
-  //   211, // B
-  //   270, // C
-  //   330, // D
-  // ];
+    /*
+     * Coordenadas calibradas na imagem já corrigida
+     * pelo warpPerspective para 1000 × 1414.
+     *
+     * Questões 1 até 20.
+     */
+    const colunaEsquerdaX = [
+      139, // A
+      202, // B
+      263, // C
+      324, // D
+    ];
+    // const colunaEsquerdaX = [
+    //   151, // A
+    //   211, // B
+    //   270, // C
+    //   330, // D
+    // ];
 
-  /*
-   * Questões 21 até 40.
-   */
-  const colunaDireitaX = [
-    547, // A
-    609, // B
-    670, // C
-    733, // D
-  ];
-  // const colunaDireitaX = [
-  //   563, // A
-  //   623, // B
-  //   683, // C
-  //   743, // D
-  // ];
+    /*
+     * Questões 21 até 40.
+     */
+    const colunaDireitaX = [
+      547, // A
+      609, // B
+      670, // C
+      733, // D
+    ];
+    // const colunaDireitaX = [
+    //   563, // A
+    //   623, // B
+    //   683, // C
+    //   743, // D
+    // ];
 
-  /*
-   * Centro vertical da primeira linha:
-   * questões 1 e 21.
-   */
-  const primeiraLinhaY = 466;
+    /*
+     * Centro vertical da primeira linha:
+     * questões 1 e 21.
+     */
+    const primeiraLinhaY = 466;
 
-  /*
-   * Distância entre o centro de uma questão
-   * e o centro da questão seguinte.
-   */
-  const distanciaVertical = 41.8;
+    /*
+     * Distância entre o centro de uma questão
+     * e o centro da questão seguinte.
+     */
+    const distanciaVertical = 41.8;
 
-  const raio = 45;
+    const raio = 45;
 
-  for (
-    let questao = 1;
-    questao <= 20;
-    questao++
-  ) {
-    const y =
-      primeiraLinhaY +
-      (questao - 1) *
-        distanciaVertical;
+    for (let questao = 1; questao <= 20; questao++) {
+      const y = primeiraLinhaY + (questao - 1) * distanciaVertical;
 
-    alternativas.forEach(
-      (alternativa, indice) => {
+      alternativas.forEach((alternativa, indice) => {
         coordenadas.push({
           questao,
           alternativa,
@@ -1526,22 +2780,13 @@ private gerarCoordenadasIniciais(): CoordenadaBolha[] {
           y,
           raio,
         });
-      },
-    );
-  }
+      });
+    }
 
-  for (
-    let questao = 21;
-    questao <= 40;
-    questao++
-  ) {
-    const y =
-      primeiraLinhaY +
-      (questao - 21) *
-        distanciaVertical;
+    for (let questao = 21; questao <= 40; questao++) {
+      const y = primeiraLinhaY + (questao - 21) * distanciaVertical;
 
-    alternativas.forEach(
-      (alternativa, indice) => {
+      alternativas.forEach((alternativa, indice) => {
         coordenadas.push({
           questao,
           alternativa,
@@ -1549,12 +2794,11 @@ private gerarCoordenadasIniciais(): CoordenadaBolha[] {
           y,
           raio,
         });
-      },
-    );
-  }
+      });
+    }
 
-  return coordenadas;
-}
+    return coordenadas;
+  }
 
   private carregarOpenCv(): Promise<void> {
     if (!this.isBrowser) {
