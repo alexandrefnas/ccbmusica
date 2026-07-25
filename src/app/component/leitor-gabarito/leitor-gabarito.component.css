@@ -111,7 +111,7 @@
   margin-top: 20px;
 
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* .camera-wrapper {
@@ -308,56 +308,157 @@ pre {
 .debug-marcadores {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+
   width: 100%;
+  min-width: 0;
   margin-top: 15px;
 }
 
-.debug-marcadores h3 {
+.debug-marcadores-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cabecalho-ajuste-marcadores {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cabecalho-ajuste-marcadores h3 {
   margin: 0;
   font-size: 16px;
   font-weight: normal;
 }
 
-.canvas-marcadores {
-  display: block;
+.zoom-atual {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.barra-ferramentas-marcadores,
+.selecao-marcadores,
+.movimento-rapido {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button-ajuste,
+.button-marcador,
+.seta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 42px;
+  height: 42px;
+  padding: 6px 10px;
+
+  border: 1px solid #aaa;
+  border-radius: 5px;
+
+  background: #fff;
+  cursor: pointer;
+
+  font-size: 18px;
+}
+
+.button-ajuste:disabled,
+.button-marcador:disabled,
+.seta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-marcador.selecionado {
+  border-color: #dc3545;
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.viewport-marcadores {
+  position: relative;
+
   width: 100%;
-  max-width: 100%;
-  height: auto;
+  max-height: 70vh;
+
+  overflow: auto;
+  overscroll-behavior: contain;
 
   border: 2px solid #dc3545;
   border-radius: 6px;
 
-  object-fit: contain;
-  background-color: #f5f5f5;
-}
+  background-color: #d5d5d5;
 
-.imagem-processada {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  margin-top: 15px;
+  /*
+   * Mantém as barras de rolagem visíveis quando
+   * o navegador oferecer suporte.
+   */
+  scrollbar-gutter: stable both-edges;
 }
 
 .canvas-marcadores {
   display: block;
-  width: 100%;
-  max-width: 100%;
+
+  min-width: 100%;
+  max-width: none;
   height: auto;
 
   cursor: grab;
   touch-action: none;
   user-select: none;
 
-  border: 2px solid #dc3545;
-  border-radius: 6px;
   background-color: #f5f5f5;
 }
 
-.canvas-marcadores:active,
 .canvas-marcadores.arrastando-marcador {
   cursor: grabbing;
+}
+
+.controle-direcional {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 48px);
+
+  grid-template-rows:
+    repeat(3, 48px);
+
+  justify-content: center;
+  gap: 5px;
+}
+
+.seta-cima {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.seta-esquerda {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.seta-centro {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.seta-direita {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.seta-baixo {
+  grid-column: 2;
+  grid-row: 3;
 }
 
 .acoes-ajuste-marcadores {
@@ -365,14 +466,32 @@ pre {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-
-  width: 100%;
-  margin-top: 10px;
 }
 
 .acoes-ajuste-marcadores p {
   flex-basis: 100%;
   margin: 0;
+}
+
+@media (max-width: 600px) {
+  .viewport-marcadores {
+    max-height: 60vh;
+  }
+
+  .button-ajuste,
+  .button-marcador,
+  .seta {
+    min-width: 46px;
+    height: 46px;
+  }
+
+  .controle-direcional {
+    grid-template-columns:
+      repeat(3, 52px);
+
+    grid-template-rows:
+      repeat(3, 52px);
+  }
 }
 
 @media (max-width: 900px) {

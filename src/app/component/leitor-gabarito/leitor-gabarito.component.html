@@ -12,7 +12,7 @@
     </div>
 
     <div class="acoes">
-      <button
+      <!-- <button
         type="button"
         class="buttons"
         [disabled]="carregandoOpenCv || cameraAtiva"
@@ -40,7 +40,7 @@
       >
         <i class="bi bi-stop-circle"></i>
         Fechar câmera
-      </button>
+      </button> -->
 
       <label
         class="buttons upload-button"
@@ -61,7 +61,7 @@
   </div>
 
   <div class="area-camera" >
-    <div class="camera-wrapper" >
+    <!-- <div class="camera-wrapper" >
       <video #videoCamera playsinline muted></video>
 
       <div class="guia-folha" *ngIf="cameraAtiva">
@@ -72,57 +72,283 @@
         <span class="canto canto-inferior-esquerdo"></span>
         <span class="canto canto-inferior-direito"></span>
       </div>
-    </div>
+    </div> -->
 
     <canvas #canvasCaptura class="canvas-oculto"></canvas>
 
-    <div class="debug-marcadores">
-      <h3>Marcadores encontrados na imagem original</h3>
-
-      <canvas
-        #canvasMarcadores
-        class="canvas-marcadores"
-        [class.arrastando-marcador]="marcadorEmArraste"
-        (pointerdown)="iniciarArrasteMarcador($event)"
-        (pointermove)="moverMarcador($event)"
-        (pointerup)="finalizarArrasteMarcador($event)"
-        (pointercancel)="finalizarArrasteMarcador($event)"
-      ></canvas>
 <div
-  class="acoes-ajuste-marcadores"
-  *ngIf="
-    modoAjusteMarcadores &&
-    ultimosMarcadores
+  class="debug-marcadores"
+    [class.debug-marcadores-oculto]="
+    !modoAjusteMarcadores
   "
 >
-  <p>
-    Arraste o marcador vermelho para o
-    centro correto do quadrado preto.
-  </p>
+  <div class="cabecalho-ajuste-marcadores">
+    <h3>Ajuste dos marcadores</h3>
 
-  <button
-    type="button"
-    class="buttons"
-    [disabled]="processando"
-    (click)="aplicarAjusteMarcadores()"
-  >
-    <i class="bi bi-check-circle"></i>
-    Aplicar ajuste
-  </button>
+    <span class="zoom-atual">
+      Zoom: {{ percentualZoomMarcadores }}%
+    </span>
+  </div>
 
-  <button
-    type="button"
-    class="buttons buttons-secundario"
-    [disabled]="processando"
-    (click)="
-      restaurarMarcadoresAutomaticos()
-    "
-  >
-    <i class="bi bi-arrow-counterclockwise"></i>
-    Detectar novamente
-  </button>
+  <div class="barra-ferramentas-marcadores">
+    <button
+      type="button"
+      class="button-ajuste"
+      title="Diminuir zoom"
+      [disabled]="zoomMarcadores <= 1"
+      (click)="diminuirZoomMarcadores()"
+    >
+      <i class="bi bi-zoom-out"></i>
+    </button>
+
+    <button
+      type="button"
+      class="button-ajuste"
+      title="Restaurar zoom"
+      (click)="restaurarZoomMarcadores()"
+    >
+      <i class="bi bi-arrows-angle-contract"></i>
+    </button>
+
+    <button
+      type="button"
+      class="button-ajuste"
+      title="Aumentar zoom"
+      [disabled]="zoomMarcadores >= 4"
+      (click)="aumentarZoomMarcadores()"
+    >
+      <i class="bi bi-zoom-in"></i>
+    </button>
+  </div>
+
+  <div class="selecao-marcadores">
+    <span>Marcador:</span>
+
+    <button
+      type="button"
+      class="button-marcador"
+      [class.selecionado]="
+        marcadorSelecionado ===
+        'superiorEsquerdo'
+      "
+      (click)="
+        selecionarMarcador(
+          'superiorEsquerdo'
+        )
+      "
+    >
+      SE
+    </button>
+
+    <button
+      type="button"
+      class="button-marcador"
+      [class.selecionado]="
+        marcadorSelecionado ===
+        'superiorDireito'
+      "
+      (click)="
+        selecionarMarcador(
+          'superiorDireito'
+        )
+      "
+    >
+      SD
+    </button>
+
+    <button
+      type="button"
+      class="button-marcador"
+      [class.selecionado]="
+        marcadorSelecionado ===
+        'inferiorEsquerdo'
+      "
+      (click)="
+        selecionarMarcador(
+          'inferiorEsquerdo'
+        )
+      "
+    >
+      IE
+    </button>
+
+    <button
+      type="button"
+      class="button-marcador"
+      [class.selecionado]="
+        marcadorSelecionado ===
+        'inferiorDireito'
+      "
+      (click)="
+        selecionarMarcador(
+          'inferiorDireito'
+        )
+      "
+    >
+      ID
+    </button>
+  </div>
+
+  <div class="viewport-marcadores">
+    <canvas
+      #canvasMarcadores
+      class="canvas-marcadores"
+      [class.arrastando-marcador]="
+        marcadorEmArraste
+      "
+      [style.width.%]="
+        zoomMarcadores * 100
+      "
+      (pointerdown)="
+        iniciarArrasteMarcador($event)
+      "
+      (pointermove)="
+        moverMarcador($event)
+      "
+      (pointerup)="
+        finalizarArrasteMarcador($event)
+      "
+      (pointercancel)="
+        finalizarArrasteMarcador($event)
+      "
+    ></canvas>
+  </div>
+
+  <div class="controle-direcional">
+    <button
+      type="button"
+      class="seta seta-cima"
+      title="Mover para cima"
+      [disabled]="!marcadorSelecionado"
+      (click)="
+        moverMarcadorSelecionado(0, -1)
+      "
+    >
+      <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <button
+      type="button"
+      class="seta seta-esquerda"
+      title="Mover para esquerda"
+      [disabled]="!marcadorSelecionado"
+      (click)="
+        moverMarcadorSelecionado(-1, 0)
+      "
+    >
+      <i class="bi bi-arrow-left"></i>
+    </button>
+
+    <button
+      type="button"
+      class="seta seta-centro"
+      disabled
+    >
+      <i class="bi bi-arrows-move"></i>
+    </button>
+
+    <button
+      type="button"
+      class="seta seta-direita"
+      title="Mover para direita"
+      [disabled]="!marcadorSelecionado"
+      (click)="
+        moverMarcadorSelecionado(1, 0)
+      "
+    >
+      <i class="bi bi-arrow-right"></i>
+    </button>
+
+    <button
+      type="button"
+      class="seta seta-baixo"
+      title="Mover para baixo"
+      [disabled]="!marcadorSelecionado"
+      (click)="
+        moverMarcadorSelecionado(0, 1)
+      "
+    >
+      <i class="bi bi-arrow-down"></i>
+    </button>
+  </div>
+
+  <div class="movimento-rapido">
+    <span>Movimento rápido:</span>
+
+    <button
+      type="button"
+      class="button-ajuste"
+      [disabled]="!marcadorSelecionado"
+      (click)="
+        moverMarcadorSelecionado(-5, 0)
+      "
+    >
+      <i class="bi bi-chevron-double-left"></i>
+    </button>
+
+    <button
+      type="button"
+      class="button-ajuste"
+      [disabled]="!marcadorSelecionado"
+      (click)="
+        moverMarcadorSelecionado(0, -5)
+      "
+    >
+      <i class="bi bi-chevron-double-up"></i>
+    </button>
+
+    <button
+      type="button"
+      class="button-ajuste"
+      [disabled]="!marcadorSelecionado"
+      (click)="
+        moverMarcadorSelecionado(0, 5)
+      "
+    >
+      <i class="bi bi-chevron-double-down"></i>
+    </button>
+
+    <button
+      type="button"
+      class="button-ajuste"
+      [disabled]="!marcadorSelecionado"
+      (click)="
+        moverMarcadorSelecionado(5, 0)
+      "
+    >
+      <i class="bi bi-chevron-double-right"></i>
+    </button>
+  </div>
+
+  <div class="acoes-ajuste-marcadores">
+    <p>
+      Selecione um marcador e use as setas para
+      posicionar o ponto verde no centro do quadrado preto.
+    </p>
+
+    <button
+      type="button"
+      class="buttons"
+      [disabled]="processando"
+      (click)="aplicarAjusteMarcadores()"
+    >
+      <i class="bi bi-check-circle"></i>
+      Aplicar ajuste
+    </button>
+
+    <button
+      type="button"
+      class="buttons buttons-secundario"
+      [disabled]="processando"
+      (click)="
+        restaurarMarcadoresAutomaticos()
+      "
+    >
+      <i class="bi bi-arrow-counterclockwise"></i>
+      Detectar novamente
+    </button>
+  </div>
 </div>
-    </div>
 
     <div class="imagem-processada">
       <h3>Imagem corrigida</h3>

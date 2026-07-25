@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostListener,
   Inject,
   OnDestroy,
   OnInit,
@@ -59,6 +60,12 @@ interface ImagemBuscaMarcadores {
   escalaX: number;
   escalaY: number;
 }
+
+type ChaveMarcador =
+  | 'superiorEsquerdo'
+  | 'superiorDireito'
+  | 'inferiorEsquerdo'
+  | 'inferiorDireito';
 
 @Component({
   selector: 'tcx-leitor-gabarito',
@@ -126,12 +133,23 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
   private coordenadasBolhas: CoordenadaBolha[] = [];
 
 
- marcadorEmArraste:
-  | 'superiorEsquerdo'
-  | 'superiorDireito'
-  | 'inferiorEsquerdo'
-  | 'inferiorDireito'
-  | null = null;
+//  marcadorEmArraste:
+//   | 'superiorEsquerdo'
+//   | 'superiorDireito'
+//   | 'inferiorEsquerdo'
+//   | 'inferiorDireito'
+//   | null = null;
+
+
+marcadorEmArraste: ChaveMarcador | null = null;
+
+marcadorSelecionado: ChaveMarcador | null = null;
+
+zoomMarcadores = 1;
+
+private readonly zoomMinimoMarcadores = 0.5;
+private readonly zoomMaximoMarcadores = 4;
+private readonly passoZoomMarcadores = 0.25;
 
 private usarMarcadoresManuais = false;
 
@@ -293,8 +311,10 @@ modoAjusteMarcadores = false;
     }
 this.usarMarcadoresManuais = false;
 this.marcadorEmArraste = null;
+this.marcadorSelecionado = null;
 this.ultimosMarcadores = null;
 this.modoAjusteMarcadores = false;
+this.zoomMarcadores = 1;
     try {
       await this.carregarOpenCv();
     } catch (erro) {
@@ -650,7 +670,10 @@ this.modoAjusteMarcadores = true;
     //   }
     // }
 
-this.desenharCanvasMarcadoresInterativo();
+// this.desenharCanvasMarcadoresInterativo();
+requestAnimationFrame(() => {
+  this.desenharCanvasMarcadoresInterativo();
+});
 
     const pontosOrigem = this.cv.matFromArray(4, 1, this.cv.CV_32FC2, [
       se.x,
@@ -828,10 +851,11 @@ private desenharCanvasMarcadoresInterativo(): void {
   );
 
   for (const item of marcadores) {
-    const selecionado =
-      this.marcadorEmArraste ===
-      item.chave;
-
+    // const selecionado =
+    //   this.marcadorEmArraste ===
+    //   item.chave;
+const selecionado =
+  this.marcadorSelecionado === item.chave;
     /*
      * Círculo externo.
      */
@@ -1007,6 +1031,9 @@ iniciarArrasteMarcador(
   this.marcadorEmArraste =
     maisProximo.chave;
 
+this.marcadorSelecionado =
+  maisProximo.chave;
+
   this.usarMarcadoresManuais = true;
 
   const canvas =
@@ -1175,11 +1202,153 @@ async restaurarMarcadoresAutomaticos(): Promise<void> {
   this.usarMarcadoresManuais = false;
   this.marcadorEmArraste = null;
   this.ultimosMarcadores = null;
+this.marcadorSelecionado = null;
+this.modoAjusteMarcadores = false;
+this.zoomMarcadores = 1;
 
   this.mensagem =
     'Localizando marcadores automaticamente...';
 
   await this.processarCanvas();
+}
+
+
+aumentarZoomMarcadores(): void {
+  this.zoomMarcadores = Math.min(
+    this.zoomMarcadores +
+      this.passoZoomMarcadores,
+    this.zoomMaximoMarcadores,
+  );
+}
+
+diminuirZoomMarcadores(): void {
+  this.zoomMarcadores = Math.max(
+    this.zoomMarcadores -
+      this.passoZoomMarcadores,
+    this.zoomMinimoMarcadores,
+  );
+}
+
+restaurarZoomMarcadores(): void {
+  this.zoomMarcadores = 1;
+}
+
+get percentualZoomMarcadores(): number {
+  return Math.round(
+    this.zoomMarcadores * 100,
+  );
+}
+
+selecionarMarcador(
+  marcador: ChaveMarcador,
+): void {
+  if (!this.ultimosMarcadores) {
+    return;
+  }
+
+  this.marcadorSelecionado = marcador;
+
+  this.desenharCanvasMarcadoresInterativo();
+}
+
+moverMarcadorSelecionado(
+  deslocamentoX: number,
+  deslocamentoY: number,
+): void {
+  if (
+    !this.ultimosMarcadores ||
+    !this.marcadorSelecionado
+  ) {
+    return;
+  }
+
+  const canvas =
+    this.canvasMarcadoresRef.nativeElement;
+
+  const marcador =
+    this.ultimosMarcadores[
+      this.marcadorSelecionado
+    ];
+
+  marcador.x = Math.max(
+    0,
+    Math.min(
+      marcador.x + deslocamentoX,
+      canvas.width - 1,
+    ),
+  );
+
+  marcador.y = Math.max(
+    0,
+    Math.min(
+      marcador.y + deslocamentoY,
+      canvas.height - 1,
+    ),
+  );
+
+  this.usarMarcadoresManuais = true;
+
+  this.desenharCanvasMarcadoresInterativo();
+}
+
+@HostListener(
+  'window:keydown',
+  ['$event'],
+)
+aoPressionarTecla(
+  event: KeyboardEvent,
+): void {
+  if (
+    !this.modoAjusteMarcadores ||
+    !this.marcadorSelecionado
+  ) {
+    return;
+  }
+
+  /*
+   * Shift movimenta 5 pixels.
+   * Sem Shift movimenta 1 pixel.
+   */
+  const passo =
+    event.shiftKey ? 5 : 1;
+
+  switch (event.key) {
+    case 'ArrowLeft':
+      event.preventDefault();
+
+      this.moverMarcadorSelecionado(
+        -passo,
+        0,
+      );
+      break;
+
+    case 'ArrowRight':
+      event.preventDefault();
+
+      this.moverMarcadorSelecionado(
+        passo,
+        0,
+      );
+      break;
+
+    case 'ArrowUp':
+      event.preventDefault();
+
+      this.moverMarcadorSelecionado(
+        0,
+        -passo,
+      );
+      break;
+
+    case 'ArrowDown':
+      event.preventDefault();
+
+      this.moverMarcadorSelecionado(
+        0,
+        passo,
+      );
+      break;
+  }
 }
 
   private criarImagemParaBuscaDeMarcadores(origem: any): ImagemBuscaMarcadores {
