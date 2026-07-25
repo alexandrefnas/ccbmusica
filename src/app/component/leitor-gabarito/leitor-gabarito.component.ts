@@ -89,7 +89,7 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
 
   private carregamentoOpenCv: Promise<void> | null = null;
 
-  private ultimosMarcadores: {
+ ultimosMarcadores: {
     superiorEsquerdo: PontoMarcador;
     superiorDireito: PontoMarcador;
     inferiorEsquerdo: PontoMarcador;
@@ -120,10 +120,23 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
 
   private readonly larguraBuscaA4 = 900;
   private readonly alturaBuscaA4 = 1273;
-  private readonly maximoCandidatosMarcadores = 12;
-  private readonly debugLeitor = false;
+  private readonly maximoCandidatosMarcadores = 24;
+  private readonly debugLeitor = true;
 
   private coordenadasBolhas: CoordenadaBolha[] = [];
+
+
+ marcadorEmArraste:
+  | 'superiorEsquerdo'
+  | 'superiorDireito'
+  | 'inferiorEsquerdo'
+  | 'inferiorDireito'
+  | null = null;
+
+private usarMarcadoresManuais = false;
+
+modoAjusteMarcadores = false;
+
 
   constructor(@Inject(PLATFORM_ID) platformId: object) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -278,7 +291,10 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     if (!arquivo) {
       return;
     }
-
+this.usarMarcadoresManuais = false;
+this.marcadorEmArraste = null;
+this.ultimosMarcadores = null;
+this.modoAjusteMarcadores = false;
     try {
       await this.carregarOpenCv();
     } catch (erro) {
@@ -385,24 +401,142 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     }
 
     const marcadores = [
-      this.ultimosMarcadores.superiorEsquerdo,
-
-      this.ultimosMarcadores.superiorDireito,
-
-      this.ultimosMarcadores.inferiorEsquerdo,
-
-      this.ultimosMarcadores.inferiorDireito,
+      {
+        nome: 'SE',
+        descricao: 'Superior esquerdo',
+        ponto: this.ultimosMarcadores.superiorEsquerdo,
+      },
+      {
+        nome: 'SD',
+        descricao: 'Superior direito',
+        ponto: this.ultimosMarcadores.superiorDireito,
+      },
+      {
+        nome: 'IE',
+        descricao: 'Inferior esquerdo',
+        ponto: this.ultimosMarcadores.inferiorEsquerdo,
+      },
+      {
+        nome: 'ID',
+        descricao: 'Inferior direito',
+        ponto: this.ultimosMarcadores.inferiorDireito,
+      },
     ];
 
-    for (const marcador of marcadores) {
+    for (const item of marcadores) {
+      const x = Math.round(item.ponto.x);
+      const y = Math.round(item.ponto.y);
+
+      /*
+       * Círculo externo.
+       */
       this.cv.circle(
         imagem,
-        new this.cv.Point(Math.round(marcador.x), Math.round(marcador.y)),
-        80,
+        new this.cv.Point(x, y),
+        45,
         new this.cv.Scalar(255, 0, 0, 255),
-        5,
+        6,
+      );
+
+      /*
+       * Ponto central.
+       */
+      this.cv.circle(
+        imagem,
+        new this.cv.Point(x, y),
+        8,
+        new this.cv.Scalar(0, 255, 0, 255),
+        -1,
+      );
+
+      /*
+       * Linhas em cruz para indicar o centro exato.
+       */
+      this.cv.line(
+        imagem,
+        new this.cv.Point(x - 60, y),
+        new this.cv.Point(x + 60, y),
+        new this.cv.Scalar(255, 0, 0, 255),
+        3,
+      );
+
+      this.cv.line(
+        imagem,
+        new this.cv.Point(x, y - 60),
+        new this.cv.Point(x, y + 60),
+        new this.cv.Scalar(255, 0, 0, 255),
+        3,
+      );
+
+      /*
+       * Identificação do canto.
+       */
+      this.cv.putText(
+        imagem,
+        item.nome,
+        new this.cv.Point(x + 20, y - 20),
+        this.cv.FONT_HERSHEY_SIMPLEX,
+        1.5,
+        new this.cv.Scalar(255, 0, 0, 255),
+        4,
+      );
+
+      /*
+       * Coordenadas encontradas.
+       */
+      this.cv.putText(
+        imagem,
+        `x:${x} y:${y}`,
+        new this.cv.Point(x + 20, y + 45),
+        this.cv.FONT_HERSHEY_SIMPLEX,
+        0.8,
+        new this.cv.Scalar(255, 0, 0, 255),
+        2,
       );
     }
+
+    /*
+     * Liga os quatro pontos para mostrar a área que será
+     * usada no warpPerspective.
+     */
+    const se = this.ultimosMarcadores.superiorEsquerdo;
+    const sd = this.ultimosMarcadores.superiorDireito;
+    const ie = this.ultimosMarcadores.inferiorEsquerdo;
+    const id = this.ultimosMarcadores.inferiorDireito;
+
+    const corLinha = new this.cv.Scalar(0, 255, 0, 255);
+
+    this.cv.line(
+      imagem,
+      new this.cv.Point(Math.round(se.x), Math.round(se.y)),
+      new this.cv.Point(Math.round(sd.x), Math.round(sd.y)),
+      corLinha,
+      5,
+    );
+
+    this.cv.line(
+      imagem,
+      new this.cv.Point(Math.round(sd.x), Math.round(sd.y)),
+      new this.cv.Point(Math.round(id.x), Math.round(id.y)),
+      corLinha,
+      5,
+    );
+
+    this.cv.line(
+      imagem,
+      new this.cv.Point(Math.round(id.x), Math.round(id.y)),
+      new this.cv.Point(Math.round(ie.x), Math.round(ie.y)),
+      corLinha,
+      5,
+    );
+
+    this.cv.line(
+      imagem,
+      new this.cv.Point(Math.round(ie.x), Math.round(ie.y)),
+      new this.cv.Point(Math.round(se.x), Math.round(se.y)),
+      corLinha,
+      5,
+    );
   }
 
   private capturarFrame(): void {
@@ -476,13 +610,20 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
   }
 
   private corrigirPerspectivaPorMarcadores(origem: any): any {
-    const marcadores = this.localizarMarcadoresDeCanto(origem);
+    // const marcadores = this.localizarMarcadoresDeCanto(origem);
+const marcadores =
+  this.usarMarcadoresManuais &&
+  this.ultimosMarcadores
+    ? this.ultimosMarcadores
+    : this.localizarMarcadoresDeCanto(origem);
 
     if (!marcadores) {
       throw new Error(
         'Não foi possível identificar corretamente os quatro marcadores.',
       );
     }
+this.ultimosMarcadores = marcadores;
+this.modoAjusteMarcadores = true;
 
     const {
       superiorEsquerdo: se,
@@ -494,20 +635,22 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     // const destinoX = 30;
     // const destinoY = 25;
 
-    if (this.debugLeitor) {
-      const imagemMarcadores = origem.clone();
+    // if (this.debugLeitor) {
+    //   const imagemMarcadores = origem.clone();
 
-      try {
-        this.desenharMarcadoresDetectados(imagemMarcadores);
+    //   try {
+    //     this.desenharMarcadoresDetectados(imagemMarcadores);
 
-        this.cv.imshow(
-          this.canvasMarcadoresRef.nativeElement,
-          imagemMarcadores,
-        );
-      } finally {
-        imagemMarcadores.delete();
-      }
-    }
+    //     this.cv.imshow(
+    //       this.canvasMarcadoresRef.nativeElement,
+    //       imagemMarcadores,
+    //     );
+    //   } finally {
+    //     imagemMarcadores.delete();
+    //   }
+    // }
+
+this.desenharCanvasMarcadoresInterativo();
 
     const pontosOrigem = this.cv.matFromArray(4, 1, this.cv.CV_32FC2, [
       se.x,
@@ -575,6 +718,470 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     }
   }
 
+private desenharCanvasMarcadoresInterativo(): void {
+  if (!this.ultimosMarcadores) {
+    return;
+  }
+
+  const canvasOrigem =
+    this.canvasRef.nativeElement;
+
+  const canvasMarcadores =
+    this.canvasMarcadoresRef.nativeElement;
+
+  canvasMarcadores.width =
+    canvasOrigem.width;
+
+  canvasMarcadores.height =
+    canvasOrigem.height;
+
+  const contexto =
+    canvasMarcadores.getContext('2d');
+
+  if (!contexto) {
+    return;
+  }
+
+  contexto.clearRect(
+    0,
+    0,
+    canvasMarcadores.width,
+    canvasMarcadores.height,
+  );
+
+  contexto.drawImage(
+    canvasOrigem,
+    0,
+    0,
+    canvasMarcadores.width,
+    canvasMarcadores.height,
+  );
+
+  const marcadores = [
+    {
+      chave: 'superiorEsquerdo' as const,
+      nome: 'SE',
+      ponto:
+        this.ultimosMarcadores
+          .superiorEsquerdo,
+    },
+    {
+      chave: 'superiorDireito' as const,
+      nome: 'SD',
+      ponto:
+        this.ultimosMarcadores
+          .superiorDireito,
+    },
+    {
+      chave: 'inferiorEsquerdo' as const,
+      nome: 'IE',
+      ponto:
+        this.ultimosMarcadores
+          .inferiorEsquerdo,
+    },
+    {
+      chave: 'inferiorDireito' as const,
+      nome: 'ID',
+      ponto:
+        this.ultimosMarcadores
+          .inferiorDireito,
+    },
+  ];
+
+  /*
+   * Liga os quatro pontos.
+   */
+  const se =
+    this.ultimosMarcadores
+      .superiorEsquerdo;
+
+  const sd =
+    this.ultimosMarcadores
+      .superiorDireito;
+
+  const ie =
+    this.ultimosMarcadores
+      .inferiorEsquerdo;
+
+  const id =
+    this.ultimosMarcadores
+      .inferiorDireito;
+
+  contexto.beginPath();
+  contexto.moveTo(se.x, se.y);
+  contexto.lineTo(sd.x, sd.y);
+  contexto.lineTo(id.x, id.y);
+  contexto.lineTo(ie.x, ie.y);
+  contexto.closePath();
+
+  contexto.strokeStyle = '#00ff00';
+  contexto.lineWidth = Math.max(
+    canvasMarcadores.width * 0.002,
+    3,
+  );
+
+  contexto.stroke();
+
+  const raioMarcador = Math.max(
+    canvasMarcadores.width * 0.012,
+    25,
+  );
+
+  for (const item of marcadores) {
+    const selecionado =
+      this.marcadorEmArraste ===
+      item.chave;
+
+    /*
+     * Círculo externo.
+     */
+    contexto.beginPath();
+
+    contexto.arc(
+      item.ponto.x,
+      item.ponto.y,
+      raioMarcador,
+      0,
+      Math.PI * 2,
+    );
+
+    contexto.strokeStyle =
+      selecionado
+        ? '#ffff00'
+        : '#ff0000';
+
+    contexto.lineWidth = Math.max(
+      canvasMarcadores.width * 0.003,
+      4,
+    );
+
+    contexto.stroke();
+
+    /*
+     * Centro exato.
+     */
+    contexto.beginPath();
+
+    contexto.arc(
+      item.ponto.x,
+      item.ponto.y,
+      Math.max(raioMarcador * 0.18, 5),
+      0,
+      Math.PI * 2,
+    );
+
+    contexto.fillStyle = '#00ff00';
+    contexto.fill();
+
+    /*
+     * Cruz central.
+     */
+    contexto.beginPath();
+
+    contexto.moveTo(
+      item.ponto.x - raioMarcador * 1.3,
+      item.ponto.y,
+    );
+
+    contexto.lineTo(
+      item.ponto.x + raioMarcador * 1.3,
+      item.ponto.y,
+    );
+
+    contexto.moveTo(
+      item.ponto.x,
+      item.ponto.y - raioMarcador * 1.3,
+    );
+
+    contexto.lineTo(
+      item.ponto.x,
+      item.ponto.y + raioMarcador * 1.3,
+    );
+
+    contexto.strokeStyle = '#ff0000';
+    contexto.lineWidth = Math.max(
+      canvasMarcadores.width * 0.0015,
+      2,
+    );
+
+    contexto.stroke();
+
+    contexto.font =
+      `bold ${Math.max(
+        canvasMarcadores.width * 0.018,
+        18,
+      )}px Arial`;
+
+    contexto.fillStyle = '#ff0000';
+
+    contexto.fillText(
+      item.nome,
+      item.ponto.x + raioMarcador,
+      item.ponto.y - raioMarcador,
+    );
+  }
+}
+
+iniciarArrasteMarcador(
+  event: PointerEvent,
+): void {
+  if (!this.ultimosMarcadores) {
+    return;
+  }
+
+  const posicao =
+    this.obterPosicaoCanvasMarcadores(
+      event,
+    );
+
+  const marcadores = [
+    {
+      chave:
+        'superiorEsquerdo' as const,
+
+      ponto:
+        this.ultimosMarcadores
+          .superiorEsquerdo,
+    },
+    {
+      chave:
+        'superiorDireito' as const,
+
+      ponto:
+        this.ultimosMarcadores
+          .superiorDireito,
+    },
+    {
+      chave:
+        'inferiorEsquerdo' as const,
+
+      ponto:
+        this.ultimosMarcadores
+          .inferiorEsquerdo,
+    },
+    {
+      chave:
+        'inferiorDireito' as const,
+
+      ponto:
+        this.ultimosMarcadores
+          .inferiorDireito,
+    },
+  ];
+
+  const maisProximo =
+    marcadores
+      .map((item) => ({
+        ...item,
+
+        distancia: Math.hypot(
+          item.ponto.x - posicao.x,
+          item.ponto.y - posicao.y,
+        ),
+      }))
+      .sort(
+        (a, b) =>
+          a.distancia -
+          b.distancia,
+      )[0];
+
+  /*
+   * Distância máxima para selecionar o marcador.
+   * Proporcional à resolução original.
+   */
+  const distanciaMaxima =
+    Math.max(
+      this.canvasMarcadoresRef
+        .nativeElement.width * 0.04,
+      60,
+    );
+
+  if (
+    !maisProximo ||
+    maisProximo.distancia >
+      distanciaMaxima
+  ) {
+    return;
+  }
+
+  this.marcadorEmArraste =
+    maisProximo.chave;
+
+  this.usarMarcadoresManuais = true;
+
+  const canvas =
+    this.canvasMarcadoresRef
+      .nativeElement;
+
+  canvas.setPointerCapture(
+    event.pointerId,
+  );
+
+  this.atualizarMarcadorEmArraste(
+    posicao,
+  );
+}
+
+moverMarcador(
+  event: PointerEvent,
+): void {
+  if (!this.marcadorEmArraste) {
+    return;
+  }
+
+  const posicao =
+    this.obterPosicaoCanvasMarcadores(
+      event,
+    );
+
+  this.atualizarMarcadorEmArraste(
+    posicao,
+  );
+}
+
+finalizarArrasteMarcador(
+  event: PointerEvent,
+): void {
+  if (!this.marcadorEmArraste) {
+    return;
+  }
+
+  const canvas =
+    this.canvasMarcadoresRef
+      .nativeElement;
+
+  if (
+    canvas.hasPointerCapture(
+      event.pointerId,
+    )
+  ) {
+    canvas.releasePointerCapture(
+      event.pointerId,
+    );
+  }
+
+  this.marcadorEmArraste = null;
+
+  this.desenharCanvasMarcadoresInterativo();
+}
+
+private atualizarMarcadorEmArraste(
+  posicao: {
+    x: number;
+    y: number;
+  },
+): void {
+  if (
+    !this.ultimosMarcadores ||
+    !this.marcadorEmArraste
+  ) {
+    return;
+  }
+
+  const canvas =
+    this.canvasMarcadoresRef
+      .nativeElement;
+
+  const x = Math.max(
+    0,
+    Math.min(
+      posicao.x,
+      canvas.width - 1,
+    ),
+  );
+
+  const y = Math.max(
+    0,
+    Math.min(
+      posicao.y,
+      canvas.height - 1,
+    ),
+  );
+
+  const marcador =
+    this.ultimosMarcadores[
+      this.marcadorEmArraste
+    ];
+
+  marcador.x = x;
+  marcador.y = y;
+
+  this.desenharCanvasMarcadoresInterativo();
+}
+
+private obterPosicaoCanvasMarcadores(
+  event: PointerEvent,
+): {
+  x: number;
+  y: number;
+} {
+  const canvas =
+    this.canvasMarcadoresRef
+      .nativeElement;
+
+  const retangulo =
+    canvas.getBoundingClientRect();
+
+  /*
+   * O canvas pode estar reduzido pelo CSS.
+   * Converte a posição visual para a resolução real.
+   */
+  const escalaX =
+    canvas.width /
+    retangulo.width;
+
+  const escalaY =
+    canvas.height /
+    retangulo.height;
+
+  return {
+    x:
+      (
+        event.clientX -
+        retangulo.left
+      ) *
+      escalaX,
+
+    y:
+      (
+        event.clientY -
+        retangulo.top
+      ) *
+      escalaY,
+  };
+}
+
+async aplicarAjusteMarcadores(): Promise<void> {
+  if (
+    !this.ultimosMarcadores ||
+    this.processando
+  ) {
+    return;
+  }
+
+  this.usarMarcadoresManuais = true;
+
+  this.mensagem =
+    'Aplicando ajuste manual dos marcadores...';
+
+  await this.processarCanvas();
+}
+
+async restaurarMarcadoresAutomaticos(): Promise<void> {
+  if (this.processando) {
+    return;
+  }
+
+  this.usarMarcadoresManuais = false;
+  this.marcadorEmArraste = null;
+  this.ultimosMarcadores = null;
+
+  this.mensagem =
+    'Localizando marcadores automaticamente...';
+
+  await this.processarCanvas();
+}
+
   private criarImagemParaBuscaDeMarcadores(origem: any): ImagemBuscaMarcadores {
     const larguraOriginal = origem.cols;
     const alturaOriginal = origem.rows;
@@ -615,60 +1222,64 @@ export class LeitorGabaritoComponent implements OnInit, OnDestroy {
     };
   }
 
-private localizarMarcadoresDeCanto(
-  origem: any,
-): {
-  superiorEsquerdo: PontoMarcador;
-  superiorDireito: PontoMarcador;
-  inferiorEsquerdo: PontoMarcador;
-  inferiorDireito: PontoMarcador;
-} | null {
-  /*
-   * Usa a fotografia original, sem redução.
-   *
-   * Essa é a detecção que já estava reconhecendo
-   * corretamente os quadrados pretos de 7 mm.
-   */
-  const marcadoresGlobais =
-    this.localizarMarcadoresNaImagemReduzida(
-      origem,
-    );
+  private localizarMarcadoresDeCanto(origem: any): {
+    superiorEsquerdo: PontoMarcador;
+    superiorDireito: PontoMarcador;
+    inferiorEsquerdo: PontoMarcador;
+    inferiorDireito: PontoMarcador;
+  } | null {
+    /*
+     * Primeira tentativa:
+     * usa o método rápido que já funcionava quando a folha
+     * está próxima das bordas da fotografia.
+     *
+     * Essa etapa trabalha apenas em pequenas regiões dos cantos.
+     */
+    const marcadoresProximos =
+      this.localizarMarcadoresProximosDasBordas(origem);
 
-  if (marcadoresGlobais) {
+    if (marcadoresProximos) {
+      this.ultimosMarcadores = marcadoresProximos;
+
+      if (this.debugLeitor) {
+        console.log(
+          'Marcadores encontrados pela busca rápida.',
+          marcadoresProximos,
+        );
+      }
+
+      return marcadoresProximos;
+    }
+
+    /*
+     * Segunda tentativa:
+     * somente quando a folha estiver afastada das bordas,
+     * procura os quadrados na imagem inteira.
+     *
+     * Usa a imagem original, sem redução, preservando
+     * a sensibilidade que já estava funcionando.
+     */
+    if (this.debugLeitor) {
+      console.warn('Busca rápida falhou. Iniciando busca global.');
+    }
+
+    const marcadoresGlobais = this.localizarMarcadoresNaImagemReduzida(origem);
+
+    if (!marcadoresGlobais) {
+      return null;
+    }
+
+    this.ultimosMarcadores = marcadoresGlobais;
+
     if (this.debugLeitor) {
       console.log(
-        'Marcadores encontrados na imagem original.',
+        'Marcadores encontrados pela busca global.',
         marcadoresGlobais,
       );
     }
 
-    this.ultimosMarcadores =
-      marcadoresGlobais;
-
     return marcadoresGlobais;
   }
-
-  /*
-   * Mantém o fallback antigo.
-   */
-  if (this.debugLeitor) {
-    console.warn(
-      'Busca global falhou. Tentando busca próxima das bordas.',
-    );
-  }
-
-  const marcadoresProximos =
-    this.localizarMarcadoresProximosDasBordas(
-      origem,
-    );
-
-  if (marcadoresProximos) {
-    this.ultimosMarcadores =
-      marcadoresProximos;
-  }
-
-  return marcadoresProximos;
-}
 
   private localizarMarcadoresProximosDasBordas(origem: any): {
     superiorEsquerdo: PontoMarcador;
@@ -703,10 +1314,17 @@ private localizarMarcadoresDeCanto(
 
       const alturaRegiao = Math.round(altura * configuracao.alturaPercentual);
 
-      console.log(`Tentativa de marcadores ${tentativa + 1}:`, {
-        larguraRegiao,
-        alturaRegiao,
-      });
+      // console.log(`Tentativa de marcadores ${tentativa + 1}:`, {
+      //   larguraRegiao,
+      //   alturaRegiao,
+      // });
+
+      if (this.debugLeitor) {
+        console.log(`Tentativa de marcadores ${tentativa + 1}:`, {
+          larguraRegiao,
+          alturaRegiao,
+        });
+      }
 
       const superiorEsquerdo = this.localizarBlocoPretoNoCanto(
         origem,
@@ -773,85 +1391,85 @@ private localizarMarcadoresDeCanto(
 
     return null;
   }
-  private localizarMarcadoresGlobalmente(origem: any): {
-    superiorEsquerdo: PontoMarcador;
-    superiorDireito: PontoMarcador;
-    inferiorEsquerdo: PontoMarcador;
-    inferiorDireito: PontoMarcador;
-  } | null {
-    /*
-     * Cria uma cópia reduzida somente para localizar
-     * os quatro quadrados pretos.
-     *
-     * A imagem original continua sendo usada posteriormente
-     * pelo warpPerspective.
-     */
-    const busca = this.criarImagemParaBuscaDeMarcadores(origem);
+  // private localizarMarcadoresGlobalmente(origem: any): {
+  //   superiorEsquerdo: PontoMarcador;
+  //   superiorDireito: PontoMarcador;
+  //   inferiorEsquerdo: PontoMarcador;
+  //   inferiorDireito: PontoMarcador;
+  // } | null {
+  //   /*
+  //    * Cria uma cópia reduzida somente para localizar
+  //    * os quatro quadrados pretos.
+  //    *
+  //    * A imagem original continua sendo usada posteriormente
+  //    * pelo warpPerspective.
+  //    */
+  //   const busca = this.criarImagemParaBuscaDeMarcadores(origem);
 
-    try {
-      if (this.debugLeitor) {
-        console.time('Busca dos marcadores');
-        console.log('Imagem original:', {
-          largura: origem.cols,
-          altura: origem.rows,
-        });
+  //   try {
+  //     if (this.debugLeitor) {
+  //       console.time('Busca dos marcadores');
+  //       console.log('Imagem original:', {
+  //         largura: origem.cols,
+  //         altura: origem.rows,
+  //       });
 
-        console.log('Imagem usada na busca:', {
-          largura: busca.imagem.cols,
-          altura: busca.imagem.rows,
-          escalaX: busca.escalaX,
-          escalaY: busca.escalaY,
-        });
-      }
+  //       console.log('Imagem usada na busca:', {
+  //         largura: busca.imagem.cols,
+  //         altura: busca.imagem.rows,
+  //         escalaX: busca.escalaX,
+  //         escalaY: busca.escalaY,
+  //       });
+  //     }
 
-      const marcadoresReduzidos = this.localizarMarcadoresNaImagemReduzida(
-        busca.imagem,
-      );
+  //     const marcadoresReduzidos = this.localizarMarcadoresNaImagemReduzida(
+  //       busca.imagem,
+  //     );
 
-      if (!marcadoresReduzidos) {
-        return null;
-      }
+  //     if (!marcadoresReduzidos) {
+  //       return null;
+  //     }
 
-      /*
-       * As coordenadas encontradas pertencem à imagem reduzida.
-       * Converte novamente para a resolução da fotografia original.
-       */
-      const converterMarcador = (marcador: PontoMarcador): PontoMarcador => ({
-        x: marcador.x * busca.escalaX,
-        y: marcador.y * busca.escalaY,
+  //     /*
+  //      * As coordenadas encontradas pertencem à imagem reduzida.
+  //      * Converte novamente para a resolução da fotografia original.
+  //      */
+  //     const converterMarcador = (marcador: PontoMarcador): PontoMarcador => ({
+  //       x: marcador.x * busca.escalaX,
+  //       y: marcador.y * busca.escalaY,
 
-        area: marcador.area * busca.escalaX * busca.escalaY,
-      });
+  //       area: marcador.area * busca.escalaX * busca.escalaY,
+  //     });
 
-      const marcadoresOriginais = {
-        superiorEsquerdo: converterMarcador(
-          marcadoresReduzidos.superiorEsquerdo,
-        ),
+  //     const marcadoresOriginais = {
+  //       superiorEsquerdo: converterMarcador(
+  //         marcadoresReduzidos.superiorEsquerdo,
+  //       ),
 
-        superiorDireito: converterMarcador(marcadoresReduzidos.superiorDireito),
+  //       superiorDireito: converterMarcador(marcadoresReduzidos.superiorDireito),
 
-        inferiorEsquerdo: converterMarcador(
-          marcadoresReduzidos.inferiorEsquerdo,
-        ),
+  //       inferiorEsquerdo: converterMarcador(
+  //         marcadoresReduzidos.inferiorEsquerdo,
+  //       ),
 
-        inferiorDireito: converterMarcador(marcadoresReduzidos.inferiorDireito),
-      };
+  //       inferiorDireito: converterMarcador(marcadoresReduzidos.inferiorDireito),
+  //     };
 
-      /*
-       * A partir daqui os pontos voltaram a representar
-       * a imagem original.
-       */
-      this.ultimosMarcadores = marcadoresOriginais;
+  //     /*
+  //      * A partir daqui os pontos voltaram a representar
+  //      * a imagem original.
+  //      */
+  //     this.ultimosMarcadores = marcadoresOriginais;
 
-      return marcadoresOriginais;
-    } finally {
-      if (this.debugLeitor) {
-        console.timeEnd('Busca dos marcadores');
-      }
+  //     return marcadoresOriginais;
+  //   } finally {
+  //     if (this.debugLeitor) {
+  //       console.timeEnd('Busca dos marcadores');
+  //     }
 
-      busca.imagem.delete();
-    }
-  }
+  //     busca.imagem.delete();
+  //   }
+  // }
 
   private localizarMarcadoresNaImagemReduzida(origem: any): {
     superiorEsquerdo: PontoMarcador;
@@ -1771,13 +2389,15 @@ private localizarMarcadoresDeCanto(
       const menorDimensao = Math.min(origem.cols, origem.rows);
 
       const distanciaMinima = Math.max(menorDimensao * 0.0035, 4);
-      console.log(`Marcador ${nome}:`, {
-        canto,
-        xLocal: pontoMaximo.x,
-        yLocal: pontoMaximo.y,
-        distanciaMaxima,
-        distanciaMinima,
-      });
+      if (this.debugLeitor) {
+        console.log(`Marcador ${nome}:`, {
+          canto,
+          xLocal: pontoMaximo.x,
+          yLocal: pontoMaximo.y,
+          distanciaMaxima,
+          distanciaMinima,
+        });
+      }
 
       if (distanciaMaxima < distanciaMinima) {
         console.warn(
@@ -1799,12 +2419,14 @@ private localizarMarcadoresDeCanto(
 
       const areaEstimada = ladoEstimado * ladoEstimado;
 
-      console.log(`Marcador confirmado — ${nome}:`, {
-        x: Math.round(x),
-        y: Math.round(y),
-        distanciaMaxima: Number(distanciaMaxima.toFixed(2)),
-        ladoEstimado: Number(ladoEstimado.toFixed(2)),
-      });
+      if (this.debugLeitor) {
+        console.log(`Marcador confirmado — ${nome}:`, {
+          x: Math.round(x),
+          y: Math.round(y),
+          distanciaMaxima: Number(distanciaMaxima.toFixed(2)),
+          ladoEstimado: Number(ladoEstimado.toFixed(2)),
+        });
+      }
 
       return {
         x,

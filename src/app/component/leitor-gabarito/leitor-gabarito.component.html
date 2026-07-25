@@ -60,8 +60,8 @@
     </div>
   </div>
 
-  <div class="area-camera">
-    <div class="camera-wrapper">
+  <div class="area-camera" >
+    <div class="camera-wrapper" >
       <video #videoCamera playsinline muted></video>
 
       <div class="guia-folha" *ngIf="cameraAtiva">
@@ -74,11 +74,61 @@
       </div>
     </div>
 
-    <!-- <canvas #canvasMarcadores class="canvas-processado"></canvas> -->
-
     <canvas #canvasCaptura class="canvas-oculto"></canvas>
 
-    <canvas #canvasProcessado class="canvas-processado"></canvas>
+    <div class="debug-marcadores">
+      <h3>Marcadores encontrados na imagem original</h3>
+
+      <canvas
+        #canvasMarcadores
+        class="canvas-marcadores"
+        [class.arrastando-marcador]="marcadorEmArraste"
+        (pointerdown)="iniciarArrasteMarcador($event)"
+        (pointermove)="moverMarcador($event)"
+        (pointerup)="finalizarArrasteMarcador($event)"
+        (pointercancel)="finalizarArrasteMarcador($event)"
+      ></canvas>
+<div
+  class="acoes-ajuste-marcadores"
+  *ngIf="
+    modoAjusteMarcadores &&
+    ultimosMarcadores
+  "
+>
+  <p>
+    Arraste o marcador vermelho para o
+    centro correto do quadrado preto.
+  </p>
+
+  <button
+    type="button"
+    class="buttons"
+    [disabled]="processando"
+    (click)="aplicarAjusteMarcadores()"
+  >
+    <i class="bi bi-check-circle"></i>
+    Aplicar ajuste
+  </button>
+
+  <button
+    type="button"
+    class="buttons buttons-secundario"
+    [disabled]="processando"
+    (click)="
+      restaurarMarcadoresAutomaticos()
+    "
+  >
+    <i class="bi bi-arrow-counterclockwise"></i>
+    Detectar novamente
+  </button>
+</div>
+    </div>
+
+    <div class="imagem-processada">
+      <h3>Imagem corrigida</h3>
+
+      <canvas #canvasProcessado class="canvas-processado"></canvas>
+    </div>
   </div>
 
   <div class="resultado" *ngIf="respostas.length > 0">
