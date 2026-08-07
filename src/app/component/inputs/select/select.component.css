@@ -9,9 +9,9 @@
 .form-field {
   position: relative;
   width: 100%;
-  z-index: auto;
   border-radius: 5px;
 }
+
 
 .form-input {
   width: 100%;
@@ -82,26 +82,53 @@
   background-color: #e9ecef;
 }
 
-.dropdown {
+/* .dropdown {
   display: flex;
   flex-direction: column;
   position: absolute;
-  top: 40px;
+  /* top: 40px; *
+  top: calc(100% + 1px);
   left: 0;
   width: 100%;
   padding: 3px;
-  /* background: #ccc; */
+  /* background: #ccc; *
+  background-color: #fff;
   border: 1px solid #ccc;
-  z-index: 99999;
+  z-index: 9999;
 
-  max-height: 200px; /* 👈 controla quantidade visível */
-  /* overflow-y: auto; */
+  max-height: 200px; /* 👈 controla quantidade visível *
+  /* overflow-y: auto; *
   overflow: hidden;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+} */
+
+.dropdown {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  padding: 3px;
+
+  background-color: #fff;
+  border: 1px solid #ccc;
+
+  max-height: 200px;
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  border-radius: 4px;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .lista-opcoes {
   max-height: 180px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .option {

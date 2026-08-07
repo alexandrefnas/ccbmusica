@@ -10,12 +10,13 @@ import {
   Output,
 } from '@angular/core';
 import { FormsModule, NgControl } from '@angular/forms';
+import { OverlayModule, ConnectedPosition } from '@angular/cdk/overlay';
 import { SelectService } from '../../../services/select.service';
 
 @Component({
   selector: 'tcx-select',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, OverlayModule],
   templateUrl: './select.component.html',
   styleUrl: './select.component.css',
 })
@@ -33,7 +34,7 @@ export class SelectComponent {
   timerBusca: any;
   textoBusca: string = '';
 
-    textoFiltro: string = '';
+  textoFiltro: string = '';
 
   @Output() valorMudou = new EventEmitter<string>();
   open = false;
@@ -42,6 +43,23 @@ export class SelectComponent {
   onTouched = () => {};
 
   ngControl: NgControl | null = null;
+
+  posicoesDropdown: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 1,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -1,
+    },
+  ];
 
   constructor(
     private injector: Injector,

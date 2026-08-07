@@ -62,17 +62,18 @@
   /* max-width: 500px; */
   max-height: 60vh;
   box-sizing: border-box;
+
 }
 
 .linha {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  gap: 5px;
   width: 550px;
   height: 58px;
+  margin: 15px 0;
 }
-  /* border: solid 1px red; */
+/* border: solid 1px red; */
 
 .button-container {
   width: 80px;
@@ -100,7 +101,7 @@
 
 .input-select {
   width: 130px;
-/* flex: 0 0 130px; */
+  /* flex: 0 0 130px; */
 }
 
 /* #input-localizacao {
@@ -191,7 +192,7 @@
   }
 
   .input-select {
-   flex: 1;
+    flex: 1;
   }
 
   #input-localizacao {
