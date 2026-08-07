@@ -1,5 +1,22 @@
 <div class="container__button">
   <button
+    class="buttons"
+    [type]="type"
+    [title]="descricao"
+    (click)="onClick($event)"
+    [disabled]="disabled"
+  >
+    @if (icon) {
+      <i [class]="icon"></i>
+    }
+    @if (liberarLabel) {
+      <span>{{ label }}</span>
+    }
+  </button>
+</div>
+
+<!-- <div class="container__button">
+  <button
     [type]="type"
     [title]="descricao"
     [disabled]="disabled"
@@ -7,4 +24,4 @@
   >
     {{ label }}
   </button>
-</div>
+</div> -->
