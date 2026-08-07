@@ -8,7 +8,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ModalComponent } from '../../../modal/modal/modal.component';
 import { ButtonComponent } from '../../../component/button/button.component';
 import {
   AuthService,
@@ -38,7 +37,6 @@ import { AlertService } from '../../../services/alert.service';
   selector: 'tcx-usuarios',
   imports: [
     CommonModule,
-    ModalComponent,
     ButtonComponent,
     FormsModule,
     ReactiveFormsModule,
@@ -55,10 +53,14 @@ export class UsuariosComponent implements OnInit {
   liberaCriar: boolean = false;
   liberaDeletar: boolean = false;
 
-  title = 'TITULO';
-  mostrarModal = false;
+  title = 'USUÁRIOS';
+
+  cadastrar = false;
+  // mostrarModal = false;
   liberacoes = false;
   dadosParaEditar: any | null = null;
+
+  usuarioSelecionado: string = '';
 
   listaSetores: Setor[] = [];
   listaComuns: Igrejas[] = [];
@@ -159,14 +161,16 @@ export class UsuariosComponent implements OnInit {
     private firestoreService: FirestoreService,
     private alertService: AlertService,
   ) {
-    this.dadosForms = this.fb.group({
-      nome: ['', Validators.required],
-      email: ['', Validators.required],
-      senha: ['', Validators.required],
-      perfil: ['', Validators.required],
-      idSetor: [''],
-      idComum: [''],
-    });
+    // this.dadosForms = this.fb.group({
+    //   nome: ['', Validators.required],
+    //   email: ['', Validators.required],
+    //   senha: ['', Validators.required],
+    //   perfil: ['', Validators.required],
+    //   idSetor: [''],
+    //   idComum: [''],
+    // });
+    this.dadosForms = this.criarFormularioCadastro();
+
     // this.liberaEditar = this.permissao('update');
     // this.liberaCriar = this.permissao('create');
     // this.liberaDeletar = this.permissao('delete');
@@ -365,7 +369,19 @@ export class UsuariosComponent implements OnInit {
 
   buttonClick(): void {
     this.title = 'Cadastrar Usuário';
-    this.mostrarModal = true;
+    // this.mostrarModal = true;
+    // console.log('ENTROU NO BUTTON CLICK');
+
+    this.cadastrar = true;
+    this.liberacoes = false;
+
+    // console.log('cadastrar:', this.cadastrar);
+    // console.log('liberacoes:', this.liberacoes);
+
+    this.dadosForms = this.criarFormularioCadastro();
+
+    this.escutarMudancaPerfil();
+    this.escutarMudancaSetor();
 
     const usuario = this.auth.usuario;
 
@@ -396,6 +412,16 @@ export class UsuariosComponent implements OnInit {
     }
   }
 
+  private criarFormularioCadastro(): FormGroup {
+    return this.fb.group({
+      nome: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      senha: ['', Validators.required],
+      perfil: ['', Validators.required],
+      idSetor: [''],
+      idComum: [''],
+    });
+  }
   // carregarDados(): void {
   //   const ref = this.auth;
   //   const collectionRef = ref && ref['firestore'] ? ref['firestore'] : null;
@@ -672,7 +698,8 @@ export class UsuariosComponent implements OnInit {
       this.email = '';
       this.senha = '';
       this.perfil = 'instrutor';
-      this.fecharModal();
+      // this.fecharModal();
+      this.fecharCadastro();
     } catch (erro) {
       // console.error(erro);
       this.alertService.erro('Erro ao cadastrar: ' + (erro as any).message);
@@ -710,7 +737,8 @@ export class UsuariosComponent implements OnInit {
       this.dadosForms.markAsPristine();
       this.houveAlteracao = false;
 
-      this.liberacoes = false;
+      // this.liberacoes = false;
+      this.voltarParaLista();
     } catch (error) {
       this.snackBar.open('Erro ao atualizar usuário', 'Fechar', {
         duration: 3000,
@@ -718,7 +746,6 @@ export class UsuariosComponent implements OnInit {
     }
   }
 
-  usuarioSelecionado: string = '';
   // editar(select: Usuarios): void {
   //   this.title = 'Editar Instrumentos';
   //   this.liberacoes = true;
@@ -771,9 +798,11 @@ export class UsuariosComponent implements OnInit {
   // }
 
   editar(select: Usuarios): void {
-    this.ignorarMudancaPerfil = true;
-    this.title = 'Editar Instrumentos';
+    this.cadastrar = false;
     this.liberacoes = true;
+
+    this.ignorarMudancaPerfil = true;
+    this.title = 'EDITAR USUÁRIO';
     this.usuarioSelecionado =
       select.nome.toUpperCase() + ' - ' + select.perfil.toUpperCase();
     this.dadosParaEditar = { ...select };
@@ -898,12 +927,39 @@ export class UsuariosComponent implements OnInit {
     return control as FormControl;
   }
 
-  fecharModal() {
-    this.mostrarModal = false;
-    this.dadosForms.reset();
+  // fecharModal() {
+  //   this.mostrarModal = false;
+  //   this.dadosForms.reset();
+  // }
+
+  private voltarParaLista(): void {
+    this.cadastrar = false;
+    this.liberacoes = false;
+
+    this.title = 'USUÁRIOS';
+
+    this.dadosParaEditar = null;
+    this.usuarioSelecionado = '';
+
+    this.ignorarMudancaPerfil = false;
+    this.houveAlteracao = false;
+    this.valorOriginalFormulario = '';
+
+    this.listaComunsSelect = [];
+
+    // deixa o formulário preparado para um próximo cadastro
+    this.dadosForms = this.criarFormularioCadastro();
   }
 
-  cancel() {
-    this.liberacoes = false;
+  fecharCadastro(): void {
+    this.voltarParaLista();
+  }
+
+  // cancel() {
+  //   this.liberacoes = false;
+  // }
+
+  cancel(): void {
+    this.voltarParaLista();
   }
 }

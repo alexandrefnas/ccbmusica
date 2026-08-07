@@ -1,328 +1,998 @@
+/* =========================================================
+   HOST
+========================================================= */
+
 :host {
   display: flex;
-  /* justify-content: center; */
   width: 100%;
   height: 100%;
   box-sizing: border-box;
 }
 
+
+/* =========================================================
+   CONTAINER PRINCIPAL DA TELA
+========================================================= */
+
 .container__tela {
   display: flex;
   flex-direction: column;
-  padding: 0 40px 15px 40px;
+
   width: 100%;
-  min-width: 700px;
-  height: auto;
+  height: 100%;
+  min-width: 0;
+
+  padding: 0 40px 15px;
+
   box-sizing: border-box;
+  overflow: hidden;
 }
+
+
+/* =========================================================
+   BARRA SUPERIOR
+========================================================= */
 
 #tela__barra-menu {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+
   width: 100%;
+
   margin-top: 20px;
   padding: 8px 15px;
+
   box-sizing: border-box;
 
   border-bottom: 2px solid #ccc;
+
   box-shadow:
     inset 0 -1px 0 #dcdcdc,
     inset 0 -2px 0 #999;
 }
 
+
+/* TÍTULO */
+
 #barra-titulo__container {
   display: flex;
   flex-direction: row;
-  /* width: 100%; */
-  /* margin-top: 20px; */
-  font-weight: bold;
   align-items: center;
-  /* border-bottom: 2px solid #ccc; */
+
+  min-width: 0;
+
+  font-weight: bold;
 }
+
+
+#barra-titulo__container h2 {
+  margin: 0;
+
+  font-size: 20px;
+
+  color: var(--cor-texto);
+}
+
+
+/* BOTÕES DA BARRA */
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 8px;
+}
+
+
+/* =========================================================
+   CONTEÚDO PRINCIPAL
+========================================================= */
+
+.tela__container-principal {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  flex: 1;
+
+  min-height: 0;
+
+  padding-top: 15px;
+
+  box-sizing: border-box;
+
+  overflow: auto;
+}
+
+
+/* =========================================================
+   TABELA
+========================================================= */
 
 #tela__container-tabela {
   width: 100%;
-  /* min-width: 400px; */
-  flex-grow: 1;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  overflow: auto;
+
+  flex: 1;
   min-height: 0;
+
+  margin-bottom: 10px;
+
+  overflow: auto;
+
   border: 1px solid #ccc;
-  /* box-shadow:
-    inset -1px -1px 0 #dcdcdc,
-    inset 2px 2px 0 #999; */
+
+  border-radius: 5px;
+
+  box-sizing: border-box;
 }
 
-/* / / */
+
+/* =========================================================
+   CADASTRO
+========================================================= */
+
+.cadastro-container {
+  align-items: center;
+}
+
+
+/* FORMULÁRIO PRINCIPAL */
+
+.form-usuario {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  max-width: 900px;
+
+  gap: 16px;
+
+  margin: 0 auto;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   CARDS DO FORMULÁRIO
+========================================================= */
+
+.form-card {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+
+  padding: 18px;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+
+  background: var(--cor-input-fundo);
+
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 5%),
+    0 2px 6px rgb(0 0 0 / 4%);
+}
+
+
+/* =========================================================
+   CABEÇALHO DOS CARDS
+========================================================= */
+
+.form-card__titulo {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  gap: 12px;
+
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+
+  box-sizing: border-box;
+
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+
+.form-card__titulo h3 {
+  margin: 0 0 3px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  color: var(--cor-texto);
+}
+
+
+.form-card__titulo span {
+  display: block;
+
+  font-size: 12px;
+  font-weight: normal;
+
+  opacity: 0.7;
+
+  color: var(--cor-texto);
+}
+
+
+/* =========================================================
+   ÍCONE DO CARD
+========================================================= */
+
+.form-card__icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+
+  box-sizing: border-box;
+}
+
+
+.form-card__icone i {
+  font-size: 18px;
+
+  color: var(--cor-texto);
+}
+
+
+/* =========================================================
+   GRID DOS CAMPOS
+========================================================= */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  width: 100%;
+
+  gap: 15px 20px;
+
+  margin-bottom: 18px;
+  box-sizing: border-box;
+}
+
+
+.campo {
+  width: 100%;
+  min-width: 0;
+}
+
+
+.campo-completo {
+  grid-column: 1 / -1;
+}
+
+
+/*
+  Garante que seus componentes internos respeitem
+  a largura disponível da coluna
+*/
+
+.campo tcx-text,
+.campo tcx-select {
+  display: block;
+
+  width: 100%;
+}
+
+
+/* =========================================================
+   COMPATIBILIDADE COM CLASSES ANTIGAS
+========================================================= */
+
 .templates__form {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* alinha o primeiro à esquerda e o último à direita */
-  /* align-items: center; */
+
   width: 100%;
-  max-width: 500px;
-  /* max-height: 60vh; */
+  max-width: 900px;
+
   box-sizing: border-box;
 }
+
 
 .linha {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  gap: 5px;
-  /* width: 350px; */
+
   width: 100%;
-  height: 58px;
-  /* border: solid 1px red; */
+
+  gap: 10px;
+
+  box-sizing: border-box;
 }
+
 
 .linhaButton {
   display: flex;
   align-items: center;
-  justify-content: center;
-  /* border: solid 1px red; */
+  justify-content: right;
+
+  width: 100%;
 }
+
 
 .form__button {
   width: 100px;
   height: 25px;
 }
-/* // */
+
 
 .input-text {
   width: 100%;
 }
 
+
 .input-select {
   display: flex;
   flex-direction: row;
+
   width: 100%;
+
   gap: 10px;
+
+  box-sizing: border-box;
 }
 
-/* #setor {
-  width: 65%;
-} */
-/* .buttons {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  padding: 3px 7px;
-  font-size: 14px;
-  flex-wrap: nowrap;
-  cursor: pointer;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-shadow:
-    inset 1px 1px 0 #fff,
-    inset -1px -1px 0 #999;
-} */
 
-/* .buttons:active {
-  border: 1px solid #ccc;
-  box-shadow:
-    inset -1px -1px 0 #fff,
-    inset 1px 1px 0 #999;
-  transform: translateY(2px);
-} */
-/* .tela__container-acessos {
-  width: 500px;
-} */
-
-.title-acessos {
-  display: flex;
-  flex-direction: row;
-  padding: 10px 0;
-  gap: 10px;
-}
+/* =========================================================
+   ÁREA DE PERMISSÕES
+========================================================= */
 
 .acessos-container {
+  display: flex;
+  flex-direction: column;
+
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  /* max-width: auto; */
-  padding: 15px 0;
-  /* margin: 0 auto 0 0; */
-  /* border: 1px solid red; */
-}
 
-.acessos-container > div[formGroupName="acessos"] {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+  gap: 8px;
 
-/* linha do módulo */
-.modulo {
-  display: flex;
-  justify-content: space-between;
-  /* align-items: center; */
-  gap: 15px;
-  /* background: #1e1e1e;
-color: white; */
-  padding: 10px 14px;
+  padding: 18px;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--cor-borda);
   border-radius: 8px;
 
-  border: 1px solid #ccc;
+  background: var(--cor-input-fundo);
+
   box-shadow:
-    inset -1px -1px 0 #fff,
-    inset 1px 1px 0 #999;
+    0 1px 2px rgb(0 0 0 / 5%),
+    0 2px 6px rgb(0 0 0 / 4%);
 }
 
-/* nome do módulo */
+
+/* =========================================================
+   TÍTULO DAS PERMISSÕES
+========================================================= */
+
+.acessos-titulo {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  padding-bottom: 14px;
+  margin-bottom: 4px;
+
+  box-sizing: border-box;
+
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+
+.acessos-titulo h3 {
+  margin: 0 0 3px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  color: var(--cor-texto);
+}
+
+
+.acessos-titulo span {
+  display: block;
+
+  font-size: 12px;
+  font-weight: normal;
+
+  opacity: 0.7;
+
+  color: var(--cor-texto);
+}
+
+
+/* =========================================================
+   LINHA DO MÓDULO
+========================================================= */
+
+.modulo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+
+  gap: 20px;
+
+  padding: 12px 14px;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+/* pequena resposta visual */
+
+.modulo:hover {
+  box-shadow: 0 1px 4px rgb(0 0 0 / 8%);
+}
+
+
+/* =========================================================
+   NOME DO MÓDULO
+========================================================= */
+
 .modulo-nome {
-  font-weight: bold;
-  /* color: #fff; */
-  min-width: 100px;
-  max-width: 250px;
+  flex: 1;
+
+  min-width: 120px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--cor-texto);
 }
 
-/* grupo de permissões */
+
+/* =========================================================
+   GRUPO DE PERMISSÕES
+========================================================= */
+
 .permissoes {
   display: flex;
-  justify-content: space-between;
-  gap: 14px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 18px;
 }
 
-/* SWITCH BASE */
+
+/* =========================================================
+   SWITCH
+========================================================= */
+
 .switch {
   display: flex;
   align-items: center;
-  gap: 4px;
+
   position: relative;
+
+  gap: 5px;
+
   cursor: pointer;
+
   font-size: 12px;
-  color: black;
+
+  color: var(--cor-texto);
+
+  user-select: none;
 }
 
-/* esconder checkbox padrão */
+
+/* esconde checkbox original */
+
 .switch input {
-  display: none;
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  opacity: 0;
+
+  pointer-events: none;
 }
 
-/* trilho */
+
+/* TRILHO */
+
 .slider {
-  width: 38px;
-  height: 20px;
-  background: #555;
-  /* color: white; */
-  border-radius: 20px;
   position: relative;
-  transition: 0.3s;
+
+  display: inline-block;
+
+  width: 36px;
+  height: 20px;
+
+  flex-shrink: 0;
+
+  background: #777;
+
+  border-radius: 20px;
+
+  transition: 0.2s;
 }
 
-/* bolinha */
+
+/* BOLINHA */
+
 .slider::before {
   content: "";
+
   position: absolute;
+
   width: 16px;
   height: 16px;
-  background: white;
-  border-radius: 50%;
+
   top: 2px;
   left: 2px;
-  transition: 0.3s;
+
+  background: white;
+
+  border-radius: 50%;
+
+  transition: 0.2s;
 }
 
-/* ativo (igual WhatsApp) */
+
+/* ATIVO */
+
 .switch input:checked + .slider {
   background: #25d366;
 }
 
+
 .switch input:checked + .slider::before {
-  transform: translateX(18px);
+  transform: translateX(16px);
 }
 
-/* texto */
+
+/* DESABILITADO */
+
+.switch input:disabled + .slider {
+  opacity: 0.4;
+
+  cursor: not-allowed;
+}
+
+
+.switch:has(input:disabled) {
+  cursor: not-allowed;
+
+  opacity: 0.65;
+}
+
+
+/* TEXTO DO SWITCH */
+
 .label {
+  min-width: 35px;
+
   font-size: 11px;
+  font-weight: normal;
+
+  color: var(--cor-texto);
 }
 
-  .tela__container-acessos {
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-  }
 
-/* RESPONSIVIDADE */
-/* Mobile */
+/* =========================================================
+   RODAPÉ DO FORMULÁRIO
+========================================================= */
+
+.form-actions {
+  position: sticky;
+
+  bottom: 0;
+
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  width: 120px;
+
+  gap: 10px;
+
+  padding: 12px 0;
+
+  box-sizing: border-box;
+}
+
+
+/* cria uma pequena separação visual do conteúdo */
+
+.form-actions::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 1px;
+
+  background: var(--cor-borda);
+
+  opacity: 0.5;
+}
+
+
+/* =========================================================
+   TÍTULO ANTIGO DE ACESSOS
+   Pode ser mantido enquanto houver HTML antigo usando
+========================================================= */
+
+.title-acessos {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  width: 100%;
+
+  padding: 10px 0;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+.tela__container-principal::-webkit-scrollbar,
+#tela__container-tabela::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+
+.tela__container-principal::-webkit-scrollbar-thumb,
+#tela__container-tabela::-webkit-scrollbar-thumb {
+  background: #aaa;
+
+  border-radius: 10px;
+}
+
+
+.tela__container-principal::-webkit-scrollbar-track,
+#tela__container-tabela::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+========================================================= */
+
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
 @media (max-width: 576px) {
+
   .container__tela {
-    padding: 0 10px 15px;
     width: 100%;
-    overflow: hidden;
-    min-width: 300px;
+
+    min-width: 0;
+
+    padding: 0 10px 10px;
   }
 
-  /* .tela__container-acessos {
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-  } */
 
-  .title-acessos {
+  /* BARRA */
+
+  #tela__barra-menu {
+    width: 100%;
+
+    margin-top: 10px;
+
+    padding: 8px 5px;
+  }
+
+
+  #barra-titulo__container {
+    min-width: 0;
+  }
+
+
+  #barra-titulo__container h2 {
+    font-size: 16px;
+
+    white-space: nowrap;
+  }
+
+
+  .button-container {
+    flex-shrink: 0;
+  }
+
+
+  /* CONTEÚDO */
+
+  .tela__container-principal {
+    padding-top: 10px;
+  }
+
+
+  /* FORMULÁRIO */
+
+  .form-usuario {
+    width: 100%;
+    max-width: none;
+
+    gap: 10px;
+  }
+
+
+  /* CARDS */
+
+  .form-card,
+  .acessos-container {
+    padding: 12px;
+
+    border-radius: 6px;
+  }
+
+
+  .form-card__titulo {
+    gap: 8px;
+
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+  }
+
+
+  .form-card__icone {
+    width: 34px;
+    height: 34px;
+  }
+
+
+  .form-card__icone i {
+    font-size: 16px;
+  }
+
+
+  .form-card__titulo h3,
+  .acessos-titulo h3 {
+    font-size: 14px;
+  }
+
+
+  .form-card__titulo span,
+  .acessos-titulo span {
+    font-size: 11px;
+  }
+
+
+  /* CAMPOS */
+
+  .form-grid {
+    grid-template-columns: 1fr;
+
+    gap: 8px;
+  }
+
+
+  .campo-completo {
+    grid-column: auto;
+  }
+
+
+  .linha {
     flex-direction: column;
-  }
 
-  .acessos-container > div[formGroupName="acessos"] {
+    height: auto;
+
     gap: 5px;
   }
 
-  .modulo {
-    width: 100%;
-    flex-direction: column;
-
-    padding: 10px 8px;
-  }
-
-  .acessos-container p {
-    width: 100%;
-    text-align: left;
-  }
-
-  .modulo-nome {
-    width: 100%;
-    text-align: left;
-  }
-
-  .permissoes {
-    gap: 2px;
-  }
-  .modulo-nome,
-  .switch,
-  .label {
-    font-size: 12px;
-    font-weight: normal;
-  }
 
   .input-select {
     flex-direction: column;
   }
 
-  #setor {
+
+  /* PERMISSÕES */
+
+  .acessos-container {
+    gap: 6px;
+  }
+
+
+  .acessos-titulo {
+    padding-bottom: 10px;
+  }
+
+
+  .modulo {
+    flex-direction: column;
+    align-items: flex-start;
+
     width: 100%;
+
+    gap: 10px;
+
+    padding: 10px;
+  }
+
+
+  .modulo-nome {
+    width: 100%;
+
+    min-width: 0;
+
+    font-size: 12px;
+  }
+
+
+  .permissoes {
+    display: flex;
+    justify-content: space-between;
+
+    width: 100%;
+
+    gap: 4px;
+  }
+
+
+  .switch {
+    flex-direction: column;
+
+    gap: 3px;
+
+    font-size: 11px;
+  }
+
+
+  .slider {
+    width: 34px;
+    height: 18px;
+  }
+
+
+  .slider::before {
+    width: 14px;
+    height: 14px;
+  }
+
+
+  .switch input:checked + .slider::before {
+    transform: translateX(16px);
+  }
+
+
+  .label {
+    min-width: 0;
+
+    font-size: 10px;
+
+    text-align: center;
+  }
+
+
+  /* BOTÕES DO RODAPÉ */
+
+  .form-actions {
+    justify-content: space-between;
+
+    width: 100%;
+
+    gap: 10px;
+
+    padding: 10px 0;
   }
 
 }
 
-/* Table */
+
+/* ---------------------------------------------------------
+   TABLET PEQUENO
+--------------------------------------------------------- */
+
+@media (min-width: 577px) and (max-width: 767px) {
+
+  .container__tela {
+    padding: 0 20px 15px;
+  }
+
+
+  .form-usuario {
+    max-width: 650px;
+  }
+
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .campo-completo {
+    grid-column: auto;
+  }
+
+
+  .permissoes {
+    gap: 10px;
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   TABLET
+--------------------------------------------------------- */
+
 @media (min-width: 768px) and (max-width: 992px) {
-  /* .templates__form {
-    width: 400px;
-  } */
-  /* .linha {
-    width: 300px;
-  } */
+
+  .container__tela {
+    padding: 0 25px 15px;
+  }
+
+
+  .form-usuario {
+    max-width: 750px;
+  }
+
+
+  .permissoes {
+    gap: 10px;
+  }
+
 }
 
-/* Desktop */
-@media (min-width: 992px) and (max-width: 1200px) {
+
+/* ---------------------------------------------------------
+   DESKTOP
+--------------------------------------------------------- */
+
+@media (min-width: 993px) and (max-width: 1200px) {
+
+  .form-usuario {
+    max-width: 850px;
+  }
+
 }
 
-/* Extra Large Devices */
+
+/* ---------------------------------------------------------
+   EXTRA LARGE
+--------------------------------------------------------- */
+
 @media (min-width: 1200px) {
+
+  .form-usuario {
+    max-width: 900px;
+  }
+
 }
-/* FIM RESPONSIVIDADE */

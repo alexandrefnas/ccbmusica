@@ -1,4 +1,316 @@
 <div class="container__tela">
+  <!-- BARRA SUPERIOR -->
+  <div id="tela__barra-menu">
+    <div id="barra-titulo__container">
+      <h2>
+        @if (cadastrar) {
+          CADASTRAR USUÁRIO
+        } @else if (liberacoes) {
+          EDITAR USUÁRIO
+        } @else {
+          USUÁRIOS
+        }
+      </h2>
+    </div>
+
+    <div class="button-container">
+      @if (!cadastrar && !liberacoes && liberaCriar) {
+        <tcx-button
+          label="Novo usuário"
+          type="button"
+          icon="bi bi-person-plus"
+          (clicked)="buttonClick()"
+        />
+      } @else if (cadastrar) {
+        <tcx-button
+          label="Voltar"
+          type="button"
+          icon="bi bi-arrow-return-left"
+          (clicked)="fecharCadastro()"
+        />
+      } @else if (liberacoes) {
+        <tcx-button
+          label="Voltar"
+          type="button"
+          icon="bi bi-arrow-return-left"
+          (clicked)="cancel()"
+        />
+      }
+    </div>
+  </div>
+
+  @if (!cadastrar && !liberacoes) {
+    <!-- ================================================= -->
+    <!-- LISTAGEM -->
+    <!-- ================================================= -->
+    <div class="tela__container-principal">
+      <div id="tela__container-tabela">
+        <tcx-table
+          [colunas]="camposColunas"
+          [colunasLabels]="tituloColunas"
+          [dados]="listaUsuarios"
+          [tamanhosColunas]="tamanhoColunas"
+          [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+          [alinhamentosColunas]="alinhamentoColuna"
+          [mostrarAcoes]="true"
+          [acoesTabela]="acoes"
+          mensagemVazio="Nenhum usuário cadastrado."
+        />
+      </div>
+    </div>
+  } @else if (cadastrar) {
+    <!-- ================================================= -->
+    <!-- CADASTRO -->
+    <!-- ================================================= -->
+    <div class="tela__container-principal cadastro-container">
+      <form
+        class="form-usuario"
+        [formGroup]="dadosForms"
+        (ngSubmit)="prepararDados()"
+      >
+        <!-- DADOS DE ACESSO -->
+
+        <div class="form-card">
+          <div class="form-card__titulo">
+            <div class="form-card__icone">
+              <i class="bi bi-person"></i>
+            </div>
+
+            <div>
+              <h3>Dados do usuário</h3>
+              <span>Informações utilizadas para identificação e acesso.</span>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="campo campo-completo">
+              <tcx-text
+                label="Nome"
+                type="text"
+                [formControl]="getControl('nome')"
+                [required]="true"
+                errorMessage="Informe o nome."
+              />
+            </div>
+
+            <div class="campo">
+              <tcx-text
+                label="E-mail"
+                type="email"
+                [formControl]="getControl('email')"
+                [required]="true"
+                errorMessage="Informe um e-mail válido."
+              />
+            </div>
+
+            <div class="campo">
+              <tcx-text
+                label="Senha"
+                type="password"
+                [formControl]="getControl('senha')"
+                [required]="true"
+                errorMessage="Informe a senha."
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- VÍNCULO -->
+
+        <div class="form-card">
+          <div class="form-card__titulo">
+            <div class="form-card__icone">
+              <i class="bi bi-diagram-3"></i>
+            </div>
+
+            <div>
+              <h3>Vínculo e perfil</h3>
+              <span>
+                Defina onde o usuário pertence e seu nível de acesso.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            @if (usuarioEhAdmin()) {
+              <div class="campo">
+                <tcx-select
+                  label="Setor"
+                  placeholder=""
+                  [niveisLimitados]="listaSetoresSelect"
+                  [formControl]="getControl('idSetor')"
+                  errorMessage="Campo obrigatório"
+                />
+              </div>
+            }
+
+            <div class="campo">
+              <tcx-select
+                label="Comum"
+                placeholder=""
+                [niveisLimitados]="listaComunsSelect"
+                [formControl]="getControl('idComum')"
+                errorMessage="Campo obrigatório"
+              />
+            </div>
+
+            <div class="campo">
+              <tcx-select
+                label="Perfil"
+                placeholder=""
+                [niveisLimitados]="listaTipoUsuarioPermitida"
+                [formControl]="getControl('perfil')"
+                [required]="true"
+                errorMessage="Campo obrigatório"
+              />
+            </div>
+          </div>
+
+          <!-- BOTÕES -->
+          <div class="linhaButton">
+            <div class="button-container">
+              <tcx-button
+                label="Salvar usuário"
+                type="submit"
+                icon="bi bi-check-lg"
+                [disabled]="carregando"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- RODAPÉ -->
+
+        <!-- <div class="form-actions">
+          <tcx-button
+            label="Cancelar"
+            type="button"
+            icon="bi bi-x-lg"
+            (clicked)="fecharCadastro()"
+          />
+
+          <tcx-button
+            label="Salvar usuário"
+            type="submit"
+            icon="bi bi-check-lg"
+            [disabled]="carregando"
+          />
+        </div> -->
+      </form>
+    </div>
+  } @else if (liberacoes) {
+    <!-- ================================================= -->
+    <!-- EDIÇÃO DE ACESSOS -->
+    <!-- ================================================= -->
+    <div class="tela__container-principal">
+      <form class="form-usuario" [formGroup]="dadosForms" (ngSubmit)="salvar()">
+        <div class="form-card">
+          <div class="form-card__titulo">
+            <div class="form-card__icone">
+              <i class="bi bi-shield-lock"></i>
+            </div>
+
+            <div>
+              <h3>{{ usuarioSelecionado }}</h3>
+              <span> Configure o perfil e as permissões deste usuário. </span>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="campo">
+              <tcx-select
+                label="Perfil"
+                placeholder=""
+                [niveisLimitados]="listaTipoUsuarioPermitida"
+                [formControl]="getControl('perfil')"
+                [required]="true"
+                errorMessage="Campo obrigatório"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="acessos-container" formGroupName="acessos">
+          <div class="acessos-titulo">
+            <div>
+              <h3>Permissões</h3>
+              <span> Controle as ações disponíveis para cada módulo. </span>
+            </div>
+          </div>
+
+          <div
+            class="modulo"
+            *ngFor="let modulo of modulos"
+            [formGroupName]="modulo"
+          >
+            <div class="modulo-nome">
+              {{ modulo | titlecase }}
+            </div>
+
+            <div class="permissoes">
+              <label class="switch">
+                <input type="checkbox" formControlName="read" />
+
+                <span class="slider"></span>
+                <span class="label">Ler</span>
+              </label>
+
+              <label class="switch">
+                <input type="checkbox" formControlName="create" />
+
+                <span class="slider"></span>
+                <span class="label">Criar</span>
+              </label>
+
+              <label class="switch">
+                <input type="checkbox" formControlName="update" />
+
+                <span class="slider"></span>
+                <span class="label">Editar</span>
+              </label>
+
+              <label class="switch">
+                <input type="checkbox" formControlName="delete" />
+
+                <span class="slider"></span>
+                <span class="label">Excluir</span>
+              </label>
+            </div>
+          </div>
+          <!-- BOTÕES -->
+          <div class="linhaButton">
+            <div class="button-container">
+              <tcx-button
+                label="Salvar alterações"
+                type="submit"
+                icon="bi bi-check-lg"
+                [disabled]="!houveAlteracao"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="form-actions">
+          <tcx-button
+            label="Cancelar"
+            type="button"
+            icon="bi bi-x-lg"
+            (clicked)="cancel()"
+          />
+
+          <tcx-button
+            label="Salvar alterações"
+            type="submit"
+            icon="bi bi-check-lg"
+            [disabled]="!houveAlteracao"
+          />
+        </div> -->
+      </form>
+    </div>
+  }
+</div>
+
+<!-- <div class="container__tela">
   <div id="tela__barra-menu">
     <div id="barra-titulo__container">
       <h2 style="font-weight: normal; color: grey">USUÁRIOS</h2>
@@ -33,13 +345,6 @@
     >
       <div formGroupName="acessos">
         <div class="input-select">
-          <!-- <tcx-select
-            id="setor"
-            [label]="'Setor'"
-            [placeholder]="''"
-            [niveisLimitados]="listaSetoresSelect"
-            [formControl]="getControl('idSetor')"
-          /> -->
           <div class="input-select" *ngIf="usuarioEhAdmin()">
             <tcx-select
               [label]="'Setor'"
@@ -78,28 +383,28 @@
           </div>
 
           <div class="permissoes">
-            <!-- READ -->
+            <!-- READ --
             <label class="switch">
               <input type="checkbox" formControlName="read" />
               <span class="slider"></span>
               <span class="label">Ler</span>
             </label>
 
-            <!-- CREATE -->
+            <!-- CREATE --
             <label class="switch">
               <input type="checkbox" formControlName="create" />
               <span class="slider"></span>
               <span class="label">Criar</span>
             </label>
 
-            <!-- UPDATE -->
+            <!-- UPDATE --
             <label class="switch">
               <input type="checkbox" formControlName="update" />
               <span class="slider"></span>
               <span class="label">Editar</span>
             </label>
 
-            <!-- DELETE -->
+            <!-- DELETE --
             <label class="switch">
               <input type="checkbox" formControlName="delete" />
               <span class="slider"></span>
@@ -126,9 +431,9 @@
       </div>
     </form>
   </div>
-</div>
+</div> -->
 
-<tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
+<!-- <tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
   <div class="templates__form">
     <form [formGroup]="dadosForms" (ngSubmit)="prepararDados()">
       <div class="linha">
@@ -206,4 +511,4 @@
       </div>
     </form>
   </div>
-</tcx-modal>
+</tcx-modal> -->
