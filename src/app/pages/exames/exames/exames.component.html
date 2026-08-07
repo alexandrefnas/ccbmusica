@@ -1238,7 +1238,7 @@
             <tcx-button
               label="Excluir Nota"
               type="button"
-              (click)="excluirNota()"
+              (clicked)="excluirNota()"
             ></tcx-button>
 
             <!-- <button type="button" class="buttons" (click)="excluirNota()">
@@ -1333,6 +1333,7 @@
     </div>
   </tcx-modal>
 </div>
+
 <tcx-modal
   [title]="'Leitor de Gabarito'"
   [visible]="abrirModalLeitor"

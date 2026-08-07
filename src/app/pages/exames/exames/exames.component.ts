@@ -15,9 +15,6 @@ import { ModalComponent } from '../../../modal/modal/modal.component';
 import { ButtonComponent } from '../../../component/button/button.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { TextComponent } from '../../../component/inputs/text/text.component';
-// import { DataComponent } from '../../../component/inputs/data/data.component';
-// import { TableComponent } from '../../../component/table/table.component';
-
 import {
   AvaliacaoCriterio,
   Candidatos,
@@ -2403,8 +2400,8 @@ export class ExamesComponent implements OnInit {
   aoSelecionarExames(selecionados: Exames[]): void {
     this.examesSelecionados = selecionados;
 
-    this.exameSelecionado =
-      selecionados.length === 1 ? (selecionados[0] as ExameTabela) : null;
+    // this.exameSelecionado =
+    //   selecionados.length === 1 ? (selecionados[0] as ExameTabela) : null;
   }
 
   podeSelecionarExame = (item: Exames): boolean => {
@@ -2617,9 +2614,32 @@ export class ExamesComponent implements OnInit {
     this.fecharModalAceiteLote();
   }
 
+  // private atualizarSelecaoAposCarregar(): void {
+  //   if (!this.examesSelecionados.length) {
+  //     this.exameSelecionado = null;
+  //     return;
+  //   }
+
+  //   const idsSelecionados = this.examesSelecionados
+  //     .map((item) => item.id)
+  //     .filter((id): id is string => !!id);
+
+  //   /*
+  //    * Substitui os objetos antigos pelos objetos atualizados
+  //    * que acabaram de chegar do Firestore.
+  //    */
+  //   this.examesSelecionados = this.dadosTodos.filter(
+  //     (item) => item.id && idsSelecionados.includes(item.id),
+  //   );
+
+  //   this.exameSelecionado =
+  //     this.examesSelecionados.length === 1
+  //       ? (this.examesSelecionados[0] as ExameTabela)
+  //       : null;
+  // }
+
   private atualizarSelecaoAposCarregar(): void {
     if (!this.examesSelecionados.length) {
-      this.exameSelecionado = null;
       return;
     }
 
@@ -2627,18 +2647,9 @@ export class ExamesComponent implements OnInit {
       .map((item) => item.id)
       .filter((id): id is string => !!id);
 
-    /*
-     * Substitui os objetos antigos pelos objetos atualizados
-     * que acabaram de chegar do Firestore.
-     */
     this.examesSelecionados = this.dadosTodos.filter(
       (item) => item.id && idsSelecionados.includes(item.id),
     );
-
-    this.exameSelecionado =
-      this.examesSelecionados.length === 1
-        ? (this.examesSelecionados[0] as ExameTabela)
-        : null;
   }
 
   @ViewChild(TableComponentSelect) tableComponent!: TableComponentSelect;
