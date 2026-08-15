@@ -67,8 +67,8 @@
 
 .linha {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  /* flex-direction: row;
+  justify-content: space-between; */
   width: 550px;
   height: 58px;
   margin: 15px 0;
@@ -119,21 +119,26 @@
     padding: 0 10px 15px;
     width: 100%;
     overflow: hidden;
-    min-width: 300px;
+    min-width: 350px;
   }
 
+.templates__form{
+  width: 100%;
+}
+
   .linha {
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
+    /* flex-direction: column;
+    align-items: center; */
+    /* gap: 15px; */
+    /* width: 350px; */
     width: 100%;
-    height: 100%;
+    margin: 0;
+    /* height: 100%; */
   }
 
   .input-text,
   .input-select {
     width: 100%;
-    /* max-width: 400px; */
   }
 }
 

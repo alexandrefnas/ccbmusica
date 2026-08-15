@@ -78,8 +78,9 @@ export class AlunosComponent implements OnInit {
   liberaEditar: boolean = false;
   liberaCriar: boolean = false;
   liberaDeletar: boolean = false;
-  title = '';
-  mostrarModal = false;
+  // title = '';
+  // mostrarModal = false;
+  cadastrar = false;
 
   filtro = false;
   filtroStatus = false;
@@ -164,17 +165,17 @@ export class AlunosComponent implements OnInit {
       visivel: (item: any) => this.liberaEditar && !item.desativado,
       callback: (item: any) => this.editar(item),
     },
-{
-  label: '',
-  descricao: (item: Candidatos) =>
-    item.desativado ? 'Ativar Candidato.' : 'Desativar Candidato.',
-  classe: (item: Candidatos) =>
-    item.desativado
-      ? 'bi bi-check-square acao-editar'
-      : 'bi bi-dash-circle acao-editar',
-  visivel: (item: Candidatos) => !this.isMobile && this.liberaEditar,
-  callback: (item: Candidatos) => this.statusCandidato(item),
-},
+    {
+      label: '',
+      descricao: (item: Candidatos) =>
+        item.desativado ? 'Ativar Candidato.' : 'Desativar Candidato.',
+      classe: (item: Candidatos) =>
+        item.desativado
+          ? 'bi bi-check-square acao-editar'
+          : 'bi bi-dash-circle acao-editar',
+      visivel: (item: Candidatos) => !this.isMobile && this.liberaEditar,
+      callback: (item: Candidatos) => this.statusCandidato(item),
+    },
     {
       label: '',
       descricao: 'Histórico',
@@ -691,114 +692,93 @@ export class AlunosComponent implements OnInit {
             .filter((etapa: any) =>
               ['aprovado', 'reprovado'].includes(etapa.resultado),
             )
-.map((etapa: any) => {
-  const avaliacaoGrupo = etapaGrupo?.avaliacao?.find(
-    (a: any) => a.ordem === etapa.ordem,
-  );
+            .map((etapa: any) => {
+              const avaliacaoGrupo = etapaGrupo?.avaliacao?.find(
+                (a: any) => a.ordem === etapa.ordem,
+              );
 
-  const notaMaxima = Number(
-    avaliacaoGrupo?.notaMaxima ?? 0,
-  );
+              const notaMaxima = Number(avaliacaoGrupo?.notaMaxima ?? 0);
 
-  const possuiNotaRecuperacao =
-    etapa.notaRecuperacao !== null &&
-    etapa.notaRecuperacao !== undefined;
+              const possuiNotaRecuperacao =
+                etapa.notaRecuperacao !== null &&
+                etapa.notaRecuperacao !== undefined;
 
-  const notaOriginal =
-    etapa.nota !== null &&
-    etapa.nota !== undefined
-      ? Number(etapa.nota)
-      : null;
+              const notaOriginal =
+                etapa.nota !== null && etapa.nota !== undefined
+                  ? Number(etapa.nota)
+                  : null;
 
-  const notaRecuperacao = possuiNotaRecuperacao
-    ? Number(etapa.notaRecuperacao)
-    : null;
+              const notaRecuperacao = possuiNotaRecuperacao
+                ? Number(etapa.notaRecuperacao)
+                : null;
 
-  /*
-   * O percentual final será calculado usando
-   * a nota de recuperação, quando existir.
-   */
-  const notaConsiderada =
-    notaRecuperacao ?? notaOriginal;
+              /*
+               * O percentual final será calculado usando
+               * a nota de recuperação, quando existir.
+               */
+              const notaConsiderada = notaRecuperacao ?? notaOriginal;
 
-  const percentual =
-    notaConsiderada !== null &&
-    notaMaxima > 0
-      ? `${(
-          (notaConsiderada * 100) /
-          notaMaxima
-        ).toFixed(1)}%`
-      : '-';
+              const percentual =
+                notaConsiderada !== null && notaMaxima > 0
+                  ? `${((notaConsiderada * 100) / notaMaxima).toFixed(1)}%`
+                  : '-';
 
-  /*
-   * Exemplo:
-   * sem recuperação: 18 (72.0%)
-   * com recuperação: 14 / 18 (72.0%)
-   */
-  const notaLabelPorcentagem =
-    possuiNotaRecuperacao
-      ? `${notaOriginal ?? '-'} / ${notaRecuperacao} (${percentual})`
-      : notaOriginal !== null
-        ? `${notaOriginal} (${percentual})`
-        : '-';
+              /*
+               * Exemplo:
+               * sem recuperação: 18 (72.0%)
+               * com recuperação: 14 / 18 (72.0%)
+               */
+              const notaLabelPorcentagem = possuiNotaRecuperacao
+                ? `${notaOriginal ?? '-'} / ${notaRecuperacao} (${percentual})`
+                : notaOriginal !== null
+                  ? `${notaOriginal} (${percentual})`
+                  : '-';
 
-  const dataConsiderada =
-    possuiNotaRecuperacao
-      ? etapa.dataRecuperacao ||
-        avaliacaoGrupo?.dataRecuperacao ||
-        etapa.dataLancamento ||
-        ''
-      : avaliacaoGrupo?.dataAvaliacao ||
-        etapa.dataLancamento ||
-        '';
+              const dataConsiderada = possuiNotaRecuperacao
+                ? etapa.dataRecuperacao ||
+                  avaliacaoGrupo?.dataRecuperacao ||
+                  etapa.dataLancamento ||
+                  ''
+                : avaliacaoGrupo?.dataAvaliacao || etapa.dataLancamento || '';
 
-  return {
-    idExame: exame.id,
+              return {
+                idExame: exame.id,
 
-    grupoExameLabel:
-      grupo?.grupoExame || '-',
+                grupoExameLabel: grupo?.grupoExame || '-',
 
-    tipoExameLabel: this.buscarLabel(
-      listaTipoExame,
-      exame.tipoExame,
-    ),
+                tipoExameLabel: this.buscarLabel(
+                  listaTipoExame,
+                  exame.tipoExame,
+                ),
 
-    categoriaExameLabel:
-      this.buscarCategoriaExame(
-        exame.categoriaExame || '',
-      ),
+                categoriaExameLabel: this.buscarCategoriaExame(
+                  exame.categoriaExame || '',
+                ),
 
-    etapaLabel:
-      avaliacaoGrupo?.nome || '-',
+                etapaLabel: avaliacaoGrupo?.nome || '-',
 
-    dataTeste: dataConsiderada,
+                dataTeste: dataConsiderada,
 
-    dataTesteLabel:
-      converterISOParaBR(dataConsiderada),
+                dataTesteLabel: converterISOParaBR(dataConsiderada),
 
-    notaLabelPorcentagem,
+                notaLabelPorcentagem,
 
-    notaMinimaLabel:
-      avaliacaoGrupo?.notaMinima ?? '-',
+                notaMinimaLabel: avaliacaoGrupo?.notaMinima ?? '-',
 
-    notaMaximaLabel:
-      avaliacaoGrupo?.notaMaxima ?? '-',
+                notaMaximaLabel: avaliacaoGrupo?.notaMaxima ?? '-',
 
-    professorLabel: possuiNotaRecuperacao
-      ? etapa.professorRecuperacao ||
-        etapa.professorLancamento ||
-        '-'
-      : etapa.professorLancamento || '-',
+                professorLabel: possuiNotaRecuperacao
+                  ? etapa.professorRecuperacao ||
+                    etapa.professorLancamento ||
+                    '-'
+                  : etapa.professorLancamento || '-',
 
-    resultadoLabel:
-      etapa.resultado === 'aprovado'
-        ? 'APROVADO'
-        : 'REPROVADO',
+                resultadoLabel:
+                  etapa.resultado === 'aprovado' ? 'APROVADO' : 'REPROVADO',
 
-    statusLabel:
-      this.formatarStatus(exame.status),
-  };
-})
+                statusLabel: this.formatarStatus(exame.status),
+              };
+            });
         })
         .sort((a, b) => (b.dataTeste || '').localeCompare(a.dataTeste || ''));
     });
@@ -889,7 +869,7 @@ export class AlunosComponent implements OnInit {
         this.snackBar.open('Nenhuma alteração detectada.', 'Fechar', {
           duration: 3000,
         });
-        this.fecharModal();
+        this.fecharCadastro();
         return;
       }
 
@@ -906,7 +886,7 @@ export class AlunosComponent implements OnInit {
               duration: 4000,
             },
           );
-          this.fecharModal();
+          this.fecharCadastro();
         });
     } else {
       // if (!confirmarAcao(mensagem)) return;
@@ -920,7 +900,7 @@ export class AlunosComponent implements OnInit {
             duration: 4000,
           },
         );
-        this.fecharModal();
+        this.fecharCadastro();
       });
     }
   }
@@ -948,7 +928,9 @@ export class AlunosComponent implements OnInit {
   // }
 
   buttonClick(): void {
-    this.title = 'Cadastro Alunos';
+    // this.title = 'Cadastro Alunos';
+ this.cadastrar = true;
+  this.modoHistorico = false;
 
     this.dadosParaEditar = null;
     this.dadosForms.reset();
@@ -957,13 +939,22 @@ export class AlunosComponent implements OnInit {
       this.listaIgreja = [];
     }
 
-    this.mostrarModal = true;
+    // this.mostrarModal = true;
   }
 
   editar(select: Candidatos): void {
-    this.title = 'Editar Instrumentos';
-    this.mostrarModal = true;
+    // this.title = 'Editar Instrumentos';
+    // this.mostrarModal = true;
+  this.cadastrar = true;
+  this.modoHistorico = false;
+
     this.dadosParaEditar = { ...select };
+    if (this.auth.usuario?.perfil === 'admin') {
+      this.listaIgreja = this.listaIgrejaTodas.filter(
+        (i) => i.idSetor === select.idSetor,
+      ).sort((a, b) => a.label.localeCompare(b.label));;
+    }
+
     this.dadosForms.patchValue({
       nomeAluno: select.nomeAluno || '',
       dataNascimento: select.dataNascimento || '',
@@ -971,12 +962,10 @@ export class AlunosComponent implements OnInit {
       idComum: select.idComum || '',
       idInstrumento: select.idInstrumento || '',
       afinacao: select.afinacao || '',
-    });
-    if (this.auth.usuario?.perfil === 'admin') {
-      this.listaIgreja = this.listaIgrejaTodas.filter(
-        (i) => i.idSetor === select.idSetor,
-      );
-    }
+    },
+    {
+      emitEvent: false,
+    },);
     // console.log(this.dadosParaEditar);
   }
 
@@ -1012,8 +1001,10 @@ export class AlunosComponent implements OnInit {
   //   this.dadosForms.reset();
   // }
 
-  fecharModal() {
-    this.mostrarModal = false;
+  fecharCadastro() {
+    // this.mostrarModal = false;
+  this.cadastrar = false;
+
     this.dadosForms.reset();
 
     // Limpa o registro que estava sendo editado

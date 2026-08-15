@@ -299,9 +299,9 @@
       </form>
       <!-- BOTÕES -->
       <footer class="form-actions">
-        <tcx-button label="Cancelar" type="button" (clicked)="fecharModal()" />
+        <tcx-button label="Cancelar" type="button"   [labelOn]="true" icon="bi bi-x-circle" (clicked)="fecharModal()" />
 
-        <tcx-button label="Salvar" type="submit"    (clicked)="onSalvar()" />
+        <tcx-button label="Salvar" type="submit"   [labelOn]="true"  icon="bi bi-floppy" (clicked)="onSalvar()" />
       </footer>
     </div>
   }
