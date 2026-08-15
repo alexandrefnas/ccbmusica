@@ -338,12 +338,12 @@
   }
 
   .cadastro-acoes {
-    justify-content: stretch;
+    justify-content: center;
   }
 
-  .cadastro-acoes .buttons {
+  /* .cadastro-acoes .buttons {
     flex: 1;
-  }
+  } */
 
   .filtros-container {
     flex-wrap: wrap;
