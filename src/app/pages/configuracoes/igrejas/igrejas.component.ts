@@ -98,8 +98,8 @@ export class IgrejasComponent implements OnInit {
 
   tamanhoColunas = {
     nomeCongregacao: { width: '40%', minWidth:'250px' },
-    nomeSetor: { width: '25%', minwidth:'150px' },
-    localizacao: { width: '35%', maxWidth: '250px' },
+    nomeSetor: { width: '25%', minWidth:'150px' },
+    localizacao: { width: '35%', minWidth: '300px' },
   };
 
   // Buttons

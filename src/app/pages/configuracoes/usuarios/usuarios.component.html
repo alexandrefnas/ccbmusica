@@ -170,9 +170,10 @@
           <div class="linhaButton">
             <div class="button-container">
               <tcx-button
-                label="Salvar usuário"
+                label="Salvar"
                 type="submit"
-                icon="bi bi-check-lg"
+                [labelOn]="true"
+                icon="bi bi-floppy"
                 [disabled]="carregando"
               />
             </div>
@@ -283,7 +284,8 @@
               <tcx-button
                 label="Salvar alterações"
                 type="submit"
-                icon="bi bi-check-lg"
+                [labelOn]="true"
+                icon="bi bi-floppy"
                 [disabled]="!houveAlteracao"
               />
             </div>
