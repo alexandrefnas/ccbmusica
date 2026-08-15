@@ -22,9 +22,20 @@
             class="buttons"
             type="button"
             title="Filtro Status"
-            (click)="filtroStatusOp"
+            (click)="(filtroStatusOp)"
           >
             <i class="bi bi-search"></i>
+          </button>
+        </div>
+      } @else {
+        <div class="button-container" *ngIf="modoHistorico && liberaHistorico">
+          <button
+            class="buttons"
+            type="button"
+            (click)="fecharHistoricoAluno()"
+          >
+            <i class="bi bi-arrow-left"></i>
+            Voltar
           </button>
         </div>
       }
@@ -32,10 +43,7 @@
 
     <!-- FILTROS -->
     <div class="filtros-container" *ngIf="filtro && !modoHistorico">
-      <div
-        class="filtro-item"
-        *ngIf="listaComunsFiltro.length > 2"
-      >
+      <div class="filtro-item" *ngIf="listaComunsFiltro.length > 2">
         <tcx-select
           label="Filtrar por comum"
           placeholder="Todas"
@@ -62,31 +70,22 @@
           (change)="alterarFiltroStatus()"
         />
 
-        <label for="mostrarDesativados">
-          Mostrar desativados
-        </label>
+        <label for="mostrarDesativados"> Mostrar desativados </label>
       </div>
     </div>
 
     <!-- HISTÓRICO -->
-    <div
-      class="historico-header"
-      *ngIf="modoHistorico && liberaHistorico"
-    >
+    <div class="historico-header" *ngIf="modoHistorico && liberaHistorico">
       <div>
         <span>
           {{ alunoHistoricoSelecionado?.nomeAluno }}
         </span>
       </div>
 
-      <button
-        class="buttons"
-        type="button"
-        (click)="fecharHistoricoAluno()"
-      >
+      <!-- <button class="buttons" type="button" (click)="fecharHistoricoAluno()">
         <i class="bi bi-arrow-left"></i>
         Voltar
-      </button>
+      </button> -->
     </div>
 
     <!-- TABELA -->
@@ -105,10 +104,7 @@
       </ng-container>
 
       <ng-container *ngIf="modoHistorico && liberaHistorico">
-        <div
-          *ngIf="historicoAluno.length === 0"
-          class="historico-vazio"
-        >
+        <div *ngIf="historicoAluno.length === 0" class="historico-vazio">
           Nenhum teste finalizado encontrado para este aluno.
         </div>
 
@@ -137,8 +133,10 @@
           </button>
 
           <span>
-            Página {{ paginaAtual }} de {{ totalPaginas }}
-            ({{ dados.length }} registros)
+            Página {{ paginaAtual }} de {{ totalPaginas }} ({{
+              dados.length
+            }}
+            registros)
           </span>
 
           <button
@@ -150,9 +148,7 @@
             <i class="bi bi-chevron-right"></i>
           </button>
         } @else {
-          <span>
-            ({{ dados.length }} registros)
-          </span>
+          <span> ({{ dados.length }} registros) </span>
         }
       </div>
     }
@@ -196,9 +192,7 @@
             <div>
               <h3>Dados do aluno</h3>
 
-              <p>
-                Informe os dados cadastrais e musicais do aluno.
-              </p>
+              <p>Informe os dados cadastrais e musicais do aluno.</p>
             </div>
           </div>
 
@@ -215,10 +209,7 @@
             </div>
 
             <!-- SETOR -->
-            <div
-              class="campo campo--metade"
-              *ngIf="usuarioEhAdmin()"
-            >
+            <div class="campo campo--metade" *ngIf="usuarioEhAdmin()">
               <tcx-select
                 label="Setor"
                 placeholder=""
@@ -279,20 +270,13 @@
         </section>
 
         <div class="cadastro-acoes">
-          <button
-            class="buttons"
-            type="button"
-            (click)="fecharCadastro()"
-          >
+          <!-- <button class="buttons" type="button" (click)="fecharCadastro()">
             <i class="bi bi-x-lg"></i>
             Cancelar
-          </button>
+          </button> -->
 
-          <button
-            class="buttons"
-            type="submit"
-          >
-            <i class="bi bi-check-lg"></i>
+          <button class="buttons" type="submit">
+            <i class="bi bi-floppy"></i>
             {{ dadosParaEditar ? "Salvar alterações" : "Salvar" }}
           </button>
         </div>

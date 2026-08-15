@@ -10,8 +10,8 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { combineLatest } from 'rxjs';
-import { ModalComponent } from '../../../modal/modal/modal.component';
-import { ButtonComponent } from '../../../component/button/button.component';
+// import { ModalComponent } from '../../../modal/modal/modal.component';
+// import { ButtonComponent } from '../../../component/button/button.component';
 import { TextComponent } from '../../../component/inputs/text/text.component';
 import { SelectComponent } from '../../../component/inputs/select/select.component';
 import { DataComponent } from '../../../component/inputs/data/data.component';
@@ -41,8 +41,8 @@ import { AlertService } from '../../../services/alert.service';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    ModalComponent,
-    ButtonComponent,
+    // ModalComponent,
+    // ButtonComponent,
     TextComponent,
     SelectComponent,
     DataComponent,
