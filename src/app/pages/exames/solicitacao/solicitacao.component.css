@@ -10,7 +10,7 @@
   flex-direction: column;
   padding: 0 40px 15px 40px;
   width: 100%;
-  min-width: 700px;
+  /* min-width: 700px; */
   height: auto;
   box-sizing: border-box;
 }
