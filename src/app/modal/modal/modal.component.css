@@ -248,7 +248,7 @@ width: fit-content;
 
 /* RESPONSIVIDADE */
 /* Mobile */
-@media (max-width: 576px) {
+/* @media (max-width: 576px) {
   .container__form {
     top: 10px;
     width: calc(100vw - 20px);
@@ -259,10 +259,10 @@ width: fit-content;
   .field__container {
     padding: 6px;
   }
-}
+} */
 
 /* Table */
-@media (min-width: 768px) and (max-width: 992px) {
+/* @media (min-width: 768px) and (max-width: 992px) {
   .container__form {
     top: 10px;
     width: 95vw;
@@ -270,7 +270,7 @@ width: fit-content;
   }
 
 
-}
+} */
 
 /* Desktop */
 @media (min-width: 992px) and (max-width: 1200px) {

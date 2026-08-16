@@ -1741,12 +1741,12 @@ export class ExamesComponent implements OnInit {
       },
     );
 
-    console.log('Quantidade de notas:', quantidadeNotas);
-    console.log('Soma dos critérios:', somaGeral);
-    console.log('Média dos critérios (0 a 10):', mediaCriterios);
-    console.log('Nota máxima da etapa:', notaMaxima);
-    console.log('Nota mínima da etapa:', notaMinima);
-    console.log('Nota final convertida:', notaFinalArredondada);
+    // console.log('Quantidade de notas:', quantidadeNotas);
+    // console.log('Soma dos critérios:', somaGeral);
+    // console.log('Média dos critérios (0 a 10):', mediaCriterios);
+    // console.log('Nota máxima da etapa:', notaMaxima);
+    // console.log('Nota mínima da etapa:', notaMinima);
+    // console.log('Nota final convertida:', notaFinalArredondada);
   }
 
   // async salvarNota(): Promise<void> {

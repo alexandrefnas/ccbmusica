@@ -51,7 +51,7 @@
   border: 1px solid #ccc;
 }
 
-/* FORMULÁRIO */
+/* #region FORMULÁRIO */
 
 .templates__form {
   display: flex;
@@ -97,9 +97,10 @@
 .form__button {
   width: auto;
   min-width: 120px;
-  height: 28px;
+  height: 40px;
   padding: 5px 10px;
 }
+/* #endregion */
 
 /* INPUTS */
 
@@ -109,7 +110,7 @@
   width: 100%;
 }
 
-/* BOTÕES */
+/* #region BOTÕES */
 .buttons {
   display: flex;
   align-items: center;
@@ -157,8 +158,9 @@
 
   transform: translateY(1px);
 }
+/* #endregion */
 
-/* STATUS VISUAL */
+/* #region STATUS VISUAL */
 
 .status-aprovado {
   color: green;
@@ -215,6 +217,7 @@
   margin-bottom: 10px; */
   overflow: hidden;
 }
+/* #endregion */
 
 /* .ficha-avaliacao {
   overflow: auto;
@@ -245,9 +248,8 @@
   font-size: 12px;
 }
 
-/* =========================================================
-   CABEÇALHO DA FICHA
-   ========================================================= */
+
+/* #region CABEÇALHO DA FICHA */
 
 .cabecalho-ficha {
   width: 100%;
@@ -485,8 +487,9 @@
   border-radius: 4px;
   font-family: inherit;
 }
+/* #endregion */
 
-/* PAGINAÇÃO */
+/* #region PAGINAÇÃO */
 .paginacao {
   display: flex;
   align-items: center;
@@ -529,7 +532,7 @@
     inset 1px 1px 0 #999;
   transform: translateY(1px);
 }
-/* FIM PAGINAÇÃO */
+/* #endregion */
 
 
 .filtros-container {
@@ -545,9 +548,7 @@
   flex-shrink: 0;
 }
 
-/* =========================================================
-   AVALIAÇÃO DAS LIÇÕES
-   ========================================================= */
+/* #region AVALIAÇÃO DAS LIÇÕES */
 
 .secao-licoes {
   display: flex;
@@ -1307,6 +1308,7 @@
 
   overflow: hidden;
 }
+/* #endregion */
 
 /* RESPONSIVIDADE */
 /* MOBILE */
@@ -1320,7 +1322,7 @@
 
   .linha {
     flex-direction: column;
-    min-width: 100%;
+    min-width: 300px;
     gap: 5px;
   }
 
@@ -1336,9 +1338,9 @@
     margin-bottom: 10px;
   }
 
-  .templates__form {
+  /* .templates__form {
     width: 100%;
-  }
+  } */
 
   .button-extra {
     width: 100%;

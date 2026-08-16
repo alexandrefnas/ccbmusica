@@ -29,7 +29,6 @@
           <i class="bi bi-repeat"></i>
         </button>
 
-
         <button
           class="buttons"
           type="button"
@@ -73,8 +72,7 @@
           *ngIf="usuarioEhAdmin()"
           (click)="lancarNotaGabarito()"
         >
-            <i class="bi bi-upc-scan"></i>
-
+          <i class="bi bi-upc-scan"></i>
         </button>
         <button
           class="buttons"
@@ -297,332 +295,6 @@
             </div>
           </div>
         </section>
-
-        <!-- <table class="ficha-tabela">
-          <tr>
-            <th colspan="8" class="titulo-cinza">Preenchido pelo Avaliador</th>
-          </tr>
-          <tr class="titulo-verde">
-            <th>Critério</th>
-            <th>(0)</th>
-            <th>(5)</th>
-            <th>(6)</th>
-            <th>(7)</th>
-            <th>(8)</th>
-            <th>(9)</th>
-            <th>(10)</th>
-          </tr>
-
-          <tr>
-            <td>Pulsação</td>
-            <td>
-              <input
-                type="radio"
-                name="pulsacao"
-                [value]="0"
-                [(ngModel)]="avaliacaoFicha.pulsacao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="pulsacao"
-                [value]="5"
-                [(ngModel)]="avaliacaoFicha.pulsacao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="pulsacao"
-                [value]="6"
-                [(ngModel)]="avaliacaoFicha.pulsacao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="pulsacao"
-                [value]="7"
-                [(ngModel)]="avaliacaoFicha.pulsacao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="pulsacao"
-                [value]="8"
-                [(ngModel)]="avaliacaoFicha.pulsacao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="pulsacao"
-                [value]="9"
-                [(ngModel)]="avaliacaoFicha.pulsacao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="pulsacao"
-                [value]="10"
-                [(ngModel)]="avaliacaoFicha.pulsacao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-          </tr>
-
-          <tr>
-            <td>Leitura Musical</td>
-            <td>
-              <input
-                type="radio"
-                name="leituraMusical"
-                [value]="0"
-                [(ngModel)]="avaliacaoFicha.leituraMusical"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="leituraMusical"
-                [value]="5"
-                [(ngModel)]="avaliacaoFicha.leituraMusical"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="leituraMusical"
-                [value]="6"
-                [(ngModel)]="avaliacaoFicha.leituraMusical"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="leituraMusical"
-                [value]="7"
-                [(ngModel)]="avaliacaoFicha.leituraMusical"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="leituraMusical"
-                [value]="8"
-                [(ngModel)]="avaliacaoFicha.leituraMusical"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="leituraMusical"
-                [value]="9"
-                [(ngModel)]="avaliacaoFicha.leituraMusical"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="leituraMusical"
-                [value]="10"
-                [(ngModel)]="avaliacaoFicha.leituraMusical"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-          </tr>
-
-          <tr>
-            <td>Movimento de Condução</td>
-            <td>
-              <input
-                type="radio"
-                name="movimentoConducao"
-                [value]="0"
-                [(ngModel)]="avaliacaoFicha.movimentoConducao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="movimentoConducao"
-                [value]="5"
-                [(ngModel)]="avaliacaoFicha.movimentoConducao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="movimentoConducao"
-                [value]="6"
-                [(ngModel)]="avaliacaoFicha.movimentoConducao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="movimentoConducao"
-                [value]="7"
-                [(ngModel)]="avaliacaoFicha.movimentoConducao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="movimentoConducao"
-                [value]="8"
-                [(ngModel)]="avaliacaoFicha.movimentoConducao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="movimentoConducao"
-                [value]="9"
-                [(ngModel)]="avaliacaoFicha.movimentoConducao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-            <td>
-              <input
-                type="radio"
-                name="movimentoConducao"
-                [value]="10"
-                [(ngModel)]="avaliacaoFicha.movimentoConducao"
-                [ngModelOptions]="{ standalone: true }"
-                (change)="calcularNotaFicha()"
-              />
-            </td>
-          </tr>
-        </table> -->
-
-        <!-- <div
-          class="bloco-licao"
-          *ngFor="let licao of licoesAvaliadas; let indiceLicao = index"
-        >
-          <div class="cabecalho-licao">
-            <div class="input-licao">
-              <label> Lição avaliada {{ indiceLicao + 1 }} </label>
-
-              <input
-                type="text"
-                class="campo-licao"
-                placeholder="Informe a lição avaliada"
-                [(ngModel)]="licao.nomeLicao"
-                [ngModelOptions]="{ standalone: true }"
-              />
-            </div>
-
-            <button
-              type="button"
-              class="buttons"
-              title="Remover lição"
-              *ngIf="licoesAvaliadas.length > 1"
-              (click)="removerLicao(indiceLicao)"
-            >
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
-
-          <table class="ficha-tabela">
-            <tr>
-              <th colspan="8" class="titulo-cinza">
-                Preenchido pelo Avaliador
-              </th>
-            </tr>
-
-            <tr class="titulo-verde">
-              <th>Critério</th>
-
-              <th *ngFor="let nota of notasDisponiveis">({{ nota }})</th>
-            </tr>
-
-            <tr
-              *ngFor="
-                let criterio of licao.criterios;
-                let indiceCriterio = index
-              "
-            >
-              <td>
-                {{ criterio.nomeCriterio }}
-              </td>
-
-              <td *ngFor="let nota of notasDisponiveis">
-                <input
-                  type="radio"
-                  [name]="'criterio-' + licao.id + '-' + criterio.idCriterio"
-                  [value]="nota"
-                  [(ngModel)]="criterio.nota"
-                  [ngModelOptions]="{ standalone: true }"
-                  (change)="calcularNotaFicha()"
-                />
-              </td>
-            </tr>
-
-            <tr>
-              <td colspan="6" class="label">Soma da lição</td>
-
-              <td colspan="2">
-                {{ licao.somaPontos }}
-              </td>
-            </tr>
-
-            <tr>
-              <td colspan="6" class="label">Média da lição</td>
-
-              <td colspan="2">
-                {{ licao.pontuacaoFinal | number: "1.2-2" }}
-              </td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="adicionar-licao">
-          <button type="button" class="buttons" (click)="adicionarLicao()">
-            <i class="bi bi-plus-circle"></i>
-            Adicionar lição
-          </button>
-        </div> -->
 
         <section class="secao-licoes">
           <div class="secao-licoes__cabecalho">
@@ -1125,7 +797,12 @@
 
         <div class="linhaButton">
           <div class="form__button">
-            <tcx-button label="Salvar" type="submit"></tcx-button>
+            <tcx-button
+              label="Salvar"
+              [labelOn]="true"
+              icon="bi bi-floppy"
+              type="submit"
+            ></tcx-button>
           </div>
         </div>
       </form>
@@ -1229,7 +906,12 @@
         <!-- BOTÃO SALVAR -->
         <div class="linhaButton" style="margin-top: 20px">
           <div class="form__button">
-            <tcx-button label="Salvar" type="submit"></tcx-button>
+            <tcx-button
+              label="Salvar"
+              type="submit"
+              [labelOn]="true"
+              icon="bi bi-floppy"
+            ></tcx-button>
           </div>
           <div
             class="container__button"
@@ -1238,6 +920,8 @@
             <tcx-button
               label="Excluir Nota"
               type="button"
+              [labelOn]="true"
+              icon="bi bi-x-circle"
               (clicked)="excluirNota()"
             ></tcx-button>
 
@@ -1285,7 +969,8 @@
 
         <div class="linhaButton">
           <div class="form__button">
-            <tcx-button label="Cancelar Exame" type="submit"></tcx-button>
+            <tcx-button label="Cancelar Exame" type="submit" [labelOn]="true"
+              icon="bi bi-slash-circle"></tcx-button>
           </div>
         </div>
       </form>
@@ -1326,7 +1011,7 @@
 
         <div class="linhaButton">
           <div>
-            <button class="buttons" type="submit">Aceitar Selecionados</button>
+            <button class="buttons" type="submit" >Aceitar Selecionados</button>
           </div>
         </div>
       </form>

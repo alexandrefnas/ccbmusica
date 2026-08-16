@@ -3003,7 +3003,7 @@ aoPressionarTecla(
         this.carregandoOpenCv = false;
         this.mensagem = 'Leitor pronto.';
 
-        console.log('OpenCV inicializado com sucesso.');
+        // console.log('OpenCV inicializado com sucesso.');
 
         /*
          * Não passe instanciaCv no resolve.
@@ -3079,7 +3079,7 @@ aoPressionarTecla(
       script.async = true;
 
       script.onload = () => {
-        console.log(`Arquivo OpenCV carregado: ${script.src}`);
+        // console.log(`Arquivo OpenCV carregado: ${script.src}`);
 
         const instanciaCv = (globalThis as any).cv;
 
