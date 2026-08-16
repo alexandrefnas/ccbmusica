@@ -16,57 +16,14 @@
       [class.open]="open"
     >
       {{ getSelectedLabel() }}
-      <!-- (keydown)="onKeyDownCustom($event)" -->
     </div>
 
-    <!-- <div class="dropdown" *ngIf="open">
-      <div
-        class="option"
-        *ngFor="let nivel of niveisLimitados; let i = index"
-        [attr.data-index]="i"
-        [class.destacado]="i === indiceDestacado"
-        (click)="selectOption(nivel)"
-      >
-        {{ nivel.label }}
-      </div>
-    </div> -->
-    <!-- <div class="dropdown" *ngIf="open" (click)="$event.stopPropagation()">
-      <div class="busca-container" *ngIf="niveisLimitados.length > 10">
-        <input
-          class="input-busca"
-          type="text"
-          placeholder="Pesquisar..."
-          [(ngModel)]="textoFiltro"
-          (keydown)="$event.stopPropagation()"
-          autofocus
-        />
-        <i class="bi bi-search"></i>
-      </div>
-
-      <div class="lista-opcoes">
-        <div
-          class="option"
-          *ngFor="let nivel of opcoesFiltradas; let i = index"
-          [attr.data-index]="i"
-          [class.destacado]="i === indiceDestacado"
-          (click)="selectOption(nivel)"
-        >
-          {{ nivel.label }}
-        </div>
-
-        <div class="option vazio" *ngIf="opcoesFiltradas.length === 0">
-          Nenhum resultado encontrado
-        </div>
-      </div>
-    </div> -->
     <ng-template
       cdkConnectedOverlay
       [cdkConnectedOverlayOrigin]="selectOrigin"
       [cdkConnectedOverlayOpen]="open"
       [cdkConnectedOverlayPositions]="posicoesDropdown"
-      [cdkConnectedOverlayWidth]="
-        selectOrigin.elementRef.nativeElement.offsetWidth
-      "
+      [cdkConnectedOverlayWidth]="dropdownWidth"
       [cdkConnectedOverlayPush]="true"
     >
       <div class="dropdown" (click)="$event.stopPropagation()">

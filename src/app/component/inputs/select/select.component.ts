@@ -8,9 +8,10 @@ import {
   Injector,
   Input,
   Output,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule, NgControl } from '@angular/forms';
-import { OverlayModule, ConnectedPosition } from '@angular/cdk/overlay';
+import { OverlayModule, ConnectedPosition, CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { SelectService } from '../../../services/select.service';
 
 @Component({
@@ -21,6 +22,11 @@ import { SelectService } from '../../../services/select.service';
   styleUrl: './select.component.css',
 })
 export class SelectComponent {
+
+@ViewChild(CdkOverlayOrigin)
+selectOrigin!: CdkOverlayOrigin;
+
+dropdownWidth = 0;
   @Input() label: string = '';
   @Input() placeholder: string = '';
   @Input() niveisLimitados: { value: string; label: string }[] = [];
@@ -199,16 +205,22 @@ export class SelectComponent {
   }
 
   toggleDropdown(event: MouseEvent) {
-    event.stopPropagation();
-    if (this.disabled) return;
+  event.stopPropagation();
 
-    this.open = !this.open;
+  if (this.disabled) return;
 
-    if (this.open) {
-      this.textoFiltro = '';
-      this.selectService.notifyOpen(this);
-    }
+  if (!this.open) {
+    this.dropdownWidth =
+      this.selectOrigin.elementRef.nativeElement.getBoundingClientRect().width;
+
+    this.textoFiltro = '';
+    this.selectService.notifyOpen(this);
+
+    this.open = true;
+  } else {
+    this.open = false;
   }
+}
 
   selectOption(nivel: any) {
     this.selectedValue = nivel.value;
