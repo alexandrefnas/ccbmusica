@@ -85,6 +85,7 @@ export class UsuariosComponent implements OnInit {
     'exames',
     'igrejas',
     'instrumentos',
+    'criterios',
     'setores',
     'usuarios',
     'logs',
@@ -830,6 +831,12 @@ export class UsuariosComponent implements OnInit {
           delete: [false],
         }),
         instrumentos: this.fb.group({
+          read: [false],
+          create: [false],
+          update: [false],
+          delete: [false],
+        }),
+        criterios: this.fb.group({
           read: [false],
           create: [false],
           update: [false],

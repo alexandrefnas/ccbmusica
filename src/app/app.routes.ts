@@ -41,6 +41,15 @@ export const routes: Routes = [
         data: { tabela: 'instrumentos', tipo: 'read' },
       },
       {
+        path: 'criterios',
+        loadComponent: () =>
+          import('./pages/configuracoes/criterios/criterios.component').then(
+            (m) => m.CriteriosComponent,
+          ),
+        canActivate: [PermissaoGuard],
+        data: { tabela: 'criterios', tipo: 'read' },
+      },
+      {
         path: 'igrejas',
         loadComponent: () =>
           import('./pages/configuracoes/igrejas/igrejas.component').then(

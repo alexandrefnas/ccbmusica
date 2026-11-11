@@ -993,7 +993,10 @@ export class ExamesComponent implements OnInit {
         this.criteriosCadastrados.find(
           (criterio) =>
             criterio.id === idCriterio &&
-            criterio.tipoExame === exame.tipoExame,
+            criterio.tipoExame === exame.tipoExame &&
+            // Vinculo por setor; criterio historico sem idSetor e mantido
+            // somente quando ja referenciado pelo grupo existente.
+            (criterio.idSetor === grupo.idSetor || !criterio.idSetor),
         ),
       )
       .filter((criterio): criterio is Criterio => !!criterio);

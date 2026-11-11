@@ -1,0 +1,123 @@
+/* CCB MODAIS PROFISSIONAIS V1 - componente central */
+:host { display: contents; }
+
+.modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(14, 26, 45, .57);
+  backdrop-filter: blur(2px);
+}
+.container__form {
+  position: relative;
+  z-index: 1;
+  width: min(600px, 100%);
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.container__form-windows {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  max-height: calc(100dvh - 32px);
+  background: var(--cor-card, #fff);
+  border: 1px solid rgba(187, 201, 219, .95);
+  border-radius: 18px;
+  box-shadow: 0 22px 70px rgba(11, 23, 39, .29), 0 4px 16px rgba(11, 23, 39, .12);
+  overflow: hidden;
+}
+.title_container {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  min-height: 78px;
+  padding: 16px 24px;
+  color: #fff;
+  background: linear-gradient(115deg, var(--cor-topo-1, #156dcc), var(--cor-topo-2, #164d98));
+  border-bottom: 1px solid rgba(7, 39, 80, .15);
+}
+.modal-titulo-icone {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  font-size: 24px;
+}
+.title_container .title1 {
+  flex: 1;
+  min-width: 0;
+  color: #fff;
+}
+.title_container .title1 h3 {
+  margin: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: clamp(18px, 2.8vw, 22px);
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.title_container .title2 {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.title_container .title2 button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  color: #fff;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+.title_container .title2 button:hover { background: rgba(255, 255, 255, .16); }
+.title_container .title2 button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.field__container {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  padding: 26px 30px 28px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: var(--cor-texto, #27354a);
+  background: var(--cor-card, #fff);
+}
+@media (max-width: 575px) {
+  .modal-container { padding: 10px; }
+  .container__form { width: 100%; max-height: calc(100dvh - 20px); }
+  .container__form-windows { max-height: calc(100dvh - 20px); border-radius: 14px; }
+  .title_container { min-height: 65px; padding: 12px 16px; gap: 10px; }
+  .modal-titulo-icone { width: 36px; height: 36px; font-size: 19px; }
+  .field__container { padding: 20px 18px 22px; }
+}

@@ -1,0 +1,172 @@
+/* CCB MODAIS PROFISSIONAIS V1 - formularios projetados em tcx-modal */
+tcx-modal .field__container > .templates__form,
+tcx-modal .field__container > .conteudo-leitor-modal {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+  box-sizing: border-box;
+}
+tcx-modal .field__container .templates__form form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100% !important;
+  min-width: 0;
+}
+tcx-modal .field__container .templates__form .linha {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 17px;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0;
+  margin: 0 !important;
+}
+tcx-modal .field__container .templates__form .linha > :only-child {
+  grid-column: 1 / -1;
+}
+tcx-modal .field__container .templates__form .linha > .campo,
+tcx-modal .field__container .templates__form .linha > .input-select,
+tcx-modal .field__container .templates__form .linha > .input-text,
+tcx-modal .field__container .templates__form .linha > .input-data {
+  width: 100% !important;
+  min-width: 0;
+  height: auto;
+}
+tcx-modal .field__container .templates__form tcx-text,
+tcx-modal .field__container .templates__form tcx-select {
+  height: auto !important;
+  min-height: 0 !important;
+}
+tcx-modal .form-field .form-label {
+  position: static !important;
+  display: block !important;
+  margin: 0 0 8px !important;
+  padding: 0 !important;
+  transform: none !important;
+  color: var(--cor-texto, #25354e) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  text-shadow: none !important;
+  pointer-events: none;
+}
+tcx-modal .form-field .form-input {
+  width: 100% !important;
+  height: 45px !important;
+  padding: 0 14px !important;
+  border: 1px solid #bbc7d5 !important;
+  border-radius: 9px !important;
+  outline: none;
+  box-shadow: none !important;
+  background-color: var(--cor-input-fundo, #fff) !important;
+  color: var(--cor-input-texto, #263238) !important;
+  font-size: 14px !important;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+tcx-modal .form-field .form-input:focus,
+tcx-modal .form-field .form-input.open {
+  border-color: var(--cor-input-focus, #2d89ef) !important;
+  box-shadow: 0 0 0 3px rgba(45, 137, 239, .14) !important;
+}
+tcx-modal .form-field .form-input::placeholder { color: #8994a6; }
+tcx-modal tcx-select .form-field .custom-select { padding-right: 38px !important; display:flex; align-items:center; }
+tcx-modal tcx-select .input-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 15px;
+  top: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+tcx-modal .field__container .templates__form .texto-contexto {
+  margin: 0 0 22px !important;
+  padding: 0 0 17px;
+  border-bottom: 1px solid #e9eef5;
+  color: var(--cor-texto-suave, #64748b);
+  font-size: 14px;
+  line-height: 1.5;
+}
+tcx-modal .field__container .templates__form .linhaButton {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 12px;
+  width: 100% !important;
+  height: auto !important;
+  margin: 12px 0 0 !important;
+  padding: 22px 0 0 !important;
+  border-top: 1px solid #e2e8f0;
+}
+tcx-modal .field__container .templates__form .linhaButton > .form__button,
+tcx-modal .field__container .templates__form .linhaButton > .container__button {
+  width: auto !important;
+  min-width: 120px;
+  height: 42px !important;
+  padding: 0 !important;
+  flex: 0 0 auto;
+}
+tcx-modal .field__container .templates__form .linhaButton tcx-button {
+  display: block;
+  width: 100% !important;
+  height: 42px !important;
+}
+tcx-modal .field__container .templates__form .linhaButton tcx-button .container__button > button,
+tcx-modal .field__container .templates__form .linhaButton > button.buttons[type="submit"] {
+  min-width: 124px;
+  min-height: 42px;
+  padding: 0 20px !important;
+  border: 1px solid var(--cor-topo-2, #1b4f9c) !important;
+  border-radius: 9px !important;
+  background: linear-gradient(115deg, var(--cor-topo-1, #2d89ef), var(--cor-topo-2, #1b4f9c)) !important;
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(13, 63, 131, .12) !important;
+  transform: none !important;
+}
+tcx-modal .field__container .templates__form .linhaButton tcx-button .container__button > button:hover,
+tcx-modal .field__container .templates__form .linhaButton > button.buttons[type="submit"]:hover {
+  filter: brightness(1.08);
+}
+tcx-modal .field__container .templates__form .linhaButton tcx-button .container__button > button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+tcx-modal .field__container .templates__form .linhaButton > .container__button tcx-button .container__button > button {
+  border-color: #f1b9bd !important;
+  background: #fff4f4 !important;
+  color: #b42335 !important;
+  box-shadow: none !important;
+}
+tcx-modal .modal-btn-cancelar {
+  min-height: 42px;
+  min-width: 120px;
+  padding: 0 20px;
+  border: 1px solid #c2cbd7;
+  border-radius: 9px;
+  background: #fff;
+  color: #27354a;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+tcx-modal .modal-btn-cancelar:hover { background: #f2f5f9; border-color: #a9b6c6; }
+tcx-modal .modal-btn-cancelar:focus-visible { outline: 3px solid #a6cef5; outline-offset: 2px; }
+/* Modais de leitura exigem mais espaco horizontal para visualizar o gabarito. */
+tcx-modal:has(.conteudo-leitor-modal) .container__form { width: min(1050px, calc(100vw - 24px)); }
+@media (max-width: 575px) {
+  tcx-modal .field__container .templates__form .linha { grid-template-columns: minmax(0, 1fr); }
+  tcx-modal .field__container .templates__form .linhaButton { gap: 9px; }
+  tcx-modal .modal-btn-cancelar { flex: 1 1 100px; min-width: 0; }
+  tcx-modal .field__container .templates__form .linhaButton > .form__button { flex: 1 1 100px; min-width: 0; }
+}

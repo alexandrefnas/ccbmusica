@@ -78,6 +78,7 @@
                 [placeholder]="''"
                 [niveisLimitados]="listaSetor"
                 [formControl]="getControl('idSetor')"
+                [disabled]="!!dadosParaEditar"
               />
             </div>
 
@@ -557,6 +558,7 @@
           </div>
         </div>
         <div class="linhaButton">
+        <button class="modal-btn-cancelar" type="button" (click)="fecharModal()">Cancelar</button>
           <div class="form__button">
             <tcx-button label="Salvar" type="submit"></tcx-button>
           </div>

@@ -13,6 +13,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
@@ -44,6 +45,7 @@ export interface GrupoExames {
 
 export interface Criterio {
   id?: string;
+  idSetor?: string; // opcional apenas para compatibilidade com criterios antigos
   tipoExame: string;
   nomeCriterio: string;
 }
@@ -295,13 +297,32 @@ export class FirestoreService {
 
 // CRITÉRIOS
 
-getCriterios(): Observable<Criterio[]> {
+getCriterios(idSetor?: string): Observable<Criterio[]> {
   const criteriosCollection = collection(this.firestore, 'criterios');
+  const consulta = idSetor
+    ? query(criteriosCollection, where('idSetor', '==', idSetor))
+    : criteriosCollection;
 
-  return collectionData(criteriosCollection, {
+  return collectionData(consulta, {
     idField: 'id',
   }) as Observable<Criterio[]>;
 }
+
+  addCriterio(data: Criterio & { idSetor: string }) {
+    if (!data.idSetor) throw new Error('Setor obrigatorio para cadastrar criterio.');
+    return this.criarComLog<Criterio>('criterios', data);
+  }
+
+  updateCriterio(id: string, data: Partial<Criterio>) {
+    if (data.idSetor !== undefined) {
+      throw new Error('Nao e permitido transferir criterios entre setores.');
+    }
+    return this.atualizarComLog<Criterio>('criterios', id, data);
+  }
+
+  deleteCriterio(id: string) {
+    return this.excluirComLog('criterios', id);
+  }
 
 // FIM CRITÉRIOS
 

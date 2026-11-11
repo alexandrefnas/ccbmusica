@@ -22,6 +22,7 @@ export type Modulo =
   | 'exames'
   | 'igrejas'
   | 'instrumentos'
+  | 'criterios'
   | 'setores'
   | 'usuarios'
   | 'logs';
@@ -59,6 +60,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       exames: { read: true, create: true, update: true, delete: true },
       igrejas: { read: true, create: true, update: true, delete: true },
       instrumentos: { read: true, create: true, update: true, delete: true },
+      criterios: { read: true, create: true, update: true, delete: true },
       setores: { read: true, create: true, update: true, delete: true },
       usuarios: { read: true, create: true, update: true, delete: true },
       logs: { read: true, create: true, update: true, delete: true },
@@ -73,6 +75,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       exames: { read: true, create: true, update: true, delete: false },
       igrejas: { read: true, create: true, update: true, delete: false },
       instrumentos: { read: true, create: false, update: false, delete: false },
+      criterios: { read: true, create: true, update: true, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: true, create: true, update: true, delete: false },
       logs: { read: true, create: true, update: true, delete: true },
@@ -87,6 +90,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       exames: { read: true, create: true, update: true, delete: false },
       igrejas: { read: true, create: false, update: false, delete: false },
       instrumentos: { read: true, create: false, update: false, delete: false },
+      criterios: { read: true, create: true, update: true, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: true, create: true, update: true, delete: false },
       logs: { read: true, create: true, update: true, delete: true },
@@ -111,6 +115,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
         update: false,
         delete: false,
       },
+      criterios: { read: false, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: false, create: false, update: false, delete: false },
       logs: { read: false, create: true, update: true, delete: true },
@@ -135,6 +140,7 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
         update: false,
         delete: false,
       },
+      criterios: { read: false, create: false, update: false, delete: false },
       setores: { read: false, create: false, update: false, delete: false },
       usuarios: { read: false, create: false, update: false, delete: false },
       logs: { read: false, create: true, update: true, delete: true },
@@ -158,6 +164,7 @@ export const listaPeriodoPratico = [
   { value: '1001', label: 'REUNIÃO DE JOVENS E MENORES' },
   { value: '1002', label: 'CULTO OFICIAL' },
   { value: '1003', label: 'OFICIALIZAÇÃO' },
+  { value: '1004', label: 'TROCA DE INSTRUMENTOS' },
 ];
 
 export const listaCategorias = [

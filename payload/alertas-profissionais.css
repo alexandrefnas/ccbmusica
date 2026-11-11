@@ -1,0 +1,28 @@
+/* CCB MODAIS PROFISSIONAIS V1 - mensagens e confirmacoes */
+.alert-overlay { background: rgba(14, 26, 45, .54); backdrop-filter: blur(2px); padding: 12px; }
+.alert-box {
+  width: min(430px, 100%);
+  max-width: 100%;
+  border: 1px solid #d4deea;
+  border-radius: 16px;
+  padding: 26px 28px 24px;
+  box-shadow: 0 22px 60px rgba(11, 23, 39, .25);
+  color: var(--cor-texto, #27354a);
+}
+.alert-icon { gap: 12px; margin-bottom: 16px; font-size: 32px; }
+.alert-icon h3 { font-size: 20px; font-weight: 700; color: var(--cor-texto, #27354a); }
+.alert-box p { font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+.botoes { justify-content: flex-end; gap: 10px; }
+.alert-box button {
+  min-width: 108px;
+  min-height: 41px;
+  padding: 8px 18px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-size: 14px;
+  transition: filter .15s ease;
+}
+.alert-box button:hover { filter: brightness(1.07); }
+.alert-box.confirmacao .btn-sim { background: var(--cor-topo-2, #1b4f9c); }
+.alert-box.confirmacao .btn-nao { color: #263238; background: #fff; border-color: #c5ceda; }
+@media(max-width:575px) { .alert-box { padding: 22px 18px; } .botoes { justify-content: stretch; } .botoes button { flex: 1; } }

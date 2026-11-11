@@ -1,13 +1,14 @@
 <div *ngIf="visible" class="modal-container" aria-modal="true">
   <div class="modal-backdrop" (click)="onBackdropClick()"></div>
-  <div class="container__form">
+  <div class="container__form" role="dialog" aria-modal="true" [attr.aria-label]="title">
     <div class="container__form-windows">
       <div class="title_container">
+        <div class="modal-titulo-icone" aria-hidden="true"><i class="bi bi-clipboard-check"></i></div>
         <div class="title1">
           <h3>{{ title }}</h3>
         </div>
         <div class="title2">
-          <button type="button" (click)="cancelar()" tabindex="-1">X</button>
+          <button type="button" (click)="cancelar()" aria-label="Fechar janela" title="Fechar"><i class="bi bi-x-lg"></i></button>
         </div>
       </div>
       <div class="field__container">

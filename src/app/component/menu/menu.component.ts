@@ -61,6 +61,12 @@ export class MenuComponent {
       icon: 'bi bi-music-note-beamed',
     },
     {
+      label: 'Critérios',
+      rota: '/criterios',
+      tabela: 'criterios',
+      icon: 'bi bi-list-check',
+    },
+    {
       label: 'Igrejas',
       rota: '/igrejas',
       tabela: 'igrejas',

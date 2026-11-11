@@ -52,6 +52,7 @@ export interface PermissoesCRUD {
 export interface Acessos {
   igrejas?: PermissoesCRUD;
   instrumentos?: PermissoesCRUD;
+  criterios?: PermissoesCRUD;
   setores?: PermissoesCRUD;
   usuarios?: PermissoesCRUD;
   candidatos?: PermissoesCRUD;

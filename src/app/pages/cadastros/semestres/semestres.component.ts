@@ -335,17 +335,32 @@ export class SemestresComponent {
 
   filtrarCriteriosPorTipoExame(): void {
     const tipoExame = this.getControl('tipoExame').value;
+    const usuario = this.auth.usuario;
+    const idSetor = usuario?.perfil === 'admin'
+      ? String(this.getControl('idSetor').value || '')
+      : String(usuario?.idSetor || '');
 
-    if (!tipoExame) {
+    // Excecao de compatibilidade: um criterio antigo sem setor aparece somente
+    // quando ja estava associado a ESTE grupo em edicao.
+    const idsAntigos = this.dadosParaEditar?.idSetor === idSetor
+      ? new Set(this.dadosParaEditar.criteriosSelecionados ?? [])
+      : new Set<string>();
+
+    if (!tipoExame || !idSetor) {
       this.listaSelect = [];
       return;
     }
 
     this.listaSelect = this.listaCriteriosTodos
-      .filter((criterio) => criterio.tipoExame === tipoExame)
+      .filter((criterio) =>
+        criterio.tipoExame === tipoExame &&
+        (criterio.idSetor === idSetor ||
+          (!criterio.idSetor && !!criterio.id && idsAntigos.has(criterio.id))),
+      )
       .map((criterio) => ({
         value: criterio.id!,
-        label: criterio.nomeCriterio.toLocaleUpperCase('pt-BR'),
+        label: criterio.nomeCriterio.toLocaleUpperCase('pt-BR') +
+          (!criterio.idSetor ? ' (ANTIGO SEM SETOR)' : ''),
       }))
       .sort((a, b) =>
         a.label.localeCompare(b.label, 'pt-BR', {
@@ -365,9 +380,12 @@ export class SemestresComponent {
       this.dadosForms.patchValue(
         {
           idComum: '',
+          criteriosSelecionados: [],
         },
         { emitEvent: false },
       );
+      this.criteriosSelecionados = [];
+      this.filtrarCriteriosPorTipoExame();
     });
   }
 
@@ -383,6 +401,7 @@ export class SemestresComponent {
         this.dadosForms.patchValue({
           idSetor: igrejaSelecionada.idSetor,
         });
+        this.filtrarCriteriosPorTipoExame();
       }
     });
   }
@@ -644,6 +663,13 @@ export class SemestresComponent {
     this.tabelaVisivel = false;
     this.dadosParaEditar = null;
     this.dadosForms.reset();
+    if (!this.usuarioEhAdmin()) {
+      this.getControl('idSetor').setValue(this.auth.usuario?.idSetor || '', {
+        emitEvent: false,
+      });
+    }
+    this.listaSelect = [];
+    this.criteriosSelecionados = [];
   }
 
   async onSalvar(): Promise<void> {
@@ -655,6 +681,35 @@ export class SemestresComponent {
       return;
     }
     const usuarioLogado = this.auth.usuario;
+    const idSetorPermitido = usuarioLogado?.perfil === 'admin'
+      ? String(this.dadosForms.value.idSetor || '')
+      : String(usuarioLogado?.idSetor || '');
+
+    if (!idSetorPermitido) {
+      this.alertService.aviso('Selecione um setor antes de salvar o grupo.');
+      return;
+    }
+    if (this.dadosParaEditar?.id && this.dadosParaEditar.idSetor !== idSetorPermitido) {
+      this.alertService.aviso('Nao e permitido transferir um grupo existente para outro setor.');
+      return;
+    }
+
+    const selecionados = this.dadosForms.value.criteriosSelecionados;
+    const tipoExame = String(this.dadosForms.value.tipoExame || '');
+    const criteriosValidos = Array.isArray(selecionados) && selecionados.every((id: string) =>
+      this.listaCriteriosTodos.some((criterio) =>
+        criterio.id === id && criterio.tipoExame === tipoExame &&
+        (criterio.idSetor === idSetorPermitido ||
+          (!criterio.idSetor &&
+            this.dadosParaEditar?.idSetor === idSetorPermitido &&
+            (this.dadosParaEditar.criteriosSelecionados ?? []).includes(id))),
+      ),
+    );
+    if (!criteriosValidos) {
+      this.alertService.aviso('Os criterios selecionados devem pertencer ao setor e ao tipo de exame deste grupo.');
+      return;
+    }
+
     const nomeUsuario =
       typeof usuarioLogado === 'string'
         ? usuarioLogado
@@ -663,11 +718,11 @@ export class SemestresComponent {
     const data = {
       grupoExame: upper(this.dadosForms.value.grupoExame),
       descricao: upper(this.dadosForms.value.descricao),
-      idSetor: this.dadosForms.value.idSetor || '',
+      idSetor: idSetorPermitido,
       idComum: this.dadosForms.value.idComum || '',
       tipoExame: this.dadosForms.value.tipoExame,
       // categoriaExame: this.dadosForms.value.categoriaExame,
-      criteriosSelecionados: this.dadosForms.value.criteriosSelecionados ?? [],
+      criteriosSelecionados: selecionados,
       concluido: this.dadosForms.value.concluido || false,
       criadoEm:
         this.dadosParaEditar?.criadoEm || formatarDataString(new Date()),

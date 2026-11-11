@@ -1,0 +1,79 @@
+<div class="container__tela">
+  <div id="tela__barra-menu">
+    <div id="barra-titulo__container">
+      <h2>Critérios de Avaliação</h2>
+    </div>
+    <div class="button-container" *ngIf="liberaCriar && !!setorAtivo">
+      <button class="buttons" type="button" (click)="novo()">
+        <i class="bi bi-file-earmark-plus"></i> Novo
+      </button>
+    </div>
+  </div>
+
+  <div class="filtro-setor" *ngIf="ehAdmin">
+    <tcx-select
+      label="Setor"
+      placeholder="Selecione o setor"
+      [niveisLimitados]="listaSetores"
+      [formControl]="setorFiltro"
+      [required]="true"
+    />
+  </div>
+
+  <div class="aviso-setor" *ngIf="!setorAtivo">
+    {{ ehAdmin ? 'Selecione um setor para visualizar e cadastrar os critérios.' : 'Seu usuário não possui setor definido. Consulte o administrador.' }}
+  </div>
+
+  <div id="tela__container-tabela" *ngIf="!!setorAtivo">
+    <tcx-table
+      [colunas]="camposColunas"
+      [colunasLabels]="tituloColunas"
+      [dados]="dados"
+      [mostrarAcoes]="liberaAcoes"
+      [acoesTabela]="acoes"
+      [tamanhosColunas]="tamanhoColunas"
+      [alinhamentosColunasTitulo]="alinhamentoColunaTitulo"
+      [alinhamentosColunas]="alinhamentoColuna"
+    />
+  </div>
+</div>
+
+<tcx-modal [title]="title" [visible]="mostrarModal" (onClose)="fecharModal()">
+  <div class="templates__form">
+    <p class="texto-contexto">O critério ficará vinculado ao setor selecionado.</p>
+    <form [formGroup]="dadosForms" (ngSubmit)="onSalvar()">
+      <div class="linha">
+        <div class="campo">
+          <tcx-select
+            label="Tipo de exame"
+            [niveisLimitados]="listaTipoExame"
+            [formControl]="getControl('tipoExame')"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+        <div class="campo">
+          <tcx-text
+            label="Nome do critério"
+            type="text"
+            formControlName="nomeCriterio"
+            [required]="true"
+            errorMessage="Campo obrigatório"
+          />
+        </div>
+      </div>
+      <div class="linhaButton">
+        <button class="modal-btn-cancelar" type="button" (click)="fecharModal()">Cancelar</button>
+        <div class="form__button">
+          <tcx-button
+            label="Salvar"
+            type="submit"
+            [labelOn]="true"
+            [disabled]="salvando"
+            icon="bi bi-floppy"
+          />
+        </div>
+      </div>
+    </form>
+  </div>
+</tcx-modal>
