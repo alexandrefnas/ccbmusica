@@ -308,6 +308,11 @@ getCriterios(idSetor?: string): Observable<Criterio[]> {
   }) as Observable<Criterio[]>;
 }
 
+  async getCriterioPorId(id: string): Promise<Criterio | null> {
+    const snap = await getDoc(doc(this.firestore, 'criterios', id));
+    return snap.exists() ? ({ ...snap.data(), id: snap.id } as Criterio) : null;
+  }
+
   addCriterio(data: Criterio & { idSetor: string }) {
     if (!data.idSetor) throw new Error('Setor obrigatorio para cadastrar criterio.');
     return this.criarComLog<Criterio>('criterios', data);

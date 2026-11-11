@@ -1,9 +1,6 @@
-/* :host {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-} */
+/* ================================================================
+   ESTRUTURA GERAL DA PAGINA
+   ================================================================ */
 
 :host {
   display: flex;
@@ -14,28 +11,14 @@
   box-sizing: border-box;
 }
 
-/* .container__tela {
-  display: flex;
-  flex-direction: column;
-  padding: 0 40px 15px 40px;
-  width: 100%;
-
-  height: 100%;
-  box-sizing: border-box;
- overflow: hidden;
-} */
-
 .container__tela {
   display: flex;
   flex-direction: column;
-
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
-
   padding: 0 40px 15px;
-
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -45,17 +28,12 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-
   width: 100%;
   margin-top: 20px;
   padding: 8px 15px;
   box-sizing: border-box;
-
   border-bottom: 2px solid #ccc;
-
-  box-shadow:
-    inset 0 -1px 0 #dcdcdc,
-    inset 0 -2px 0 #999;
+  box-shadow: inset 0 -1px 0 #dcdcdc, inset 0 -2px 0 #999;
 }
 
 #barra-titulo__container {
@@ -93,53 +71,31 @@ p {
   color: grey;
 }
 
-/* FORMULÁRIO */
 
-/* .templates__form {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-} */
-
-/* .templates__form-tela {
-  width: 100%;
-  max-width: 820px;
-  min-width: 0;
-  margin: 10px auto;
-  padding: 0 16px 20px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-sizing: border-box;
-} */
+/* ================================================================
+   FORMULARIO - ESTRUTURA ORIGINAL
+   ================================================================ */
 
 .templates__form-tela {
   display: flex;
   flex-direction: column;
-gap: 5px;
+  gap: 5px;
   flex: 1;
   min-height: 0;
-
   width: 100%;
   max-width: 820px;
-
   margin: 10px 0;
 }
 
 .form-exame {
   display: flex;
   flex-direction: column;
-
   flex: 1;
   min-width: 0;
   min-height: 0;
-
   padding: 0 16px 16px;
-
   overflow-y: auto;
   overflow-x: hidden;
-
   gap: 16px;
 }
 
@@ -164,18 +120,19 @@ gap: 5px;
   color: #7a7a7a;
 }
 
-/* BLOCOS */
+
+/* ================================================================
+   FORMULARIO - SECOES E CAMPOS
+   ================================================================ */
 
 .form-section {
   width: 100%;
   min-width: 0;
   padding: 16px;
   box-sizing: border-box;
-
   background: #fff;
   border: 1px solid #dcdcdc;
   border-radius: 8px;
-
   box-shadow: 0 2px 5px rgb(0 0 0 / 6%);
 }
 
@@ -202,8 +159,6 @@ gap: 5px;
   color: #858585;
 }
 
-/* CAMPOS GERAIS */
-
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -228,14 +183,16 @@ gap: 5px;
   box-sizing: border-box;
 }
 
-/* AVALIAÇÕES */
+
+/* ================================================================
+   CONFIGURACAO ORIGINAL DE AVALIACOES E NOTAS
+   ================================================================ */
 
 .avaliacoes-scroll {
   width: 100%;
   min-width: 0;
   overflow-x: auto;
   padding-bottom: 4px;
-
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
 }
@@ -252,7 +209,6 @@ gap: 5px;
   width: 100%;
   min-width: 0;
   overflow: hidden;
-
   background: #fafafa;
   border: 1px solid #dedede;
   border-radius: 7px;
@@ -274,10 +230,7 @@ gap: 5px;
 
 .avaliacao-grid {
   display: grid;
-  grid-template-columns:
-    minmax(210px, 1fr)
-    minmax(210px, 1fr)
-    minmax(120px, 0.55fr);
+  grid-template-columns: minmax(210px, 1fr) minmax(210px, 1fr) minmax(120px, 0.55fr);
   gap: 14px;
   width: 100%;
   padding: 14px;
@@ -316,7 +269,10 @@ gap: 5px;
   border-left: 1px solid #d8d8d8;
 }
 
-/* DATAS */
+
+/* ================================================================
+   DATAS DE AVALIACAO
+   ================================================================ */
 
 .datas-grid {
   display: grid;
@@ -342,22 +298,18 @@ gap: 5px;
   color: #606060;
 }
 
-/* BOTÕES */
+
+/* ================================================================
+   BOTOES E ACOES GERAIS
+   ================================================================ */
 
 .form-actions {
   flex-shrink: 0;
-
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-
   padding: 5px 15px 0;
-
   border-top: 1px solid #ddd;
-  /*
-  background: #fff; */
-
-  /* box-shadow: 0 -2px 8px rgb(0 0 0 / 8%); */
 }
 
 .form-actions tcx-button {
@@ -365,29 +317,19 @@ gap: 5px;
   width: 120px;
 }
 
-/* BOTÕES */
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-
   gap: 6px;
-
   padding: 5px 12px;
-
   font-size: 13px;
   cursor: pointer;
-
   border-radius: 5px;
   border: 1px solid #ccc;
-
   background: #f5f5f5;
-
-  box-shadow:
-    inset 1px 1px 0 #fff,
-    inset -1px -1px 0 #999;
-
+  box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #999;
   transition: 0.2s;
 }
 
@@ -402,19 +344,18 @@ gap: 5px;
 }
 
 .container__button > button:hover {
-  /* font-weight: bold; */
   transform: scale(1.05);
 }
 
 .buttons:active {
-  box-shadow:
-    inset -1px -1px 0 #fff,
-    inset 1px 1px 0 #999;
-
+  box-shadow: inset -1px -1px 0 #fff, inset 1px 1px 0 #999;
   transform: translateY(1px);
 }
 
-/* STATUS VISUAL */
+
+/* ================================================================
+   STATUS DA AVALIACAO
+   ================================================================ */
 
 .status-aprovado {
   color: green;
@@ -447,89 +388,76 @@ gap: 5px;
   text-decoration: line-through;
 }
 
-/* RESPONSIVIDADE */
 
-/* MOBILE */
-/* @media (max-width: 576px) {
-  .container__tela {
-    padding: 0 10px 15px;
-    width: 100%;
-    overflow: hidden;
-    min-width: 300px;
-  }
+/* ================================================================
+   AJUSTES ANTERIORES DE ALINHAMENTO (PRESERVADOS)
+   ================================================================ */
 
-  h2 {
-    font-size: 14px;
-  }
-  .linha {
-    flex-direction: column;
-    min-width: 100%;
-    gap: 5px;
-  }
+.ga-editor .ga-cabecalho-criterios {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  text-align: left;
+}
 
-  .templates__form {
-    width: 100%;
-  }
+.ga-editor .ga-cabecalho-criterios > div {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  text-align: left;
+}
 
-  .buttons {
-    width: 100%;
-    justify-content: center;
-  }
-} */
+.ga-editor .ga-cabecalho-criterios .ga-titulo-principal {
+  justify-content: flex-start;
+  text-align: left;
+}
 
-/* @media (max-width: 576px) {
-  .container__tela {
-    padding: 0 10px 15px;
-    width: 100%;
-    overflow: hidden;
-    min-width: 300px;
-  }
+.ga-editor .ga-cabecalho-criterios .ga-btn-novo {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-left: auto;
+  min-height: 34px;
+  padding: 7px 11px;
+  font-size: 12px;
+  white-space: nowrap;
+}
 
-  h2 {
-    font-size: 14px;
-  }
+.ga-editor .ga-rodape {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
 
-  .linha {
-    flex-direction: column;
-    min-width: 100%;
-    gap: 5px;
-  }
+.ga-editor .ga-rodape-direita {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: auto;
+  margin-left: auto;
+  gap: 8px;
+}
 
-  .templates__form {
-    width: 100%;
-  }
+.ga-editor .ga-rodape .ga-btn {
+  flex: 0 0 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
 
-  .buttons {
-    width: 100%;
-    justify-content: center;
-  }
 
-  .container__notas {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: auto;
-  }
-
-  .container__avaliacao,
-  .linhaOff {
-    flex-direction: row;
-
-    /*
-      A largura mínima preserva o tamanho dos campos.
-      Quando não couber, o container__notas cria a rolagem.
-    *
-    min-width: 570px;
-  }
-
-  .input-mine,
-  .input-recuperacao {
-    flex: 0 0 100px;
-    width: 100px;
-    min-width: 100px;
-    max-width: 100px;
-  }
-} */
+/* ================================================================
+   RESPONSIVIDADE DA ESTRUTURA ORIGINAL
+   ================================================================ */
 
 @media (max-width: 767px) {
   .container__tela {
@@ -580,10 +508,7 @@ gap: 5px;
   }
 
   .avaliacao-grid {
-    grid-template-columns:
-      minmax(200px, 1fr)
-      minmax(200px, 1fr)
-      minmax(120px, 0.55fr);
+    grid-template-columns: minmax(200px, 1fr) minmax(200px, 1fr) minmax(120px, 0.55fr);
   }
 
   .datas-grid {
@@ -602,14 +527,46 @@ gap: 5px;
   .form-actions tcx-button {
     width: 130px;
   }
-}
 
-/* TABLET */
-/* @media (min-width: 768px) and (max-width: 992px) {
-  .container__tela {
-    padding: 0 20px 15px;
+  .ga-editor .ga-cabecalho-criterios {
+    gap: 8px;
   }
-} */
+
+  .ga-editor .ga-cabecalho-criterios .ga-titulo-principal h4 {
+    font-size: 13px;
+  }
+
+  .ga-editor .ga-cabecalho-criterios .ga-btn-novo {
+    min-height: 32px;
+    padding: 6px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .ga-editor .ga-rodape {
+    padding: 10px 8px;
+    gap: 5px;
+    flex-wrap: nowrap;
+  }
+
+  .ga-editor .ga-rodape-direita {
+    width: auto;
+    gap: 5px;
+    flex-wrap: nowrap;
+  }
+
+  .ga-editor .ga-rodape .ga-btn {
+    min-height: 36px;
+    min-width: 0;
+    padding: 7px 7px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .ga-editor .ga-rodape .ga-btn i {
+    font-size: 12px;
+  }
+}
 
 @media (min-width: 768px) and (max-width: 992px) {
   .container__tela {
@@ -621,20 +578,725 @@ gap: 5px;
   }
 
   .avaliacao-grid {
-    grid-template-columns:
-      minmax(190px, 1fr)
-      minmax(190px, 1fr)
-      minmax(110px, 0.55fr);
+    grid-template-columns: minmax(190px, 1fr) minmax(190px, 1fr) minmax(110px, 0.55fr);
   }
 }
 
-/* DESKTOP */
 @media (min-width: 992px) and (max-width: 1200px) {
   .container__tela {
     padding: 0 30px 15px;
   }
 }
 
-/* EXTRA LARGE */
 @media (min-width: 1200px) {
+}
+
+
+/* ================================================================
+   GRUPO DE AVALIACOES V4 - COMPONENTES
+   ================================================================ */
+
+.ga-editor {
+  max-width: 1160px;
+  min-width: 0;
+  margin: 12px auto;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  background: var(--cor-card, #fff);
+  border: 1px solid var(--cor-borda, #dbe2eb);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(21, 42, 79, 0.09);
+}
+
+.ga-editor > .form-exame {
+  width: 100%;
+  min-height: 0;
+  padding: 0 20px 20px;
+  gap: 18px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.ga-editor .ga-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 -20px;
+  padding: 20px 24px;
+  border-bottom: none;
+}
+
+.ga-editor .ga-cabecalho-icone {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 23px;
+}
+
+.ga-editor .ga-cabecalho h3 {
+  font-weight: 650;
+  font-size: 20px;
+}
+
+.ga-editor .ga-cabecalho p {
+  font-size: 12px;
+}
+
+.ga-editor .ga-secao {
+  border: 1px solid var(--cor-borda, #dbe2eb);
+  border-radius: 11px;
+  padding: 18px;
+  box-shadow: none;
+  background: var(--cor-card, #fff);
+}
+
+.ga-editor .ga-secao-titulo {
+  padding-bottom: 13px;
+  margin-bottom: 17px;
+  border-color: var(--cor-borda, #e6edf4);
+}
+
+.ga-editor .ga-titulo-principal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ga-editor .ga-titulo-principal i {
+  font-size: 18px;
+  color: var(--cor-topo-2, #17549b);
+}
+
+.ga-editor .ga-secao-titulo h4 {
+  color: var(--cor-texto, #223248);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 0;
+}
+
+.ga-editor .ga-secao-titulo span {
+  color: var(--cor-texto-suave, #637185);
+  font-size: 12px;
+}
+
+
+/* ================================================================
+   V4 - CAMPOS, TIPOS DE EXAME E NOTAS
+   ================================================================ */
+
+.ga-editor .ga-dados-grid {
+  gap: 15px;
+}
+
+.ga-editor .ga-tipo-exame {
+  margin-top: 20px;
+}
+
+.ga-editor .ga-campo-titulo {
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--cor-texto, #1b2d45);
+}
+
+.ga-editor .ga-campo-titulo span {
+  color: var(--cor-erro, #c62828);
+}
+
+.ga-editor .ga-tipo-opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ga-editor .ga-tipo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 165px;
+  min-height: 41px;
+  padding: 9px 18px;
+  color: var(--cor-texto, #203248);
+  background: var(--cor-card, #fff);
+  border: 1px solid var(--cor-borda, #cad5e1);
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.ga-editor .ga-tipo-btn.ativo {
+  background: var(--cor-menu-submenu, #e9f2ff);
+  border-color: var(--cor-topo-1, #2478db);
+  color: var(--cor-topo-2, #134c91);
+  box-shadow: inset 0 0 0 1px var(--cor-topo-1, #2478db);
+}
+
+.ga-editor .ga-tipo-btn:hover {
+  border-color: var(--cor-topo-1, #2478db);
+}
+
+.ga-editor :is(button, input):focus-visible {
+  outline: 2px solid var(--cor-input-focus, #2d89ef);
+  outline-offset: 2px;
+}
+
+.ga-editor .ga-tabela-rolagem {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--cor-borda, #dbe3ec);
+  border-radius: 9px;
+}
+
+.ga-editor .ga-notas-tabela {
+  width: 100%;
+  min-width: 610px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.ga-editor .ga-notas-tabela thead {
+  background: var(--cor-menu-submenu, #f0f5fa);
+}
+
+.ga-editor .ga-notas-tabela th,
+.ga-editor .ga-notas-tabela td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--cor-borda, #e1e8f0);
+  vertical-align: middle;
+}
+
+.ga-editor .ga-notas-tabela thead th {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cor-texto, #21384d);
+  white-space: nowrap;
+}
+
+.ga-editor .ga-notas-tabela thead span {
+  font-weight: 400;
+  color: var(--cor-texto-suave, #667486);
+}
+
+.ga-editor .ga-notas-tabela tbody tr:last-child td,
+.ga-editor .ga-notas-tabela tbody tr:last-child th {
+  border-bottom: 0;
+}
+
+.ga-editor .ga-notas-tabela tbody tr:nth-child(even) {
+  background: var(--cor-tabela-linha-alt, #f7f9fc);
+}
+
+.ga-editor .ga-notas-tabela .ga-categoria {
+  width: 35%;
+  min-width: 170px;
+  color: var(--cor-texto, #243244);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ga-editor .ga-par-notas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ga-editor .ga-par-notas > span {
+  font-size: 13px;
+  color: var(--cor-texto-suave, #637185);
+}
+
+.ga-editor .ga-nota-input {
+  width: 71px;
+  max-width: 100%;
+  height: 36px;
+  padding: 7px 8px;
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+  background: var(--cor-input-fundo, #fff);
+  color: var(--cor-input-texto, #213248);
+  border: 1px solid var(--cor-input-borda, #c0cad6);
+  border-radius: 7px;
+  appearance: textfield;
+  box-shadow: none;
+}
+
+.ga-editor .ga-nota-input:focus {
+  outline: 2px solid var(--cor-input-focus, #2d89ef);
+  outline-offset: 0;
+}
+
+.ga-editor .ga-nota-input::placeholder {
+  font-size: 10px;
+  color: var(--cor-placeholder, #82909d);
+}
+
+
+/* ================================================================
+   V4 - CRITERIOS, BOTOES E SELECAO
+   ================================================================ */
+
+.ga-editor .ga-cabecalho-criterios {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  text-align: left;
+}
+
+.ga-editor .ga-cabecalho-criterios > div {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 4px;
+  text-align: left;
+}
+
+.ga-editor .ga-cabecalho-criterios .ga-titulo-principal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.ga-editor .ga-cabecalho-criterios .ga-btn-novo {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-left: auto;
+  min-height: 34px;
+  padding: 7px 11px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ga-editor .ga-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 15px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: 0.15s ease;
+  white-space: nowrap;
+}
+
+.ga-editor .ga-btn-primary {
+  color: #fff;
+  border: 1px solid var(--cor-topo-2, #1955a4);
+  background: linear-gradient( 115deg, var(--cor-topo-1, #297fe5), var(--cor-topo-2, #1955a4) );
+}
+
+.ga-editor .ga-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.ga-editor .ga-btn-secundario {
+  color: var(--cor-texto, #344458);
+  background: var(--cor-card, #fff);
+  border: 1px solid var(--cor-borda, #c7d2df);
+}
+
+.ga-editor .ga-btn-secundario:hover {
+  background: var(--cor-menu-submenu, #eff6ff);
+}
+
+.ga-editor .ga-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ga-editor .ga-criterios-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.ga-editor .ga-criterios-coluna {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--cor-borda, #dce4ec);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.ga-editor .ga-criterios-coluna.ga-selecionados {
+  background: var(--cor-menu-submenu, #f5f8fc);
+}
+
+.ga-editor .ga-coluna-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--cor-texto, #203248);
+  font-size: 13px;
+}
+
+.ga-editor .ga-coluna-cabecalho > span {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 30px;
+  background: var(--cor-card, #fff);
+  font-weight: 600;
+  border: 1px solid var(--cor-borda, #dde6ee);
+}
+
+.ga-editor .ga-busca {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ga-editor .ga-busca i {
+  position: absolute;
+  left: 12px;
+  font-size: 14px;
+  color: var(--cor-texto-suave, #6d7a88);
+  pointer-events: none;
+}
+
+.ga-editor .ga-busca input {
+  height: 40px;
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  font: inherit;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid var(--cor-input-borda, #cbd4df);
+  background: var(--cor-input-fundo, #fff);
+  color: var(--cor-input-texto, #203248);
+}
+
+.ga-editor .ga-opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 65px;
+  max-height: 230px;
+  overflow-y: auto;
+}
+
+.ga-editor .ga-opcao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--cor-texto, #223348);
+}
+
+.ga-editor .ga-opcao.selecionado {
+  background: var(--cor-menu-submenu, #edf4fb);
+}
+
+.ga-editor .ga-opcao:hover {
+  background: var(--cor-menu-hover, #edf7ff);
+}
+
+.ga-editor .ga-opcao input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: var(--cor-topo-2, #1956a5);
+  cursor: pointer;
+}
+
+.ga-editor .ga-lista-selecionados {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 100px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.ga-editor .ga-chip-criterio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--cor-card, #fff);
+  border: 1px solid var(--cor-borda, #dce5ef);
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.ga-editor .ga-chip-criterio button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--cor-texto-suave, #667485);
+  font-size: 18px;
+}
+
+.ga-editor .ga-chip-criterio button:hover {
+  color: var(--cor-erro, #c62828);
+}
+
+.ga-editor .ga-sem-criterios {
+  padding: 22px 12px;
+  color: var(--cor-texto-suave, #667485);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+
+/* ================================================================
+   V4 - CADASTRO RAPIDO DE CRITERIOS
+   ================================================================ */
+
+.ga-editor .ga-cadastro-rapido {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: var(--cor-menu-submenu, #f2f7fc);
+  border: 1px solid var(--cor-borda, #d1e0f1);
+  border-radius: 10px;
+}
+
+.ga-editor .ga-rapido-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--cor-texto, #22364b);
+  font-size: 13px;
+}
+
+.ga-editor .ga-rapido-cabecalho p {
+  padding: 0;
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: var(--cor-texto-suave, #657487);
+}
+
+.ga-editor .ga-rapido-campos {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ga-editor .ga-rapido-entrada {
+  display: flex;
+  flex: 1 1 270px;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ga-editor .ga-rapido-entrada label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cor-texto, #24364a);
+}
+
+.ga-editor .ga-rapido-entrada input {
+  width: 100%;
+  height: 40px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--cor-input-texto, #213348);
+  background: var(--cor-input-fundo, #fff);
+  border: 1px solid var(--cor-input-borda, #cbd5df);
+  border-radius: 8px;
+}
+
+.ga-editor .ga-btn-fechar {
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+  font-size: 16px;
+  color: var(--cor-texto-suave, #728093);
+}
+
+.ga-editor .ga-erro {
+  padding: 0;
+  color: var(--cor-erro, #bf2c2c);
+  font-size: 12px;
+}
+
+
+/* ================================================================
+   V4 - RESUMO E RODAPE
+   ================================================================ */
+
+.ga-editor .ga-resumo {
+  padding: 18px;
+  border-radius: 10px;
+  border: 1px solid var(--cor-borda, #d4e1ef);
+  background: var(--cor-menu-submenu, #f4f8fd);
+  font-size: 13px;
+  color: var(--cor-texto, #24364b);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ga-editor .ga-resumo h4 {
+  color: var(--cor-texto, #203246);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.ga-editor .ga-resumo-separador {
+  margin: 0 8px;
+  color: var(--cor-texto-suave, #748293);
+}
+
+.ga-editor .ga-rodape {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding: 12px 16px;
+  margin: 0;
+  background: var(--cor-card, #fff);
+  border-top: 1px solid var(--cor-borda, #d8e0ea);
+}
+
+.ga-editor .ga-rodape-direita {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  width: auto;
+  min-width: 0;
+  margin-left: auto;
+  gap: 8px;
+}
+
+.ga-editor .ga-rodape .ga-btn {
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.ga-editor .datas-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+
+/* ================================================================
+   V4 - RESPONSIVIDADE
+   ================================================================ */
+
+@media (max-width: 900px) {
+  .ga-editor .ga-criterios-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ga-editor .datas-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .ga-editor {
+    max-width: 100%;
+    margin: 8px 0;
+    border-radius: 10px;
+  }
+
+  .ga-editor > .form-exame {
+    padding: 0 12px 14px;
+  }
+
+  .ga-editor .ga-cabecalho {
+    margin: 0 -12px;
+    padding: 16px;
+  }
+
+  .ga-editor .ga-cabecalho h3 {
+    font-size: 17px;
+  }
+
+  .ga-editor .ga-cabecalho-icone {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+
+  .ga-editor .ga-secao {
+    padding: 13px;
+  }
+
+  .ga-editor .ga-tipo-btn {
+    flex: 1 1 130px;
+    min-width: 0;
+  }
+
+  .ga-editor .ga-criterios-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ga-editor .ga-rodape {
+    padding: 10px 6px;
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+
+  .ga-editor .ga-rodape-direita {
+    display: flex;
+    width: auto;
+    min-width: 0;
+    margin-left: auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .ga-editor .ga-rodape .ga-btn {
+    flex: 0 1 auto;
+    min-width: 0;
+    min-height: 34px;
+    padding: 6px 6px;
+    font-size: 11px;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .ga-editor .ga-rodape .ga-btn i {
+    font-size: 11px;
+  }
+
+  .ga-editor .datas-grid {
+    grid-template-columns: 1fr;
+  }
 }

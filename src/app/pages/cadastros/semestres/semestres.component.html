@@ -39,52 +39,63 @@
       />
     </div>
   } @else {
-    <div class="templates__form-tela">
+    <div class="templates__form-tela ga-editor">
       <form class="form-exame" [formGroup]="dadosForms" (ngSubmit)="onSalvar()">
-        <header class="form-header">
-          <h3>Cadastro de Grupo de Exame</h3>
-          <p>Informe os dados gerais, as notas e as datas das avaliações.</p>
+        <header class="form-header ga-cabecalho">
+          <div class="ga-cabecalho-icone">
+            <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
+          </div>
+          <div>
+            <h3>
+              {{
+                dadosParaEditar
+                  ? "Editar Grupo de Avaliações"
+                  : "Novo Grupo de Avaliações"
+              }}
+            </h3>
+            <p>Configure os dados, notas, critérios e datas da avaliação.</p>
+          </div>
         </header>
 
-        <!-- DADOS GERAIS -->
-        <section class="form-section">
-          <div class="section-header">
-            <h4>Dados gerais</h4>
+        <!-- 1. DADOS GERAIS -->
+        <section class="form-section ga-secao">
+          <div class="section-header ga-secao-titulo">
+            <div class="ga-titulo-principal">
+              <i class="bi bi-building" aria-hidden="true"></i>
+              <h4>1. Dados gerais</h4>
+            </div>
+            <span>Identificação e local da avaliação.</span>
           </div>
-
-          <div class="form-grid">
+          <div class="form-grid ga-dados-grid">
             <div class="campo campo-full">
               <tcx-text
-                label="Nome do Exame"
+                label="Nome do grupo"
                 type="text"
                 formControlName="grupoExame"
                 [required]="true"
                 errorMessage="Campo obrigatório"
               />
             </div>
-
             <div class="campo campo-full">
               <tcx-text
-                label="Descrição do Exame"
+                label="Descrição"
                 type="text"
                 formControlName="descricao"
-                [required]="false"
+                [required]="true"
+                errorMessage="Campo obrigatório"
               />
             </div>
-
             <div class="campo" *ngIf="usuarioEhAdmin()">
               <tcx-select
-                [label]="'Setor'"
+                label="Setor"
                 [placeholder]="''"
                 [niveisLimitados]="listaSetor"
                 [formControl]="getControl('idSetor')"
-                [disabled]="!!dadosParaEditar"
               />
             </div>
-
             <div class="campo">
               <tcx-select
-                [label]="'Comum Congregação'"
+                label="Comum congregação"
                 [placeholder]="''"
                 [niveisLimitados]="listaIgreja"
                 [formControl]="getControl('idComum')"
@@ -92,238 +103,432 @@
                 errorMessage="Campo obrigatório"
               />
             </div>
-
-            <div class="campo">
-              <tcx-select
-                [label]="'Tipo de Exame'"
-                [placeholder]="''"
-                [niveisLimitados]="listaTipoExame"
-                [formControl]="getControl('tipoExame')"
-                [required]="true"
-                errorMessage="Campo obrigatório"
-                (valorMudou)="onTipoExameChange()"
-              />
+          </div>
+          <div class="ga-tipo-exame">
+            <div class="ga-campo-titulo">
+              Tipo de exame <span aria-hidden="true">*</span>
             </div>
-          </div>
-        </section>
-
-        <!-- CONFIGURAÇÃO DAS NOTAS -->
-        <section class="form-section" *ngIf="avaliacoesArray.length > 0">
-          <div class="section-header">
-            <h4>Configuração das notas</h4>
-            <span>Defina as notas mínimas e máximas de cada avaliação.</span>
-          </div>
-
-          <div class="avaliacoes-scroll">
-            <div class="avaliacoes-lista" formArrayName="avaliacoes">
-              <article
-                class="avaliacao-card"
-                *ngFor="
-                  let avaliacao of avaliacoesArray.controls;
-                  let i = index
-                "
-                [formGroupName]="i"
+            <div class="ga-tipo-opcoes" role="group" aria-label="Tipo de exame">
+              <button
+                type="button"
+                class="ga-tipo-btn"
+                [class.ativo]="getControl('tipoExame').value === '001'"
+                [attr.aria-pressed]="getControl('tipoExame').value === '001'"
+                (click)="selecionarTipoExame('001')"
               >
-                <div class="avaliacao-titulo">
-                  <h5>{{ avaliacao.get("label")?.value }}</h5>
-                </div>
-
-                <!-- TIPO 001 -->
-                <div
-                  class="avaliacao-grid"
-                  *ngIf="getControl('tipoExame').value === '001'"
-                >
-                  <div class="grupo-nota">
-                    <p class="grupo-nota-titulo">Parte Teórica</p>
-
-                    <div class="notas-grid">
-                      <tcx-text
-                        label="Nota mín."
-                        type="number"
-                        formControlName="teoricaNotaMinima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-
-                      <tcx-text
-                        label="Nota máx."
-                        type="number"
-                        formControlName="teoricaNotaMaxima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="grupo-nota">
-                    <p class="grupo-nota-titulo">Parte Prática</p>
-
-                    <div class="notas-grid">
-                      <tcx-text
-                        label="Nota mín."
-                        type="number"
-                        formControlName="praticaNotaMinima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-
-                      <tcx-text
-                        label="Nota máx."
-                        type="number"
-                        formControlName="praticaNotaMaxima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-                    </div>
-                  </div>
-
-                  <div
-                    class="grupo-nota grupo-recuperacao"
-                    *ngIf="selectRecuperacao"
-                  >
-                    <p class="grupo-nota-titulo">Recuperação</p>
-
-                    <div class="notas-grid notas-grid-unica">
-                      <tcx-text
-                        label="Nota mín."
-                        type="number"
-                        formControlName="teoricaRecuperacao"
-                        [required]="false"
-                        errorMessage="Campo obrigatório"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <!-- TIPO 002 -->
-                <div
-                  class="avaliacao-grid avaliacao-grid-pratica"
-                  *ngIf="getControl('tipoExame').value === '002'"
-                >
-                  <div class="grupo-nota">
-                    <p class="grupo-nota-titulo">Parte Prática</p>
-
-                    <div class="notas-grid">
-                      <tcx-text
-                        label="Nota mínima"
-                        type="number"
-                        formControlName="praticaNotaMinima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-
-                      <tcx-text
-                        label="Nota máxima"
-                        type="number"
-                        formControlName="praticaNotaMaxima"
-                        [required]="true"
-                        errorMessage="Campo obrigatório"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </article>
+                <i class="bi bi-journal-text" aria-hidden="true"></i> MSA
+              </button>
+              <button
+                type="button"
+                class="ga-tipo-btn"
+                [class.ativo]="getControl('tipoExame').value === '002'"
+                [attr.aria-pressed]="getControl('tipoExame').value === '002'"
+                (click)="selecionarTipoExame('002')"
+              >
+                <i class="bi bi-music-note-beamed" aria-hidden="true"></i>
+                Instrumento
+              </button>
             </div>
           </div>
         </section>
 
-        <!-- CRITÉRIOS -->
-        <section class="form-section" *ngIf="avaliacoesArray.length > 0">
-          <div class="section-header">
-            <h4>Critérios de avaliação prática</h4>
-            <span>Selecione os critérios aplicados durante a avaliação.</span>
+        <!-- 2. NOTAS -->
+        <section
+          class="form-section ga-secao"
+          *ngIf="avaliacoesArray.length > 0"
+        >
+          <div class="section-header ga-secao-titulo">
+            <div class="ga-titulo-principal">
+              <i class="bi bi-list-check" aria-hidden="true"></i>
+              <h4>2. Configuração das notas</h4>
+            </div>
+            <span
+              >Informe as notas mínimas e máximas para cada período ou
+              categoria.</span
+            >
           </div>
-
-          <div class="campo campo-full">
-            <tcx-multi-select
-              [label]="''"
-              [placeholder]="'Selecione os critérios de avaliação prática'"
-              [niveisLimitados]="listaSelect"
-              [formControl]="getControl('criteriosSelecionados')"
-              (valorMudou)="aoSelecionarFiltro($event)"
-            />
+          <div
+            class="ga-tabela-rolagem"
+            role="region"
+            aria-label="Notas por período"
+            tabindex="0"
+          >
+            <table class="ga-notas-tabela">
+              <thead>
+                <tr>
+                  <th scope="col">
+                    {{
+                      getControl("tipoExame").value === "001"
+                        ? "Período"
+                        : "Categoria"
+                    }}
+                  </th>
+                  <th
+                    *ngIf="getControl('tipoExame').value === '001'"
+                    scope="col"
+                  >
+                    Teórica <span>(mín. / máx.)</span>
+                  </th>
+                  <th scope="col">Prática <span>(mín. / máx.)</span></th>
+                  <th
+                    *ngIf="
+                      getControl('tipoExame').value === '001' &&
+                      selectRecuperacao
+                    "
+                    scope="col"
+                  >
+                    Recuperação <span>(mín.)</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody formArrayName="avaliacoes">
+                <tr
+                  *ngFor="
+                    let avaliacao of avaliacoesArray.controls;
+                    let i = index
+                  "
+                  [formGroupName]="i"
+                >
+                  <th scope="row" class="ga-categoria">
+                    {{ avaliacao.get("label")?.value }}
+                  </th>
+                  <td *ngIf="getControl('tipoExame').value === '001'">
+                    <div class="ga-par-notas">
+                      <input
+                        class="ga-nota-input"
+                        type="number"
+                        min="0"
+                        formControlName="teoricaNotaMinima"
+                        [attr.aria-label]="
+                          'Nota teórica mínima de ' +
+                          avaliacao.get('label')?.value
+                        "
+                      />
+                      <span aria-hidden="true">/</span>
+                      <input
+                        class="ga-nota-input"
+                        type="number"
+                        min="0"
+                        formControlName="teoricaNotaMaxima"
+                        [attr.aria-label]="
+                          'Nota teórica máxima de ' +
+                          avaliacao.get('label')?.value
+                        "
+                      />
+                    </div>
+                  </td>
+                  <td>
+                    <div class="ga-par-notas">
+                      <input
+                        class="ga-nota-input"
+                        type="number"
+                        min="0"
+                        formControlName="praticaNotaMinima"
+                        [attr.aria-label]="
+                          'Nota prática mínima de ' +
+                          avaliacao.get('label')?.value
+                        "
+                      />
+                      <span aria-hidden="true">/</span>
+                      <input
+                        class="ga-nota-input"
+                        type="number"
+                        min="0"
+                        formControlName="praticaNotaMaxima"
+                        [attr.aria-label]="
+                          'Nota prática máxima de ' +
+                          avaliacao.get('label')?.value
+                        "
+                      />
+                    </div>
+                  </td>
+                  <td
+                    *ngIf="
+                      getControl('tipoExame').value === '001' &&
+                      selectRecuperacao
+                    "
+                  >
+                    <input
+                      class="ga-nota-input"
+                      type="number"
+                      min="0"
+                      formControlName="teoricaRecuperacao"
+                      [attr.aria-label]="
+                        'Nota mínima de recuperação de ' +
+                        avaliacao.get('label')?.value
+                      "
+                      placeholder="Opcional"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
-        <!-- DATAS -->
-        <section class="form-section" *ngIf="avaliacoesArray.length > 0">
-          <div class="section-header" *ngIf="getLiberaData()">
-            <h4>Datas das avaliações</h4>
-            <span>Informe quando cada etapa será realizada.</span>
+        <!-- 3. CRITÉRIOS -->
+        <section
+          class="form-section ga-secao"
+          *ngIf="avaliacoesArray.length > 0"
+        >
+          <div class="section-header ga-secao-titulo ga-cabecalho-criterios">
+            <div>
+              <div class="ga-titulo-principal">
+                <i class="bi bi-check2-square" aria-hidden="true"></i>
+                <h4>3. Critérios de avaliação prática</h4>
+              </div>
+              <span
+                >Marque os critérios aplicados à prova deste setor e tipo de
+                exame.</span
+              >
+            </div>
+            <button
+              type="button"
+              class="ga-btn ga-btn-primary ga-btn-novo"
+              *ngIf="podeCriarCriterios"
+              [disabled]="salvandoCriterio"
+              (click)="alternarCadastroRapido()"
+            >
+              <i class="bi bi-plus-lg" aria-hidden="true"></i> Novo critério
+            </button>
           </div>
 
-          <div
-            class="datas-grid"
-            *ngIf="getControl('tipoExame').value === '001'"
-          >
-            <div class="grupo-data">
-              <p>Parte Teórica</p>
+          <div class="ga-cadastro-rapido" *ngIf="cadastroRapidoAberto">
+            <div class="ga-rapido-cabecalho">
+              <div>
+                <strong>Cadastro rápido de critério</strong>
+                <p>
+                  O setor e o tipo de exame serão vinculados automaticamente.
+                </p>
+              </div>
+              <button
+                type="button"
+                class="ga-btn-fechar"
+                aria-label="Fechar cadastro rápido"
+                [disabled]="salvandoCriterio"
+                (click)="alternarCadastroRapido()"
+              >
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="ga-rapido-campos">
+              <div class="ga-rapido-entrada">
+                <label for="ga-nome-criterio">Nome do critério</label>
+                <input
+                  id="ga-nome-criterio"
+                  type="text"
+                  maxlength="120"
+                  placeholder="Ex.: Expressão musical"
+                  [value]="nomeNovoCriterio"
+                  [disabled]="salvandoCriterio"
+                  (input)="atualizarNovoCriterio($event)"
+                  (keydown.enter)="
+                    $event.preventDefault(); criarCriterioRapido()
+                  "
+                />
+              </div>
+              <button
+                class="ga-btn ga-btn-primary"
+                type="button"
+                [disabled]="salvandoCriterio"
+                (click)="criarCriterioRapido()"
+              >
+                <i class="bi bi-check2" aria-hidden="true"></i>
+                {{
+                  salvandoCriterio ? "Salvando..." : "Adicionar e selecionar"
+                }}
+              </button>
+            </div>
+            <p class="ga-erro" *ngIf="erroCadastroRapido" role="alert">
+              {{ erroCadastroRapido }}
+            </p>
+          </div>
 
+          <div class="ga-criterios-grid">
+            <div class="ga-criterios-coluna">
+              <div class="ga-coluna-cabecalho">
+                <strong>Critérios disponíveis</strong
+                ><span>{{ criteriosFiltrados.length }}</span>
+              </div>
+              <div class="ga-busca">
+                <i class="bi bi-search" aria-hidden="true"></i
+                ><input
+                  type="search"
+                  aria-label="Pesquisar critérios"
+                  placeholder="Pesquisar critério..."
+                  [value]="pesquisaCriterios"
+                  (input)="atualizarPesquisaCriterios($event)"
+                />
+              </div>
+              <div
+                class="ga-opcoes"
+                role="group"
+                aria-label="Critérios disponíveis para seleção"
+              >
+                <label
+                  class="ga-opcao"
+                  *ngFor="
+                    let criterio of criteriosFiltrados;
+                    trackBy: rastrearCriterio
+                  "
+                  [class.selecionado]="criterioMarcado(criterio.value)"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="criterioMarcado(criterio.value)"
+                    (change)="alternarCriterio(criterio.value, $event)"
+                  />
+                  <span>{{ criterio.label }}</span>
+                </label>
+                <div
+                  class="ga-sem-criterios"
+                  *ngIf="criteriosFiltrados.length === 0"
+                >
+                  Nenhum critério encontrado para este setor e tipo de exame.
+                </div>
+              </div>
+            </div>
+            <div class="ga-criterios-coluna ga-selecionados">
+              <div class="ga-coluna-cabecalho">
+                <strong>Critérios selecionados</strong
+                ><span>{{ criteriosMarcados.length }}</span>
+              </div>
+              <div class="ga-lista-selecionados">
+                <div
+                  class="ga-chip-criterio"
+                  *ngFor="
+                    let criterio of criteriosMarcados;
+                    trackBy: rastrearCriterio
+                  "
+                >
+                  <span>{{ criterio.label }}</span>
+                  <button
+                    type="button"
+                    aria-label="Remover critério selecionado"
+                    (click)="removerCriterio(criterio.value)"
+                  >
+                    <i class="bi bi-x" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div
+                  class="ga-sem-criterios"
+                  *ngIf="criteriosMarcados.length === 0"
+                >
+                  Nenhum critério selecionado.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. DATAS -->
+        <section
+          class="form-section ga-secao"
+          *ngIf="avaliacoesArray.length > 0"
+        >
+          <div class="section-header ga-secao-titulo">
+            <div class="ga-titulo-principal">
+              <i class="bi bi-calendar-event" aria-hidden="true"></i>
+              <h4>4. Datas das avaliações</h4>
+            </div>
+            <span>Informe as datas de cada etapa.</span>
+          </div>
+          <div class="datas-grid">
+            <div
+              class="grupo-data"
+              *ngIf="getControl('tipoExame').value === '001'"
+            >
+              <p>Parte teórica</p>
               <tcx-data
-                label="Data da Etapa"
+                label="Data da etapa"
                 type="data"
                 formControlName="dataTeorica"
                 [required]="true"
               />
             </div>
-
             <div class="grupo-data">
-              <p>Parte Prática</p>
-
+              <p>Parte prática</p>
               <tcx-data
-                label="Data da Etapa"
+                label="Data da etapa"
                 type="data"
                 formControlName="dataPratica"
                 [required]="true"
               />
             </div>
-
-            <div class="grupo-data" *ngIf="selectRecuperacao">
+            <div
+              class="grupo-data"
+              *ngIf="
+                getControl('tipoExame').value === '001' && selectRecuperacao
+              "
+            >
               <p>Recuperação</p>
-
               <tcx-data
-                label="Data da Recuperação"
+                label="Data da recuperação"
                 type="data"
                 formControlName="dataRecuperacao"
                 [required]="false"
               />
             </div>
           </div>
+        </section>
 
-          <div
-            class="datas-grid datas-grid-unica"
-            *ngIf="getControl('tipoExame').value === '002'"
-          >
-            <div class="grupo-data">
-              <p>Parte Prática</p>
-
-              <tcx-data
-                label="Data da Etapa"
-                type="data"
-                formControlName="dataPratica"
-                [required]="true"
-              />
-            </div>
+        <section
+          *ngIf="mostrarResumo"
+          class="ga-resumo"
+          aria-label="Resumo do grupo antes de salvar"
+        >
+          <h4>
+            <i class="bi bi-clipboard-check" aria-hidden="true"></i> Resumo do
+            grupo
+          </h4>
+          <div>
+            <strong>Grupo:</strong>
+            {{ getControl("grupoExame").value || "Não informado" }}
+          </div>
+          <div><strong>Setor:</strong> {{ nomeSetorSelecionado }}</div>
+          <div>
+            <strong>Tipo de exame:</strong>
+            {{
+              getControl("tipoExame").value === "001" ? "MSA" : "INSTRUMENTO"
+            }}
+          </div>
+          <div>
+            <strong>Categorias:</strong> {{ avaliacoesArray.length }}
+            <span class="ga-resumo-separador">·</span>
+            <strong>Critérios:</strong> {{ criteriosMarcados.length }}
+          </div>
+          <div>
+            <strong>Critérios selecionados:</strong> {{ nomesCriteriosResumo }}
           </div>
         </section>
       </form>
-      <!-- BOTÕES -->
-      <footer class="form-actions">
-        <!-- <tcx-button
-          label="Cancelar"
+      <footer class="form-actions ga-rodape">
+        <button
+          class="ga-btn ga-btn-secundario"
           type="button"
-          [labelOn]="true"
-          icon="bi bi-x-circle"
-          (clicked)="fecharModal()"
-        /> -->
-
-        <tcx-button
-          label="Salvar"
-          type="submit"
-          [labelOn]="true"
-          icon="bi bi-floppy"
-          (clicked)="onSalvar()"
-        />
+          (click)="fecharModal()"
+        >
+          <i class="bi bi-arrow-left" aria-hidden="true"></i> Voltar
+        </button>
+        <div class="ga-rodape-direita">
+          <button
+            class="ga-btn ga-btn-secundario"
+            type="button"
+            (click)="mostrarResumo = !mostrarResumo"
+          >
+            <i class="bi bi-eye" aria-hidden="true"></i>
+            {{ mostrarResumo ? "Ocultar resumo" : "Ver resumo" }}
+          </button>
+          <button
+            class="ga-btn ga-btn-primary"
+            type="button"
+            [disabled]="salvandoGrupo || salvandoCriterio"
+            (click)="onSalvar()"
+          >
+            <i class="bi bi-floppy" aria-hidden="true"></i>
+            {{ salvandoGrupo ? "Salvando..." : "Salvar Grupo" }}
+          </button>
+        </div>
       </footer>
     </div>
   }
@@ -558,7 +763,13 @@
           </div>
         </div>
         <div class="linhaButton">
-        <button class="modal-btn-cancelar" type="button" (click)="fecharModal()">Cancelar</button>
+          <button
+            class="modal-btn-cancelar"
+            type="button"
+            (click)="fecharModal()"
+          >
+            Cancelar
+          </button>
           <div class="form__button">
             <tcx-button label="Salvar" type="submit"></tcx-button>
           </div>
