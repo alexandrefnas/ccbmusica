@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { MenuComponent } from './component/menu/menu.component';
 import { AuthService } from './services/auth.service';
 import { TcxAlertComponent } from './component/tcx-alert/tcx-alert.component';
+import { SetorAtivoService } from './services/setor-ativo.service';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { TcxAlertComponent } from './component/tcx-alert/tcx-alert.component';
 export class AppComponent {
   constructor(
     public authService: AuthService,
+    public setorAtivo: SetorAtivoService,
     // private router: Router,
   ) {
     this.authService.currentUser$.subscribe((user) => {

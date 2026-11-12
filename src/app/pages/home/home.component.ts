@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { combineLatest } from 'rxjs';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { catchError, combineLatest, EMPTY, map, switchMap } from 'rxjs';
 
 import {
   Candidatos,
   Exames,
   FirestoreService,
+  Igrejas,
 } from '../../services/firestore.service';
 
 import { AuthService } from '../../services/auth.service';
@@ -16,6 +17,8 @@ import {
   listaTipoExame,
 } from '../../services/select.service';
 import { Router } from '@angular/router';
+import { SetorAtivoService } from '../../services/setor-ativo.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 type CardDetalhe = {
   label: string;
@@ -38,11 +41,15 @@ type CardResumo = {
   styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor(
     private firestoreService: FirestoreService,
     private auth: AuthService,
     private router: Router,
+    private setorAtivo: SetorAtivoService,
   ) {}
+
   dados: CardResumo[] = [];
   resumoPorIgreja: any[] = [];
   resumoMSA: any[] = [];
@@ -50,74 +57,115 @@ export class HomeComponent implements OnInit {
   totalSolicitacoesPendentes = 0;
 
   ngOnInit(): void {
-    this.auth.getUsuarioAtualObservable().subscribe((usuario) => {
-      if (!usuario) return;
+    combineLatest([
+      this.auth.getUsuarioAtualObservable(),
+      this.setorAtivo.setorAtivo$,
+    ])
+      .pipe(
+        switchMap(([usuario, idSetor]) => {
+          this.limparResumo();
 
-      this.carregarDadosCards();
-    });
+          if (!usuario || !idSetor) {
+            return EMPTY;
+          }
+
+          return combineLatest([
+            this.firestoreService.getExames(),
+            this.firestoreService.getCandidato(),
+            this.firestoreService.getIgrejas(),
+          ]).pipe(
+            map(([exames, alunos, igrejas]) => ({
+              idSetor,
+              exames,
+              alunos,
+              igrejas,
+            })),
+            catchError((erro) => {
+              console.error('Erro ao carregar dashboard do setor:', erro);
+              this.limparResumo();
+              return EMPTY;
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ idSetor, exames, alunos, igrejas }) => {
+        this.carregarDadosCards(idSetor, exames, alunos, igrejas);
+      });
   }
 
-get liberaAcessoExames(): boolean {
-  return this.auth.temPermissao('exames', 'read');
-}
+  get liberaAcessoExames(): boolean {
+    return this.auth.temPermissao('exames', 'read');
+  }
 
-abrirExames(): void {
-  if (!this.liberaAcessoExames) return;
+  abrirExames(): void {
+    if (!this.liberaAcessoExames) return;
 
-  this.router.navigate(['/exames']);
-}
+    this.router.navigate(['/exames']);
+  }
 
-  carregarDadosCards(): void {
-    combineLatest([
-      this.firestoreService.getExames(),
-      this.firestoreService.getCandidato(),
-      this.firestoreService.getIgrejas(),
-    ]).subscribe(([exames, alunos, igrejas]) => {
-      // if (!this.auth.temPermissao('exames', 'read')) {
-      //   this.dados = [];
-      //   return;
-      // }
-      const podeVerResumo =
-        this.auth.temPermissao('exames', 'read') ||
-        this.auth.temPermissao('solicitacoes', 'read') ||
-        this.auth.temPermissao('candidatos', 'read');
+  private limparResumo(): void {
+    this.dados = [];
+    this.resumoPorIgreja = [];
+    this.resumoMSA = [];
+    this.resumoInstrumento = [];
+    this.totalSolicitacoesPendentes = 0;
+  }
 
-      if (!podeVerResumo) {
-        this.dados = [];
-        this.resumoMSA = [];
-        this.resumoInstrumento = [];
-        this.totalSolicitacoesPendentes = 0;
-        return;
-      }
+  private carregarDadosCards(
+    idSetor: string,
+    exames: Exames[],
+    alunos: Candidatos[],
+    igrejas: Igrejas[],
+  ): void {
+    const podeVerResumo =
+      this.auth.temPermissao('exames', 'read') ||
+      this.auth.temPermissao('solicitacoes', 'read') ||
+      this.auth.temPermissao('candidatos', 'read');
 
-      const alunosPermitidos = alunos.filter((a) =>
-        this.auth.temAcessoAoRegistro(a),
-      );
+    if (!podeVerResumo) {
+      this.limparResumo();
+      return;
+    }
 
-      const idsAlunosPermitidos = alunosPermitidos.map((a) => a.id);
+    // Considera somente alunos do setor ativo.
+    const alunosPermitidos = alunos.filter(
+      (aluno) =>
+        aluno.idSetor === idSetor && this.auth.temAcessoAoRegistro(aluno),
+    );
 
-      const examesPermitidos = exames.filter((exame) =>
-        idsAlunosPermitidos.includes(exame.idAluno),
-      );
+    const idsAlunos = new Set(
+      alunosPermitidos
+        .map((aluno) => aluno.id)
+        .filter((id): id is string => !!id),
+    );
 
-      this.resumoMSA = this.montarResumoPorIgreja(
-        examesPermitidos.filter((e) => e.tipoExame === '001'),
-        alunosPermitidos,
-        igrejas,
-      );
+    // Os exames são relacionados ao setor pelo aluno.
+    const examesPermitidos = exames.filter((exame) =>
+      idsAlunos.has(exame.idAluno),
+    );
 
-      this.resumoInstrumento = this.montarResumoPorIgreja(
-        examesPermitidos.filter((e) => e.tipoExame === '002'),
-        alunosPermitidos,
-        igrejas,
-      );
+    const igrejasPermitidas = igrejas.filter(
+      (igreja) => igreja.idSetor === idSetor,
+    );
 
-      this.totalSolicitacoesPendentes = examesPermitidos.filter(
-        (e) => e.status === 'solicitado',
-      ).length;
+    this.resumoMSA = this.montarResumoPorIgreja(
+      examesPermitidos.filter((exame) => exame.tipoExame === '001'),
+      alunosPermitidos,
+      igrejasPermitidas,
+    );
 
-      this.dados = this.montarCards(examesPermitidos);
-    });
+    this.resumoInstrumento = this.montarResumoPorIgreja(
+      examesPermitidos.filter((exame) => exame.tipoExame === '002'),
+      alunosPermitidos,
+      igrejasPermitidas,
+    );
+
+    this.totalSolicitacoesPendentes = examesPermitidos.filter(
+      (exame) => exame.status === 'solicitado',
+    ).length;
+
+    this.dados = this.montarCards(examesPermitidos);
   }
 
   montarResumoPorIgreja(

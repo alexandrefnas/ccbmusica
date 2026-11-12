@@ -62,13 +62,20 @@ export interface Acessos {
   logs: PermissoesCRUD;
 }
 
+
 export interface Usuarios {
   uid?: string;
   nome: string;
   email: string;
   perfil: string;
+
+  // Vínculo atual, preservado para compatibilidade.
   idSetor?: string;
   idComum?: string;
+
+  // Novo: setores autorizados para o perfil Gestor.
+  idSetores?: string[];
+
   acessos?: Acessos;
 }
 

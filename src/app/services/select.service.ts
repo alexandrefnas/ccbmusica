@@ -44,12 +44,15 @@ export type Permissao = {
 
 export type Acessos = Record<Modulo, Permissao>;
 
+
 export type Perfil =
   | 'admin'
+  | 'gestor'
   | 'regional'
   | 'secretario'
   | 'encarregado'
   | 'instrutor';
+
 
 export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
   admin: {
@@ -64,6 +67,22 @@ export const TIPO_PERFIL: Record<Perfil, { acessos: Acessos }> = {
       setores: { read: true, create: true, update: true, delete: true },
       usuarios: { read: true, create: true, update: true, delete: true },
       logs: { read: true, create: true, update: true, delete: true },
+    },
+  },
+
+
+  gestor: {
+    acessos: {
+      candidatos: { read: true, create: true, update: true, delete: false },
+      grupoExames: { read: true, create: true, update: true, delete: false },
+      solicitacoes: { read: true, create: true, update: true, delete: false },
+      exames: { read: true, create: true, update: true, delete: false },
+      igrejas: { read: true, create: true, update: true, delete: false },
+      instrumentos: { read: true, create: false, update: false, delete: false },
+      criterios: { read: true, create: true, update: true, delete: false },
+      setores: { read: false, create: false, update: false, delete: false },
+      usuarios: { read: true, create: false, update: false, delete: false },
+      logs: { read: false, create: false, update: false, delete: false },
     },
   },
 

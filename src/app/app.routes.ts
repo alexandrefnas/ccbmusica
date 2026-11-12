@@ -3,11 +3,13 @@ import { AuthGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 import { PermissaoGuard } from './guards/permissao.guard';
 import { AuthResolver } from './guards/auth.resolver';
+import { SetorAtivoGuard } from './guards/setor-ativo.guard';
 
 export const routes: Routes = [
   {
     path: '',
     resolve: { authReady: AuthResolver }, // resolver na raiz
+    canActivateChild: [SetorAtivoGuard],
     children: [
       { path: '', redirectTo: 'login', pathMatch: 'full' },
       {
@@ -22,6 +24,16 @@ export const routes: Routes = [
           import('./pages/home/home.component').then((m) => m.HomeComponent),
         canActivate: [AuthGuard],
       },
+
+      {
+        path: 'selecionar-setor',
+        loadComponent: () =>
+          import('./pages/selecionar-setor/selecionar-setor.component').then(
+            (m) => m.SelecionarSetorComponent,
+          ),
+        canActivate: [AuthGuard],
+      },
+
       {
         path: 'setor',
         loadComponent: () =>

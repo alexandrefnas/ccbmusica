@@ -1,15 +1,24 @@
-<div style="width: 100%; height: 100%;"  *ngIf="authService.authInicializado$ | async; else loading">
+<div
+  style="width: 100%; height: 100%"
+  *ngIf="authService.authInicializado$ | async; else loading"
+>
   <!-- <ng-container> -->
   <div class="container">
     <div class="conteiner__menu-topo" *ngIf="logado">
       <div class="menu-topo-left">
-        <button (click)="alternarMenu()" class="toggle-btn">
+        <button
+          *ngIf="setorAtivo.podeCarregarDados"
+          (click)="alternarMenu()"
+          class="toggle-btn"
+        >
           <i class="bi bi-list"></i>
         </button>
       </div>
       <div class="menu-topo-right">
-        <div class="usuario-log" [title]="email" ><i class="bi bi-person-circle"></i></div>
-        <button (click)="logout()" class="toggle-btn" title="Fazer Logoff" >
+        <div class="usuario-log" [title]="email">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        <button (click)="logout()" class="toggle-btn" title="Fazer Logoff">
           <i class="bi bi-power"></i>
         </button>
       </div>
@@ -28,7 +37,7 @@
         class="container__menu-lateral"
         [class.oculto]="menuOculto"
         [class.mobile-aberto]="menuMobileAberto"
-        *ngIf="logado"
+        *ngIf="logado && setorAtivo.podeCarregarDados"
       >
         <tcx-menu />
       </div>
@@ -43,7 +52,6 @@
 </div>
 
 <ng-template #loading>
-
   <div id="splash-screen">
     <div class="spinner"></div>
     <p>Carregando aplicação...</p>
