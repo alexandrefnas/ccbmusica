@@ -15,6 +15,21 @@
         </button>
       </div>
       <div class="menu-topo-right">
+        <button
+          *ngIf="
+            logado &&
+            setorAtivo.exigeSelecaoManual &&
+            setorAtivo.podeCarregarDados
+          "
+          type="button"
+          class="btn-trocar-setor"
+          title="Trocar setor"
+          (click)="trocarSetor()"
+        >
+          <i class="bi bi-arrow-left-right"></i>
+          <span>Trocar setor</span>
+        </button>
+
         <div class="usuario-log" [title]="email">
           <i class="bi bi-person-circle"></i>
         </div>

@@ -71,7 +71,7 @@
   align-items: center;
 } */
 
-.menu-topo-right {
+/* .menu-topo-right {
   width: 150px;
   height: 100%;
   display: flex;
@@ -79,7 +79,20 @@
   align-items: center;
   justify-content: center;
   padding: 0;
+} */
+
+
+.menu-topo-right {
+  width: auto;
+  min-width: 150px;
+  height: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
 }
+
 
 .usuario-log {
   display: flex;
@@ -174,6 +187,29 @@
   z-index: 10;
 }
 
+
+.btn-trocar-setor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-trocar-setor:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+
 /* RESPONSIVIDADE */
 /* Mobile */
 @media (max-width: 576px) {
@@ -212,6 +248,14 @@
   /* IMPORTANTE: não usar width 0 no mobile */
   .container__menu-lateral.oculto {
     width: 250px;
+  }
+
+ .btn-trocar-setor {
+    padding: 8px 10px;
+  }
+
+  .btn-trocar-setor span {
+    display: none;
   }
 }
 

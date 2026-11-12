@@ -1,0 +1,326 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil == "admin";
+    }
+
+
+    function userData() {
+      return exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data
+        : null;
+    }
+
+    function canRead(tabela) {
+      return userData() != null
+        && userData().acessos != null
+        && tabela in userData().acessos
+        && userData().acessos[tabela].read == true;
+    }
+
+    function canCreate(tabela) {
+      return userData() != null
+        && userData().acessos != null
+        && tabela in userData().acessos
+        && userData().acessos[tabela].create == true;
+    }
+
+    function canUpdate(tabela) {
+      return userData() != null
+        && userData().acessos != null
+        && tabela in userData().acessos
+        && userData().acessos[tabela].update == true;
+    }
+
+    function canDelete(tabela) {
+      return userData() != null
+        && userData().acessos != null
+        && tabela in userData().acessos
+        && userData().acessos[tabela].delete == true;
+    }
+
+    match /candidatos/{id} {
+      allow read: if request.auth != null && canRead("candidatos");
+      allow create: if request.auth != null && canCreate("candidatos");
+      allow update: if request.auth != null && canUpdate("candidatos");
+      allow delete: if request.auth != null && canDelete("candidatos");
+    }
+
+    match /igrejas/{id} {
+      allow read: if request.auth != null
+        && (
+          canRead("igrejas")
+          || canRead("candidatos")
+          || canRead("grupoExames")
+        );
+
+      allow create: if request.auth != null && canCreate("igrejas");
+      allow update: if request.auth != null && canUpdate("igrejas");
+      allow delete: if request.auth != null && canDelete("igrejas");
+    }
+
+
+    match /instrumentos/{id} {
+      allow read: if request.auth != null && (canRead("instrumentos") || canRead("candidatos"));
+      allow create: if request.auth != null && canCreate("instrumentos");
+      allow update: if request.auth != null && canUpdate("instrumentos");
+      allow delete: if request.auth != null && canDelete("instrumentos");
+    }
+
+
+    match /grupoExames/{id} {
+  allow read: if request.auth != null
+    && (
+      canRead("grupoExames")
+      || canRead("exames")
+      || canRead("solicitacoes")
+      || canRead("candidatos")
+    );
+
+  allow create: if request.auth != null && canCreate("grupoExames");
+  allow update: if request.auth != null && canUpdate("grupoExames");
+  allow delete: if request.auth != null && canDelete("grupoExames");
+}
+
+// match /criterios/{id} {
+//   allow read: if request.auth != null
+//     && (
+//       canRead("grupoExames")
+//       || canRead("exames")
+//     );
+
+//   allow create, update, delete: if request.auth != null && isAdmin();
+// }
+
+
+match /criterios/{id} {
+
+  // Permissão para consultar critérios.
+  function podeLerCriterios() {
+    return canRead("criterios")
+      || canRead("grupoExames")
+      || canRead("exames");
+  }
+
+  // Verifica se o critério pertence ao setor autorizado.
+  function pertenceAoSetor(dados) {
+    return dados.get("idSetor", "") != ""
+      && (
+        isAdmin()
+        || dados.get("idSetor", "") ==
+           userData().get("idSetor", "")
+      );
+  }
+
+  // Validação dos campos obrigatórios.
+  function criterioValido(dados) {
+    return dados.keys().hasAll([
+        "idSetor",
+        "tipoExame",
+        "nomeCriterio"
+      ])
+      && dados.idSetor is string
+      && dados.idSetor.size() > 0
+      && dados.tipoExame in ["001", "002"]
+      && dados.nomeCriterio is string
+      && dados.nomeCriterio.size() > 0;
+  }
+
+  // Consulta individual, incluindo critérios históricos.
+  allow get: if request.auth != null
+    && (
+      isAdmin()
+      || (
+        podeLerCriterios()
+        && pertenceAoSetor(resource.data)
+      )
+      || (
+        !("idSetor" in resource.data)
+        && (
+          canRead("grupoExames")
+          || canRead("exames")
+        )
+      )
+    );
+
+  // Listagem restrita ao setor.
+  allow list: if request.auth != null
+    && (
+      isAdmin()
+      || (
+        podeLerCriterios()
+        && pertenceAoSetor(resource.data)
+      )
+    );
+
+  // Cadastro de novos critérios.
+  allow create: if request.auth != null
+    && criterioValido(request.resource.data)
+    && (
+      isAdmin()
+      || (
+        canCreate("criterios")
+        && pertenceAoSetor(request.resource.data)
+      )
+    );
+
+  // Edição sem permitir mudança de setor.
+  allow update: if request.auth != null
+    && criterioValido(request.resource.data)
+    && pertenceAoSetor(resource.data)
+    && request.resource.data.idSetor == resource.data.idSetor
+    && (
+      isAdmin()
+      || canUpdate("criterios")
+    );
+
+  // Exclusão por usuários autorizados.
+  allow delete: if request.auth != null
+    && pertenceAoSetor(resource.data)
+    && (
+      isAdmin()
+      || canDelete("criterios")
+    );
+}
+
+
+    match /setores/{id} {
+      allow read: if request.auth != null
+        && (
+          canRead("setores")
+          || canRead("candidatos")
+          || canRead("grupoExames")
+        );
+
+      allow create: if request.auth != null && canCreate("setores");
+      allow update: if request.auth != null && canUpdate("setores");
+      allow delete: if request.auth != null && canDelete("setores");
+    }
+
+        match /exames/{id} {
+          allow read: if request.auth != null
+            && (
+              canRead("exames")
+              || canRead("solicitacoes")
+              || canRead("candidatos")
+            );
+
+          allow create: if request.auth != null
+            && (
+              canCreate("exames")
+              ||
+              (
+                canCreate("solicitacoes")
+                && request.resource.data.status == "solicitado"
+              )
+            );
+
+          // allow update: if request.auth != null && canUpdate("exames");
+          allow update: if request.auth != null
+            && (
+              canUpdate("exames")
+              ||
+              (
+                canUpdate("solicitacoes")
+                && resource.data.status == "solicitado"
+                && request.resource.data.status == "solicitado"
+              )
+            );
+          allow delete: if request.auth != null && canDelete("exames");
+        }
+
+        function nivelPerfil(perfil) {
+          return perfil == "admin" ? 5 :
+                 perfil == "regional" ? 4 :
+                 perfil == "secretario" ? 3 :
+                 perfil == "encarregado" ? 2 :
+                 perfil == "instrutor" ? 1 : 0;
+        }
+
+        function podeGerenciarPerfil(perfilAlvo) {
+          return isAdmin()
+            || nivelPerfil(perfilAlvo) <= nivelPerfil(userData().perfil);
+        }
+
+        match /usuarios/{userId} {
+          allow read: if request.auth != null;
+
+          allow create: if request.auth != null
+            && (
+              isAdmin()
+              ||
+              (
+                canCreate("usuarios")
+                && podeGerenciarPerfil(request.resource.data.perfil)
+                && request.resource.data.perfil != "admin"
+                && request.resource.data.idSetor == userData().idSetor
+              )
+            );
+
+          allow update: if request.auth != null
+            && (
+              isAdmin()
+              ||
+              (
+                canUpdate("usuarios")
+                && podeGerenciarPerfil(request.resource.data.perfil)
+                && request.resource.data.perfil != "admin"
+                && resource.data.idSetor == userData().idSetor
+              )
+            );
+
+          allow delete: if request.auth != null && isAdmin();
+        }
+
+//         match /logs/{id} {
+//           allow read: if request.auth != null && isAdmin();
+
+//           allow create: if request.auth != null
+//             && request.resource.data.usuarioUid == request.auth.uid
+//             && request.resource.data.usuarioEmail is string
+//             && request.resource.data.colecao is string
+//             && request.resource.data.documentoId is string
+//             && request.resource.data.acao in ['cadastro', 'alteracao', 'exclusao']
+//             && request.resource.data.dataHora == request.time;
+
+//           allow update: if false;
+//           allow delete: if false;
+//         }
+
+//           match /logs/{id} {
+//             allow read: if request.auth != null && canRead("logs");
+
+//             allow create: if request.auth != null
+//               && request.resource.data.usuarioUid == request.auth.uid
+//               && request.resource.data.usuarioEmail is string
+//               && request.resource.data.colecao is string
+//               && request.resource.data.documentoId is string
+//               && request.resource.data.acao in ['cadastro', 'alteracao', 'exclusao']
+//               && request.resource.data.dataHora == request.time;
+
+//             allow update: if false;
+//             allow delete: if false;
+//           }
+            match /logs/{id} {
+
+              // Quem tiver read=true poderá visualizar os logs
+              allow read: if request.auth != null && canRead("logs");
+
+              // Todo usuário autenticado pode registrar logs
+              allow create: if request.auth != null
+                && request.resource.data.usuarioUid == request.auth.uid
+                && request.resource.data.usuarioEmail is string
+                && request.resource.data.colecao is string
+                && request.resource.data.documentoId is string
+                && request.resource.data.acao in ['cadastro', 'alteracao', 'exclusao'];
+
+              allow update: if false;
+              allow delete: if false;
+            }
+
+  }
+}

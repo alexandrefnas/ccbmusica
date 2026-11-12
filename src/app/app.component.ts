@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { MenuComponent } from './component/menu/menu.component';
 import { AuthService } from './services/auth.service';
 import { TcxAlertComponent } from './component/tcx-alert/tcx-alert.component';
@@ -16,7 +16,7 @@ export class AppComponent {
   constructor(
     public authService: AuthService,
     public setorAtivo: SetorAtivoService,
-    // private router: Router,
+    private router: Router,
   ) {
     this.authService.currentUser$.subscribe((user) => {
       this.logado = !!user;
@@ -70,6 +70,21 @@ export class AppComponent {
   isTable(): boolean {
     const result = window.innerWidth >= 577 && window.innerWidth <= 992;
     return result;
+  }
+
+  trocarSetor(): void {
+    if (!this.setorAtivo.exigeSelecaoManual) {
+      return;
+    }
+
+    this.menuMobileAberto = false;
+
+    // Invalida o setor atual antes da navegação.
+    this.setorAtivo.limparSelecao();
+
+    void this.router.navigateByUrl('/selecionar-setor', {
+      replaceUrl: true,
+    });
   }
 
   // carregando: any;
