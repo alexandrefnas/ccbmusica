@@ -628,14 +628,21 @@ p {
 }
 
 .ga-editor .ga-cabecalho-icone {
-  display: grid;
-  place-items: center;
-  flex: 0 0 46px;
-  width: 46px;
-  height: 46px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.16);
-  font-size: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 40px;
+  height: 40px;
+
+  border: 1px solid var(--cor-borda, #ccc);
+  border-radius: 9px;
+
+  background: var(--cor-input-fundo, #fff);
+  color: var(--cor-texto, #555);
+
+  font-size: 18px;
 }
 
 .ga-editor .ga-cabecalho h3 {

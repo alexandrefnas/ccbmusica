@@ -133,9 +133,7 @@
           </button>
 
           <span>
-            Página {{ paginaAtual }} de {{ totalPaginas }} ({{
-              dados.length
-            }}
+            Página {{ paginaAtual }} de {{ totalPaginas }} ({{ dados.length }}
             registros)
           </span>
 
@@ -269,17 +267,23 @@
           </div>
         </section>
 
-        <div class="cadastro-acoes">
-          <!-- <button class="buttons" type="button" (click)="fecharCadastro()">
-            <i class="bi bi-x-lg"></i>
-            Cancelar
-          </button> -->
-
-          <button class="buttons" type="submit">
-            <i class="bi bi-floppy"></i>
-            {{ dadosParaEditar ? "Salvar alterações" : "Salvar" }}
+        <footer class="cadastro-acoes">
+          <button
+            type="button"
+            class="cadastro-btn cadastro-btn-secundario"
+            (click)="fecharCadastro()"
+          >
+            <i class="bi bi-arrow-left"></i>
+            Voltar
           </button>
-        </div>
+
+          <div class="cadastro-acoes-direita">
+            <button type="submit" class="cadastro-btn cadastro-btn-primary">
+              <i class="bi bi-floppy"></i>
+              {{ dadosParaEditar ? "Salvar alterações" : "Salvar aluno" }}
+            </button>
+          </div>
+        </footer>
       </form>
     </div>
   }

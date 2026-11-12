@@ -1,7 +1,15 @@
 <div class="container__tela">
   <div id="tela__barra-menu">
     <div id="barra-titulo__container">
-      <h2>Grupo de Avaliações</h2>
+      <h2 style="font-weight: normal; color: grey">
+        {{
+          tabelaVisivel
+            ? "GRUPO DE AVALIAÇÕES"
+            : dadosParaEditar
+              ? "EDITAR GRUPO DE AVALIAÇÕES"
+              : "CADASTRAR GRUPO DE AVALIAÇÕES"
+        }}
+      </h2>
     </div>
     @if (tabelaVisivel) {
       <div class="button-container" *ngIf="liberaCriar">
@@ -46,13 +54,7 @@
             <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
           </div>
           <div>
-            <h3>
-              {{
-                dadosParaEditar
-                  ? "Editar Grupo de Avaliações"
-                  : "Novo Grupo de Avaliações"
-              }}
-            </h3>
+            <h3>Dados do grupo de avaliações</h3>
             <p>Configure os dados, notas, critérios e datas da avaliação.</p>
           </div>
         </header>
